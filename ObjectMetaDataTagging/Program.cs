@@ -26,9 +26,9 @@ namespace ObjectMetaDataTagging
             s.SetTag("potato");
             s.SetTag("cucumber");
 
-            object? tag1 = s.GetTag(0);
+            var tag1 = s.GetTag<string>(0);
             Console.WriteLine(tag1);
-            object? tag2 = s.GetTag(1);
+            var tag2 = s.GetTag<string>(1);
             Console.WriteLine(tag2);
 
         }
@@ -37,22 +37,22 @@ namespace ObjectMetaDataTagging
     public static class ObjectTaggingExtensionMethod
     {
         private static Dictionary<WeakReference, List<object>> data
-            = new Dictionary<WeakReference, List<object>>();
+           = new Dictionary<WeakReference, List<object>>();
 
-        public static object? GetTag(this object o, int tagIndex)
+        public static T? GetTag<T>(this object o, int tagIndex)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && data[key].Count > tagIndex)
+            if (key != null && data[key].Count > tagIndex && data[key][tagIndex] is T)
             {
-                return (object?)data[key][tagIndex];
+                return (T)data[key][tagIndex];
             }
             else
             {
-                return null;
+                return default;
             }
         }
 
-        public static void SetTag(this object o, object tag)
+        public static void SetTag<T>(this object o, T tag)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null)
@@ -77,13 +77,12 @@ namespace ObjectMetaDataTagging
         public static IEnumerable<object> GetAllTags(this object o)
         {
             var tags = new List<object>();
-            var keys = data.Keys
-                .Where(k => k.IsAlive && k.Target == o);
+            var keys = data.Keys.Where(k => k.IsAlive && k.Target == o);
             foreach (var key in keys)
             {
                 tags.AddRange(data[key]);
             }
-            return tags;            
+            return tags;
         }
 
     }
