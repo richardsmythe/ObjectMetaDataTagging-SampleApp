@@ -8,33 +8,13 @@ namespace ObjectMetaDataTagging
     public class Program { 
         static void Main(string[] args)
         {
-            // TODO :
-            string s = "I am a string object";
+            // To do: Querying tags, event driven tagging, allowing multiple tags per Set, 
 
-            //s.SetTag("cheese");
-            //s.SetTag("lego");
-            //s.SetTag(1234);
-
-            //var allTags = s.GetAllTags();
-            //foreach (var tag in allTags)
-            //{
-            //    Console.WriteLine(tag);
-            //}
-
-            //s.RemoveAllTags();
-
-            //s.SetTag("potato");
-            //s.SetTag("cucumber");
-
-            //var tag1 = s.GetTag<string>(0);
-            //Console.WriteLine(tag1);
-            //var tag2 = s.GetTag<string>(1);
-            //Console.WriteLine(tag2);
-
+            string s = "I am a string object";      
 
             s.SetTag("foo");
             s.SetTag("bar");
-            //Console.WriteLine(s.GetTag<string>(0));
+            s.SetTag(12);
 
             var allTags = s.GetAllTags();
             foreach (var tag in allTags)
@@ -84,26 +64,33 @@ namespace ObjectMetaDataTagging
             }
         }
 
-        public static IEnumerable<object> GetAllTags(this object o)
+        public static IEnumerable<KeyValuePair<string, object>> GetAllTags(this object o)
         {
-            var tags = new List<object>();
+            var tags = new List<KeyValuePair<string, object>>();
             var keys = data.Keys.Where(k => k.IsAlive && k.Target == o);
+
+            // E.g:
+            // [System.String, [System.String, foo]]
+            // [System.String, [System.Int32, 3]]
             foreach (var key in keys)
             {
-                tags.AddRange(data[key]);
-            }
-
-            var properties = o.GetType().GetProperties();
-            foreach (var p in properties)
-            {
-                var propertyName = p.Name;
-                var propertyValue = p.GetValue(o);
-                tags.Add(new KeyValuePair<string, object>(propertyName, propertyValue));
+                var values = data[key];
+                foreach (var value in values)
+                {
+                    if (value is KeyValuePair<string, object> tag)
+                    {
+                        tags.Add(new KeyValuePair<string, object>(o.GetType().ToString(), tag));
+                    }
+                    else
+                    {
+                        tags.Add(new KeyValuePair<string, object>(o.GetType().ToString(), 
+                            new KeyValuePair<string, object>(value.GetType().ToString(), value)));
+                    }
+                }
             }
             return tags;
         }
 
- 
 
     }
 
