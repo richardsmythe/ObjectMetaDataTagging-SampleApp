@@ -86,7 +86,7 @@ namespace ObjectMetaDataTagging
             }
             else
             {
-                data.Add(new WeakReference(o), new List<object> { tag });  
+                data.Add(new WeakReference(o), new List<object> { tag });
             }
 
             _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
@@ -147,7 +147,8 @@ namespace ObjectMetaDataTagging
             public void RaiseTagAdded(TagAddedEventArgs e)
             {
                 TagAdded?.Invoke(this, e);
-                Console.WriteLine($"'{e.Tag}' tag was created and added to object: '{e.Object.GetType()}'.");
+                // ... Do some action
+                Console.WriteLine($"'{e.Tag}' tag was created and added to object: '{e.Object.GetType().Name}'.");
             }
         }
     }
