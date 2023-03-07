@@ -29,19 +29,21 @@ namespace ObjectMetaDataTagging
             s.SetTag("bar");
             s.SetTag(12);
 
-            var allTags = s.GetAllTags();
-            foreach (var tag in allTags)
-            {
-                Console.WriteLine(tag);
-            }
+            //var allTags = s.GetAllTags();
+            //foreach (var tag in allTags)
+            //{
+            //    Console.WriteLine(tag);
+            //}
 
             Person p = new Person { Name = "John", Age = 30 };
             p.SetTag("Suspicious");
 
-            foreach (var tag in p.GetAllTags())
-            {
-                Console.WriteLine(tag);
-            }
+            //foreach (var tag in p.GetAllTags())
+            //{
+            //    Console.WriteLine(tag);
+            //}
+
+            Console.Read();
         }
     }
 
@@ -81,13 +83,13 @@ namespace ObjectMetaDataTagging
             if (key != null)
             {
                 data[key].Add(tag);
-                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
             }
             else
             {
-                data.Add(new WeakReference(o), new List<object> { tag });
-                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+                data.Add(new WeakReference(o), new List<object> { tag });  
             }
+
+            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
         }
 
         public static void RemoveAllTags(this object o)
