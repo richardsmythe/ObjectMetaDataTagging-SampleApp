@@ -47,6 +47,7 @@ namespace ObjectMetaDataTagging.Extensions
                 var existingTags = data[key];
                 if (!existingTags.Contains(tag))
                 {
+                    // tag is added to the existing list
                     existingTags.Add(tag);
                     _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
                     alertService.CheckForSuspiciousTransaction(o);
@@ -54,6 +55,7 @@ namespace ObjectMetaDataTagging.Extensions
             }
             else
             {
+                // A new key value pair is added to the dict
                 data.Add(new WeakReference(o), new List<object> { tag });
                 _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
                 alertService.CheckForSuspiciousTransaction(o);

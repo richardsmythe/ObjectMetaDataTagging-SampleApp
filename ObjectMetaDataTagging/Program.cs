@@ -9,17 +9,17 @@ namespace ObjectMetaDataTagging
         {
             // To do: Querying tags, event driven tagging, allowing multiple tags per Set, 
 
-            string s = "I am a string object";
-            s.SetTag("foo");
-            s.SetTag("bar");
-            s.SetTag(12);
+            //string s = "I am a string object";
+            //s.SetTag("foo");
+            //s.SetTag("bar");
+            //s.SetTag(12);
 
-            Console.WriteLine("\nShow all tags: "  );
-            var allTags = s.GetAllTags();
-            foreach (var tag in allTags)
-            {
-                Console.WriteLine(tag);
-            }
+            //Console.WriteLine("\nShow all tags: "  );
+            //var allTags = s.GetAllTags();
+            //foreach (var tag in allTags)
+            //{
+            //    Console.WriteLine(tag);
+            //}
 
             // This will trigger a transaction event
             Console.WriteLine("####### Test for event driven tags #######");
