@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Extensions
 {
@@ -12,10 +8,17 @@ namespace ObjectMetaDataTagging.Extensions
            = new Dictionary<WeakReference, List<object>>();
 
         private static readonly TaggingEventManager _eventManager = new TaggingEventManager();
+        private static IAlertService alertService;
+
         public static event EventHandler<TagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
             remove => _eventManager.TagAdded -= value;
+        }
+
+        static ObjectTaggingExtensions()
+        {
+            alertService = new AlertService();
         }
 
         public static void AddTagAddedHandler(EventHandler<TagAddedEventArgs> handler)
@@ -39,16 +42,22 @@ namespace ObjectMetaDataTagging.Extensions
         public static void SetTag<T>(this object o, T tag)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null)
+            if (key != null && tag != null)
             {
-                data[key].Add(tag);
+                var existingTags = data[key];
+                if (!existingTags.Contains(tag))
+                {
+                    existingTags.Add(tag);
+                    _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+                    alertService.CheckForSuspiciousTransaction(o);
+                }
             }
             else
             {
                 data.Add(new WeakReference(o), new List<object> { tag });
+                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+                alertService.CheckForSuspiciousTransaction(o);
             }
-
-            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
         }
 
         public static void RemoveAllTags(this object o)
@@ -65,9 +74,6 @@ namespace ObjectMetaDataTagging.Extensions
             var tags = new List<KeyValuePair<string, object>>();
             var keys = data.Keys.Where(k => k.IsAlive && k.Target == o);
 
-            // E.g:
-            // [System.String, [System.String, foo]]
-            // [System.String, [System.Int32, 3]]
             foreach (var key in keys)
             {
                 var values = data[key];
@@ -98,18 +104,16 @@ namespace ObjectMetaDataTagging.Extensions
                 Tag = tag;
             }
         }
-
-        private class TaggingEventManager
-        {
-            public event EventHandler<TagAddedEventArgs> TagAdded;
-
-            public void RaiseTagAdded(TagAddedEventArgs e)
-            {
-                TagAdded?.Invoke(this, e);
-                // ... Do some action
-                Console.WriteLine($"'{e.Tag}' tag was created and added to object: '{e.Object.GetType().Name}'.");
-            }
-        }
     }
 
+    // Manage the event related to the tag
+    public class TaggingEventManager
+    {
+        public event EventHandler<TagAddedEventArgs>? TagAdded;
+
+        public void RaiseTagAdded(TagAddedEventArgs e)
+        {
+            TagAdded?.Invoke(this, e);
+        }
+    }
 }

@@ -14,19 +14,25 @@ namespace ObjectMetaDataTagging
             s.SetTag("bar");
             s.SetTag(12);
 
-            //var allTags = s.GetAllTags();
-            //foreach (var tag in allTags)
-            //{
-            //    Console.WriteLine(tag);
-            //}
+            Console.WriteLine("\nShow all tags: "  );
+            var allTags = s.GetAllTags();
+            foreach (var tag in allTags)
+            {
+                Console.WriteLine(tag);
+            }
 
-            Person p = new Person { Name = "John", Age = 30 };
-            p.SetTag("Suspicious");
+            // This will trigger a transaction event
+            Console.WriteLine("####### Test for event driven tags #######");
+            PersonTransaction trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
 
-            //foreach (var tag in p.GetAllTags())
-            //{
-            //    Console.WriteLine(tag);
-            //}
+            trans1.SetTag("Payment");
+
+            var tags = trans1.GetAllTags();
+            foreach (var tag in tags)
+            {
+                Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
+            }
+
 
             Console.Read();
         }
