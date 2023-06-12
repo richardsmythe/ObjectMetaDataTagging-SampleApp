@@ -8,7 +8,7 @@ namespace ObjectMetaDataTagging.Extensions
            = new Dictionary<WeakReference, List<object>>();
 
         private static readonly TaggingEventManager _eventManager = new TaggingEventManager();
-        private static IAlertService alertService;
+        private static IAlertService _alertService;
 
         public static event EventHandler<TagAddedEventArgs> TagAdded
         {
@@ -18,7 +18,7 @@ namespace ObjectMetaDataTagging.Extensions
 
         static ObjectTaggingExtensions()
         {
-            alertService = new AlertService();
+            _alertService = new AlertService();
         }
 
         public static void AddTagAddedHandler(EventHandler<TagAddedEventArgs> handler)
@@ -48,18 +48,18 @@ namespace ObjectMetaDataTagging.Extensions
                 if (!existingTags.Contains(tag))
                 {
                     // tag is added to the existing list
-                    existingTags.Add(tag);
-                    _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
-                    alertService.CheckForSuspiciousTransaction(o);
+                    existingTags.Add(tag);                   
+                   
                 }
             }
             else
             {
                 // A new key value pair is added to the dict
                 data.Add(new WeakReference(o), new List<object> { tag });
-                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
-                alertService.CheckForSuspiciousTransaction(o);
-            }
+                //_eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+                //_alertService.CheckForSuspiciousTransaction(o);
+            }         
+            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));      
         }
 
         public static void RemoveAllTags(this object o)
@@ -83,7 +83,7 @@ namespace ObjectMetaDataTagging.Extensions
                 {
                     if (value is KeyValuePair<string, object> tag)
                     {
-                        tags.Add(new KeyValuePair<string, object>(o.GetType().ToString(), tag));
+                        tags.Add(tag);
                     }
                     else
                     {

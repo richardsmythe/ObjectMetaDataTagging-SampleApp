@@ -20,8 +20,6 @@ namespace ObjectMetaDataTagging
                 Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
             }
 
-
-            // this will not
             Console.WriteLine("\n####### Test for non-event triggered transaction #######");
             PersonTransaction trans2 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
 
@@ -32,7 +30,6 @@ namespace ObjectMetaDataTagging
             {
                 Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
             }
-
 
 
             Console.Read();
