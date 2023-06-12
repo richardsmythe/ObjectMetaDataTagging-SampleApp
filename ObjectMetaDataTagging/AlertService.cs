@@ -10,7 +10,7 @@ namespace ObjectMetaDataTagging
         {
             if (obj is PersonTransaction transaction &&
                            transaction.Amount > 1000 &&
-                           !transaction.GetAllTags().Any(tag => tag.Key == "Suspicious"))
+                           !transaction.HasTag(Tags.Suspicious))
             {
                 return true;
             }

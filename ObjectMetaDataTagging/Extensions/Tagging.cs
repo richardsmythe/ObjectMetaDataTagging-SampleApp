@@ -28,6 +28,21 @@ namespace ObjectMetaDataTagging.Extensions
             }
         }
 
+        public static bool HasTag<T>(this object o, T tag)
+        {
+            // true if the object has the specificied tag already attached to it
+            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
+            if (key != null)
+            {
+                var existingTags = data[key];
+                // checks t is T
+                return existingTags.Any(t => t is T 
+                    && EqualityComparer<T>.Default.Equals((T)t, tag));
+            }
+
+            return false;
+        }
+
         public static void SetTag<T>(this object o, T tag)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
