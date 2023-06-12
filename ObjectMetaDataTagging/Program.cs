@@ -8,15 +8,15 @@ namespace ObjectMetaDataTagging
         static void Main(string[] args)
         {
             // Mechanism for tagging meta data to objects
-            // - Event driven: can trigger events based on needs
-            // - Multiple tags: each object can have multiple tags
+            //   - Event driven: can trigger events based on needs
+            //   - Multiple tags: each object can have multiple tags
 
             // To do: Querying tags 
 
             Console.WriteLine("####### Test for event triggered transaction #######");
             PersonTransaction trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
 
-            trans1.SetTag("Payment");
+            trans1.SetTag(Tags.FundsTransfer);
 
             var allTags = trans1.GetAllTags();
             foreach (var tag in allTags)
@@ -27,7 +27,7 @@ namespace ObjectMetaDataTagging
             Console.WriteLine("\n####### Test for non-event triggered transaction #######");
             PersonTransaction trans2 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
 
-            trans2.SetTag("Payment");
+            trans2.SetTag(Tags.FundsTransfer);
 
             allTags = trans2.GetAllTags();
             foreach (var tag in allTags)

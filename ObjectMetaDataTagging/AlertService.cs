@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging
         {
             if (IsSuspiciousTransaction(obj))
             {
-                obj.SetTag("Suspicious");
+                obj.SetTag(Tags.Suspicious);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace ObjectMetaDataTagging.Extensions
     public class TaggingEventManager
     {
         private IAlertService _alertService;
-        public event EventHandler<TagAddedEventArgs>? TagAdded;
+        public event EventHandler<TagAddedEventArgs>? TagAdded; // To do: TagRemoved, TagUpdated etc 
 
         public TaggingEventManager()
         {
