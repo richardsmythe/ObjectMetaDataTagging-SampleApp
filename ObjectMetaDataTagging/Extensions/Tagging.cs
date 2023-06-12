@@ -1,29 +1,19 @@
-﻿using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Extensions
 {
     public static class ObjectTaggingExtensions
     {
-        private static Dictionary<WeakReference, List<object>> data
-           = new Dictionary<WeakReference, List<object>>();
-
+        private static Dictionary<WeakReference, List<object>> data = new Dictionary<WeakReference, List<object>>();
         private static readonly TaggingEventManager _eventManager = new TaggingEventManager();
-        private static IAlertService _alertService;
 
         public static event EventHandler<TagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
             remove => _eventManager.TagAdded -= value;
-        }
-
-        static ObjectTaggingExtensions()
-        {
-            _alertService = new AlertService();
-        }
-
-        public static void AddTagAddedHandler(EventHandler<TagAddedEventArgs> handler)
-        {
-            TagAdded += handler;
         }
 
         public static T? GetTag<T>(this object o, int tagIndex)
@@ -48,18 +38,16 @@ namespace ObjectMetaDataTagging.Extensions
                 if (!existingTags.Contains(tag))
                 {
                     // tag is added to the existing list
-                    existingTags.Add(tag);                   
-                   
+                    existingTags.Add(tag);
+                    _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
                 }
             }
             else
             {
                 // A new key value pair is added to the dict
-                data.Add(new WeakReference(o), new List<object> { tag });
-                //_eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
-                //_alertService.CheckForSuspiciousTransaction(o);
-            }         
-            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));      
+                data.Add(new WeakReference(o), new List<object> { tag! });
+                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+            }
         }
 
         public static void RemoveAllTags(this object o)
@@ -111,11 +99,23 @@ namespace ObjectMetaDataTagging.Extensions
     // Manage the event related to the tag
     public class TaggingEventManager
     {
+        private IAlertService _alertService;
         public event EventHandler<TagAddedEventArgs>? TagAdded;
+
+        public TaggingEventManager()
+        {
+            _alertService = new AlertService();
+            TagAdded += HandleTagAdded;
+        }
 
         public void RaiseTagAdded(TagAddedEventArgs e)
         {
             TagAdded?.Invoke(this, e);
+        }
+
+        private void HandleTagAdded(object sender, TagAddedEventArgs e)
+        {
+            _alertService.CheckForSuspiciousTransaction(e.Object);
         }
     }
 }
