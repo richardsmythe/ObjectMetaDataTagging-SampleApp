@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FrameService } from './services/frame.service';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'objectrelationshipui';
+  showFrames: boolean[] = [];
+
+  constructor(private frameService: FrameService) {}
+
+  createNewFrame(): void {
+    const position = { x: 200, y: 200 };
+    const size = { w: 200, h: 200 };
+    this.frameService.createNewFrame(position, size);
+    this.showFrames.push(true);
+  }
 }

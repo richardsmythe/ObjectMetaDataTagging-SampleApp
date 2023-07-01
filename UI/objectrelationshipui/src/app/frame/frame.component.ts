@@ -13,7 +13,7 @@ export class FrameComponent {
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
-
+  
   position = { x: 200, y: 200 };
   size = { w: 200, h: 200 };
   lastPosition: { x: number, y: number } | undefined;
@@ -25,7 +25,7 @@ export class FrameComponent {
     this.lastPosition = undefined;
     this.lastSize = undefined;
   }
-  startDrag(event: MouseEvent): void {
+  drag(event: MouseEvent): void {
     event.preventDefault();
     const mouseX = event.clientX;
     const mouseY = event.clientY;
@@ -48,7 +48,7 @@ export class FrameComponent {
     this.document.addEventListener('mouseup', finishDrag);
   }
 
-  startResize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
+  resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
     event.preventDefault();
     const mouseX = event.clientX;
     const mouseY = event.clientY;
