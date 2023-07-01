@@ -49,55 +49,64 @@ export class FrameComponent {
   }
 
   startResize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
-  event.preventDefault();
-  const mouseX = event.clientX;
-  const mouseY = event.clientY;
-  const lastX = this.position.x;
-  const lastY = this.position.y;
-  const dimensionWidth = this.size.w;
-  const dimensionHeight = this.size.h;
-
-  const duringResize = (e: MouseEvent) => {
-    let dw = dimensionWidth;
-    let dh = dimensionHeight;
+    event.preventDefault();
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    const lastX = this.position.x;
+    const lastY = this.position.y;
+    const dimensionWidth = this.size.w;
+    const dimensionHeight = this.size.h;
   
-    if (direction === 'x' || direction === 'xy') {
-      if (anchors.includes('left')) {
-        const offsetX = e.clientX - mouseX;
-        dw -= offsetX;
-        this.position.x = lastX + offsetX;
-      } else if (anchors.includes('right')) {
-        dw += (e.clientX - mouseX);
+    const duringResize = (e: MouseEvent) => {
+      let dw = dimensionWidth;
+      let dh = dimensionHeight;
+  
+      if (direction === 'x' || direction === 'xy') {
+        if (anchors.includes('left')) {
+          const offsetX = e.clientX - mouseX;
+          dw -= offsetX;
+          if (dw >= this.minSize.w) {
+            this.position.x = lastX + offsetX;
+          } else {
+            dw = this.minSize.w;
+            this.position.x = lastX + dimensionWidth - this.minSize.w;
+          }
+        } else if (anchors.includes('right')) {
+          dw += (e.clientX - mouseX);
+        }
       }
-    }
   
-    if (direction === 'y' || direction === 'xy') {
-      if (anchors.includes('top')) {
-        const offsetY = e.clientY - mouseY;
-        dh -= offsetY;
-        this.position.y = lastY + offsetY;
-      } else if (anchors.includes('bottom')) {
-        dh += (e.clientY - mouseY);
+      if (direction === 'y' || direction === 'xy') {
+        if (anchors.includes('top')) {
+          const offsetY = e.clientY - mouseY;
+          dh -= offsetY;
+          if (dh >= this.minSize.h) {
+            this.position.y = lastY + offsetY;
+          } else {
+            dh = this.minSize.h;
+            this.position.y = lastY + dimensionHeight - this.minSize.h;
+          }
+        } else if (anchors.includes('bottom')) {
+          dh += (e.clientY - mouseY);
+        }
       }
-    }
 
-      // stop resizing beyond the original size of 200x200
-    if (anchors.includes('left') || anchors.includes('top') || anchors.includes('bottom') || anchors.includes('right')){
-      dw = Math.max(dw, this.minSize.w);
-      dh = Math.max(dh, this.minSize.h);
-    }
+      if (anchors.includes('left') || anchors.includes('top') || anchors.includes('bottom') || anchors.includes('right')){
+        dw = Math.max(dw, this.minSize.w);
+        dh = Math.max(dh, this.minSize.h);
+      }
   
-    this.size.w = dw;
-    this.size.h = dh;
-    this.lastSize = { ...this.size };
-  };
-
-  const finishResize = () => {
-    this.document.removeEventListener('mousemove', duringResize);
-    this.document.removeEventListener('mouseup', finishResize);
-  };
-
-  this.document.addEventListener('mousemove', duringResize);
-  this.document.addEventListener('mouseup', finishResize);
-}
+      this.size.w = dw;
+      this.size.h = dh;
+      this.lastSize = { ...this.size };
+    };
+  
+    const finishResize = () => {
+      this.document.removeEventListener('mousemove', duringResize);
+      this.document.removeEventListener('mouseup', finishResize);
+    };
+  
+    this.document.addEventListener('mousemove', duringResize);
+    this.document.addEventListener('mouseup', finishResize);
+  }
 }
