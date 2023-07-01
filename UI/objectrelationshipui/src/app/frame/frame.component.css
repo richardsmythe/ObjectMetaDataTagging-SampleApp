@@ -1,0 +1,85 @@
+/* frame.component.css */
+
+.top-bar-wrapper {
+    width: 100%;
+    height: 20px;
+    background-color: rgb(0, 0, 0);
+  }
+  
+  .frame-wrapper {
+    position: absolute;
+    border: 2px solid black;
+  }
+  
+  .content-wrapper {
+    position: absolute;
+    background-color: rgb(158, 237, 218);
+    /* overflow: auto; */
+  }
+  
+  .resizers {
+    box-sizing: border-box;
+  }
+  
+  .resizers .resizer {
+    opacity: 1;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: white;
+    border: 1px solid #d50000;
+    position: absolute;
+  }
+  
+  .resizers .right {
+    top: 0;
+    right: -3px;
+    height: 100%;
+    cursor: ew-resize;
+  }
+  
+  .resizers .bottom {
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    cursor: ns-resize;
+  }
+  
+  .resizers .top {
+    top: -3px;
+    left: 0;
+    width: 100%;
+    cursor: ns-resize;
+  }
+  
+  .resizers .left {
+    top: 0;
+    left: -3px;
+    height: 100%;
+    cursor: ew-resize;
+  }
+  
+  .resizers .bottom-right {
+    right: -3px;
+    bottom: -3px;
+    cursor: nwse-resize;
+  }
+  
+  .resizers .top-right {
+    right: -3px;
+    top: -3px;
+    cursor: nesw-resize;
+  }
+  
+  .resizers .top-left {
+    left: -3px;
+    top: -3px;
+    cursor: nwse-resize;
+  }
+  
+  .resizers .bottom-left {
+    left: -3px;
+    bottom: -3px;
+    cursor: nesw-resize;
+  }
+  
