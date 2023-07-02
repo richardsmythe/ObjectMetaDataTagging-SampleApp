@@ -1,6 +1,6 @@
 <ng-container *ngFor="let frame of frames">
-  <app-frame></app-frame>
+  <app-frame [frame]="frame"></app-frame>
 </ng-container>
 
 <button (click)="createNewFrame()">Create New Frame</button>
-<p>frames: {{frameCount}}</p>
+<p>frames: {{ frameCount }}</p>

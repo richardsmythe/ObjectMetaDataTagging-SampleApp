@@ -118,6 +118,7 @@ export class FrameComponent {
 
   deleteFrame(): void {
     if (this.frame) {
+      console.log(this.frame.id);
       this.frameService.destroyFrame(this.frame.id);
     }
   }

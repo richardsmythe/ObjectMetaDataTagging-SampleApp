@@ -32,6 +32,7 @@ export class FrameService {
   }
 
   destroyFrame(frameId: number): void {
+    console.log(frameId);
     const index = this.frames.findIndex(frame => frame.id === frameId);
     if (index !== -1) {
       this.frames.splice(index, 1);
