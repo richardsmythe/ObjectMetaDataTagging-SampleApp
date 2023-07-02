@@ -1,6 +1,5 @@
-<router-outlet></router-outlet>
-<button (click)="createNewFrame()">Create New Frame</button>
-
-<ng-container *ngFor="let showFrame of showFrames">
-  <app-frame *ngIf="showFrame"></app-frame>
+<ng-container *ngFor="let frame of frames">
+  <app-frame></app-frame>
 </ng-container>
+
+<button (click)="createNewFrame()">Create New Frame</button>
