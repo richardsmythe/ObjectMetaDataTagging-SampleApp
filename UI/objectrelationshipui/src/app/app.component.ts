@@ -9,7 +9,7 @@ import { Frame } from './models/Frame';
 })
 export class AppComponent {
   frames: Frame[] = [];
-
+  frameCount: number = 0;
   constructor(private frameService: FrameService) {}
 
   createNewFrame(): void {
@@ -17,5 +17,8 @@ export class AppComponent {
     const size = { w: 200, h: 200 };
     const frame = this.frameService.createNewFrame(position, size);
     this.frames.push(frame);
+    this.frameCount = this.frames.length;
   }
+
+ 
 }

@@ -1,5 +1,7 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, Input, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Frame } from '../models/Frame';
+import { FrameService } from '../services/frame.service';
 
 export type ResizeAnchorType = 'top' | 'left' | 'bottom' | 'right';
 export type ResizeDirectionType = 'x' | 'y' | 'xy';
@@ -10,9 +12,12 @@ export type ResizeDirectionType = 'x' | 'y' | 'xy';
   styleUrls: ['./frame.component.css']
 })
 export class FrameComponent {
+  @Input() frame: Frame | undefined;
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
+
+
   
   position = { x: 200, y: 200 };
   size = { w: 200, h: 200 };
@@ -21,9 +26,10 @@ export class FrameComponent {
   minSize = { w: 200, h: 200 };
   _document: any;
 
-  constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef) {
+  constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef, private frameService: FrameService) {
     this.lastPosition = undefined;
     this.lastSize = undefined;
+
   }
   drag(event: MouseEvent): void {
     event.preventDefault();
@@ -108,5 +114,11 @@ export class FrameComponent {
   
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
+  }
+
+  deleteFrame(): void {
+    if (this.frame) {
+      this.frameService.destroyFrame(this.frame.id);
+    }
   }
 }
