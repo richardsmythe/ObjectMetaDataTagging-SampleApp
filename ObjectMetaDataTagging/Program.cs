@@ -13,7 +13,7 @@ namespace ObjectMetaDataTagging
 
             // To do: Querying tags 
 
-            Console.WriteLine("####### Test for event triggered transaction #######");
+          
             PersonTransaction trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
 
             trans1.SetTag(Tags.FundsTransfer);
@@ -24,7 +24,7 @@ namespace ObjectMetaDataTagging
                 Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
             }
 
-            Console.WriteLine("\n####### Test for non-event triggered transaction #######");
+         
             PersonTransaction trans2 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
 
             trans2.SetTag(Tags.FundsTransfer);

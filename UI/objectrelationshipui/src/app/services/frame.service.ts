@@ -1,4 +1,4 @@
-import { Injectable, NgZone  } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Frame } from '../models/Frame';
 
 @Injectable({
@@ -7,7 +7,7 @@ import { Frame } from '../models/Frame';
 export class FrameService {
   frames: Frame[] = [];
 
-  constructor(private ngZone: NgZone) { }
+  constructor() { }
 
 
   createNewFrame(position: { x: number; y: number }, size: { w: number; h: number }): Frame {
@@ -36,8 +36,7 @@ export class FrameService {
     const index = this.frames.findIndex(frame => frame.id === frameId);
     console.log(index)
     if (index !== -1) {
-      this.frames.splice(index, 1);
-      this.ngZone.run(() => {}); 
+      this.frames.splice(index, 1); 
     }
   }
 

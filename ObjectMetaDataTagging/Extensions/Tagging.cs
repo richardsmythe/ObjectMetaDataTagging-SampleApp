@@ -1,4 +1,7 @@
-﻿namespace ObjectMetaDataTagging.Extensions
+﻿using ObjectMetaDataTagging.Models;
+using System.Linq;
+
+namespace ObjectMetaDataTagging.Extensions
 {
     public static class ObjectTaggingExtensions
     {
@@ -92,6 +95,29 @@
             }
             return tags;
         }
+
+        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
+        {
+            var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
+
+            var trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00 };
+            trans1.SetTag(Tags.FundsTransfer);
+            trans1.SetTag(Tags.Suspicious);
+            testData.Add(trans1.GetAllTags().ToList()); // Convert to List
+
+            var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
+            trans2.SetTag(Tags.FundsTransfer);
+            trans2.SetTag(Tags.PaymentExpired);
+            testData.Add(trans2.GetAllTags().ToList()); // Convert to List
+
+            var trans3 = new PersonTransaction { Sender = "Sam", Receiver = "James", Amount = 31.50 };
+            trans3.SetTag(Tags.FundsTransfer);
+            testData.Add(trans3.GetAllTags().ToList()); // Convert to List
+
+            return testData;
+        }
+
+
 
         public class TagAddedEventArgs : EventArgs
         {
