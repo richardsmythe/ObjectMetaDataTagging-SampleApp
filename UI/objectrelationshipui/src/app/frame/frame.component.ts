@@ -116,10 +116,10 @@ export class FrameComponent {
     this.document.addEventListener('mouseup', finishResize);
   }
 
-  deleteFrame(): void {
-    if (this.frame) {
-      console.log(this.frame.id);
-      this.frameService.destroyFrame(this.frame.id);
+  deleteFrame(frameId: number | undefined): void {
+    if (frameId !== undefined) {
+      console.log(frameId);
+      this.frameService.destroyFrame(frameId);
     }
   }
 }
