@@ -122,4 +122,16 @@ export class FrameComponent {
       this.frameService.destroyFrame(frameId);
     }
   }
+
+  getData(): void {
+    this.frameService.getFrames().subscribe(
+      (response: Frame[]) => {
+        this.frames = response;
+      },
+      (error: any) => {
+        console.error(error);
+      }
+    );
+  }
+
 }

@@ -1,5 +1,5 @@
 export interface ObjectModel {
     id: number;
-    name: string;
+    objectName: string;
     
   }

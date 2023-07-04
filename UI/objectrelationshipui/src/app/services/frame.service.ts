@@ -8,8 +8,9 @@ import { Frame } from '../models/Frame';
 })
 export class FrameService {
   frames: Frame[] = [];
+  private endpointUrl = 'https://localhost:7170/';
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
 
   createNewFrame(position: { x: number; y: number }, size: { w: number; h: number }): Frame {
@@ -25,7 +26,9 @@ export class FrameService {
     return frame;
   }
 
-  
+  getFrames(): Observable<Frame[]> {
+    return this.http.get<Frame[]>(this.endpointUrl);
+  }
 
   // placeholder for actual id
   private generateUniqueId(): number {

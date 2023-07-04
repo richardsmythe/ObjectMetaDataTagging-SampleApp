@@ -1,4 +1,5 @@
 export interface TagModel {
-    id: number;
-    name: string;
+  associatedObjectId: number;
+  associatedObject: string;
+  tagName: string
   }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Extensions;
 using ObjectMetaDataTagging.Api.Models;
+using System.Reflection;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -33,13 +34,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 objectModels.Add(new ObjectModel
                 {
                     Id = objectId,
-                    Name = objectName
+                    ObjectName = objectName
                 });
 
                 tagModels.AddRange(tags.Select(tag => new TagModel
                 {
 
-                    Name = tag.Value,
+                    TagName = tag.Value,
                     AssociatedObject = tag.Key,
                     AssociatedObjectId = objectId
                 }));
@@ -48,7 +49,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var frameModel = new Frame
             {
                 Id = Guid.NewGuid(),
-                FrameName = "New Frame",
+                FrameName = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectModel = objectModels,
                 TagModel = tagModels
             };
