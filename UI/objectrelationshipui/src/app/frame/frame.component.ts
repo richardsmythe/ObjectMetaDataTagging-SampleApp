@@ -116,6 +116,10 @@ export class FrameComponent {
     this.document.addEventListener('mouseup', finishResize);
   }
 
+  processFrameData(){
+
+  }
+
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
       console.log(frameId);
@@ -123,15 +127,5 @@ export class FrameComponent {
     }
   }
 
-  getData(): void {
-    this.frameService.getFrames().subscribe(
-      (response: Frame[]) => {
-        this.frames = response;
-      },
-      (error: any) => {
-        console.error(error);
-      }
-    );
-  }
 
 }

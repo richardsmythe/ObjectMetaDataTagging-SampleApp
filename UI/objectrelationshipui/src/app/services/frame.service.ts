@@ -8,36 +8,35 @@ import { Frame } from '../models/Frame';
 })
 export class FrameService {
   frames: Frame[] = [];
-  private endpointUrl = 'https://localhost:7170/';
 
   constructor(private http: HttpClient) { }
 
+  getFrameData(): void {
+    this.http.get<Frame[]>('https://localhost:7170/api/Tag').subscribe(
+      (response: Frame[]) => {
+        this.frames = response.map(frameData => this.createNewFrame(frameData));
+      },
+      (error) => {
+        console.error('Error fetching frame data:', error);
+      }
+    );
+  }
 
-  createNewFrame(position: { x: number; y: number }, size: { w: number; h: number }): Frame {
+  createNewFrame(frameData: Frame): Frame {
     const frame: Frame = {
-      id: this.generateUniqueId(),
-      position,
-      size,
-      title: '',
-      object: undefined,
-      tags: []
+      id: frameData.id,
+      position: {x: 100, y: 100},
+      size: {w: 200, h: 200},
+      title: frameData.title,
+      object: frameData.object,
+      tags: frameData.tags
     };
     this.frames.push(frame);
     return frame;
   }
+ 
 
-  getFrames(): Observable<Frame[]> {
-    return this.http.get<Frame[]>(this.endpointUrl);
-  }
-
-  // placeholder for actual id
-  private generateUniqueId(): number {
-    const min = 0;
-    const max = 100;
-    const randomId = Math.floor(Math.random() * (max - min + 1)) + min;
-    return randomId;
-  }
-
+  
   destroyFrame(frameId: number): void {
     console.log(frameId);
     const index = this.frames.findIndex(frame => frame.id === frameId);

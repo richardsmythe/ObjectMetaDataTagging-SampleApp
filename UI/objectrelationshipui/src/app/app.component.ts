@@ -10,15 +10,11 @@ import { Frame } from './models/Frame';
 export class AppComponent {
   frames: Frame[] = [];
   frameCount: number = 0;
+
   constructor(private frameService: FrameService) {}
 
-  createNewFrame(): void {
-    const position = { x: 200, y: 200 };
-    const size = { w: 200, h: 200 };
-    const frame = this.frameService.createNewFrame(position, size);
-    this.frames.push(frame);
-    this.frameCount = this.frames.length;
-  }
-
- 
+  
+    ngOnInit(): void {
+      this.frameService.getFrameData();
+    } 
 }
