@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Frame } from '../models/Frame';
 
 @Injectable({
@@ -22,6 +24,8 @@ export class FrameService {
     this.frames.push(frame);
     return frame;
   }
+
+  
 
   // placeholder for actual id
   private generateUniqueId(): number {

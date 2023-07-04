@@ -27,52 +27,33 @@ namespace ObjectMetaDataTagging.Api.Controllers
             foreach (var obj in testData)
             {
                 var objectName = obj.First().Key.ToString();
+                var objectId = obj.GetHashCode();
                 var tags = obj.Select(kv => new KeyValuePair<string, string>(objectName, kv.Value.ToString())).ToList();
 
                 objectModels.Add(new ObjectModel
                 {
-                    Id = GenerateObjectId(),
+                    Id = objectId,
                     Name = objectName
                 });
 
                 tagModels.AddRange(tags.Select(tag => new TagModel
                 {
-                    //Id = GenerateTagId(),
+
                     Name = tag.Value,
-                    AssociatedObject = tag.Key
+                    AssociatedObject = tag.Key,
+                    AssociatedObjectId = objectId
                 }));
             }
 
             var frameModel = new Frame
             {
-                Id = GenerateFrameId(),
-                //Title = "Frame 1",
+                Id = Guid.NewGuid(),
+                FrameName = "New Frame",
                 ObjectModel = objectModels,
                 TagModel = tagModels
             };
 
             return Ok(new List<Frame> { frameModel });
-        }
-
-
-        private Guid GenerateFrameId()
-        {
-            return Guid.NewGuid();
-        }
-
-        private static int objectIdCounter = 0;
-        private static int tagIdCounter = 0;
-
-        private int GenerateObjectId()
-        {
-            int uniqueId = objectIdCounter++; // Increment the counter to generate a new unique ID
-            return uniqueId;
-        }
-
-        private int GenerateTagId()
-        {
-            int uniqueId = tagIdCounter++; // Increment the counter to generate a new unique ID
-            return uniqueId;
         }
     }
 }
