@@ -16,8 +16,6 @@ export class FrameComponent {
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
-
-
   
   position = { x: 200, y: 200 };
   size = { w: 200, h: 200 };
@@ -116,9 +114,6 @@ export class FrameComponent {
     this.document.addEventListener('mouseup', finishResize);
   }
 
-  processFrameData(){
-
-  }
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
