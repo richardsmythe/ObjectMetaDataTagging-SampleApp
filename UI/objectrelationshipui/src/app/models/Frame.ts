@@ -6,6 +6,8 @@ export interface Frame {
   position: { x: number; y: number };
   size: { w: number; h: number };
   frameName: string;
+  origin: string;
+  frameType: string;
   objectData?: ObjectModel[] ;
   tagData: TagModel[];
 }

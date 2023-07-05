@@ -49,7 +49,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var frameModel = new Frame
             {
                 Id = Guid.NewGuid(),
-                FrameName = Assembly.GetEntryAssembly().GetName().Name,
+                Origin = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectData = objectModels,
                 TagData = tagModels
             };

@@ -18,7 +18,7 @@ export class FrameComponent {
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
   
   position = { x: 200, y: 200 };
-  size = { w: 200, h: 200 };
+  size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
   minSize = { w: 200, h: 200 };
@@ -27,8 +27,17 @@ export class FrameComponent {
   constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef, private frameService: FrameService) {
     this.lastPosition = undefined;
     this.lastSize = undefined;
-
   }
+
+  ngOnInit(): void {
+    if (this.frame) {
+      const frameSize = this.frameService.getFrameSize(this.frame);
+      if (frameSize) {
+        this.size = { w: frameSize.width, h: frameSize.height };
+      }
+    }
+  }
+
   drag(event: MouseEvent): void {
     event.preventDefault();
     const mouseX = event.clientX;
@@ -113,7 +122,6 @@ export class FrameComponent {
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
   }
-
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { Frame } from '../models/Frame';
+import { ObjectModel } from '../models/ObjectModel';
 
 @Injectable({
   providedIn: 'root'
@@ -15,27 +16,28 @@ export class FrameService {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
         const frames: Frame[] = [];
-
-        // Iterate over the response data
+  
         response.forEach(frameData => {
           // Check if there are objects
           if (frameData.objectData) {
-             console.log('Object Data:', frameData.objectData);
-            const objectFrameData: Frame[] = frameData.objectData.map((object: { objectName: string; }) => {
-              return this.createNewFrame(object.objectName, 'Object');
+            frameData.objectData.forEach((object: ObjectModel) => {
+              // Create an object frame
+              const objectFrame = this.createNewFrame(object.objectName, 'Object', frameData.id, frameData.origin);
+              frames.push(objectFrame);
+  
+              // Filter the tags associated with the current object
+              const associatedTags = frameData.tagData.filter((tag: { associatedObjectId: number; }) => tag.associatedObjectId === object.id);
+              
+              // Create a tag frame and populate the grouped tags
+              if (associatedTags.length > 0) {
+                const tagNames = associatedTags.map((tag: { tagName: any; }) => tag.tagName);
+                const tagFrame = this.createNewFrame(tagNames.join(', '), 'Tag', frameData.id, frameData.origin);
+                frames.push(tagFrame);
+              }
             });
-            frames.push(...objectFrameData); // Add frames for objectData
-          }
-
-          // Iterate over the associated tags and create frames for each tag
-          if (frameData.tagData) {
-            const tagFrameData: Frame[] = frameData.tagData.map((tag: { tagName: string; }) => {
-              return this.createNewFrame(tag.tagName, 'Tag');
-            });
-            frames.push(...tagFrameData); // Add frames for tagData
           }
         });
-
+  
         this.frames.next(frames);
         return of(frames);
       }),
@@ -45,22 +47,31 @@ export class FrameService {
       })
     );
   }
-
-  createNewFrame(frameName: string, frameType: string): Frame {
+  
+  createNewFrame(frameName: string, frameType: string, id: number, origin: string): Frame {
     const frame: Frame = {
-      id: 0,
+      id,
       position: { x: 100, y: 100 },
-      size: { w: 400, h: 250 },
+      size: { w: 450, h: 250 },
       frameName,
+      origin,
+      frameType,
       objectData: [],
       tagData: []
     };
-
+  
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-
+  
     return frame;
+  }
+
+  getFrameSize(frame: Frame): { width: number, height: number } | undefined {
+    if (frame && frame.size) {
+      return { width: frame.size.w, height: frame.size.h };
+    }
+    return undefined;
   }
 
   destroyFrame(frameId: number): void {
