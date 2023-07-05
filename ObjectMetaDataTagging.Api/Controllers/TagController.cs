@@ -50,8 +50,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
             {
                 Id = Guid.NewGuid(),
                 FrameName = Assembly.GetEntryAssembly().GetName().Name,
-                ObjectModel = objectModels,
-                TagModel = tagModels
+                ObjectData = objectModels,
+                TagData = tagModels
             };
 
             return Ok(new List<Frame> { frameModel });

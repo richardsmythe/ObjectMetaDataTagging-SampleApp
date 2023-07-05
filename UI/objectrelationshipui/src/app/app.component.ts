@@ -13,8 +13,10 @@ export class AppComponent {
 
   constructor(private frameService: FrameService) {}
 
-  
-    ngOnInit(): void {
-      this.frameService.getFrameData();
-    } 
+  ngOnInit(): void {
+    this.frameService.getFrameData().subscribe((data: Frame[]) => {
+      this.frames = data;
+      this.frameCount = this.frames.length;
+    });
+  }
 }

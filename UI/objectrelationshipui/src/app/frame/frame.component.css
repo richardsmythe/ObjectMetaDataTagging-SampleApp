@@ -1,4 +1,12 @@
-/* frame.component.css */
+
+.top-bar-title {
+  cursor: grab;
+  position: relative;
+  top: 5px;
+  left: 10px; 
+  font-size: 18px;
+  color: rgb(0, 0, 0);
+}
 
 .delete-icon {
   position: absolute;
@@ -25,6 +33,14 @@
     position: absolute;
     background-color: rgb(158, 237, 218);
     overflow: auto;
+  }
+
+  .frame-body {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    font-size: 16px;
+    color: rgb(0, 0, 0);
   }
   
   .resizers {
