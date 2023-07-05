@@ -4,22 +4,13 @@
     [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
     <div class="frame-body">
       <ul>
-        <li>Origin: {{ frame?.origin }}</li>
-        <li>FrameId: {{ frame?.id }}</li>
-        <ng-container *ngFor="let tag of frame?.tagData">
-          <li *ngIf="tag.tagName">{{ tag.tagName }}</li>
-        </ng-container>
-      </ul>
-      <ul>
-        <ng-container *ngFor="let obj of frame?.objectData">
-          <li *ngIf="obj.objectName">{{ obj.objectName }}</li>
-        </ng-container>
+        <li>{{ frame?.name }}</li>
       </ul>
     </div>
     <div class="top-bar-wrapper" (mousedown)="drag($event)">
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
       <div class="top-bar-title">
-        {{ frame?.frameName }}
+        {{ frame?.frameType }}
         <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
       </div>
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>

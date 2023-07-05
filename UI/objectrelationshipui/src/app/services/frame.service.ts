@@ -48,12 +48,12 @@ export class FrameService {
     );
   }
   
-  createNewFrame(frameName: string, frameType: string, id: number, origin: string): Frame {
+  createNewFrame(name: string, frameType: string, id: number, origin: string): Frame {
     const frame: Frame = {
       id,
       position: { x: 100, y: 100 },
       size: { w: 450, h: 250 },
-      frameName,
+      name,
       origin,
       frameType,
       objectData: [],
