@@ -15,24 +15,27 @@ export class FrameService {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
         const frames: Frame[] = [];
-  
+
         // Iterate over the response data
         response.forEach(frameData => {
           // Check if there are objects
           if (frameData.objectData) {
-            const objectFrame: Frame = this.createNewFrame(frameData.objectData, 'Object');
-            frames.push(objectFrame); // Add frame for the object
-          }
-  
-          // Iterate over the associated tags and create frames for each tag
-          if (frameData.tagData && frameData.tagData.length > 0) {
-            frameData.tagData.forEach((tag: any) => {
-              const tagFrameData: Frame = this.createNewFrame(tag, 'Tag');
-              frames.push(tagFrameData); // Add frame for the tag
+             console.log('Object Data:', frameData.objectData);
+            const objectFrameData: Frame[] = frameData.objectData.map((object: { objectName: string; }) => {
+              return this.createNewFrame(object.objectName, 'Object');
             });
+            frames.push(...objectFrameData); // Add frames for objectData
+          }
+
+          // Iterate over the associated tags and create frames for each tag
+          if (frameData.tagData) {
+            const tagFrameData: Frame[] = frameData.tagData.map((tag: { tagName: string; }) => {
+              return this.createNewFrame(tag.tagName, 'Tag');
+            });
+            frames.push(...tagFrameData); // Add frames for tagData
           }
         });
-  
+
         this.frames.next(frames);
         return of(frames);
       }),
@@ -43,14 +46,14 @@ export class FrameService {
     );
   }
 
-  createNewFrame(frameData: any, frameType: string): Frame {
+  createNewFrame(frameName: string, frameType: string): Frame {
     const frame: Frame = {
-      id: frameData.id,
+      id: 0,
       position: { x: 100, y: 100 },
       size: { w: 400, h: 250 },
-      frameName: frameType === 'Object' ? frameData.objectName : "Associated Tags",
-      objectData: frameType === 'Object' ? [frameData] : [],
-      tagData: frameType === 'Tag' ? [frameData] : []
+      frameName,
+      objectData: [],
+      tagData: []
     };
 
     const currentFrames = this.frames.value.slice();
