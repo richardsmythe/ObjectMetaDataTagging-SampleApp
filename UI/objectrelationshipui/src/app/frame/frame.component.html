@@ -2,10 +2,16 @@
   <div #topBar></div>
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h">
     <div class="frame-body">
-      <ng-container *ngFor="let tag of frame?.tagData">
-        <span *ngIf="tag.tagName">{{ tag.tagName }}</span>     
-
-      </ng-container>
+      <ul>
+        <ng-container *ngFor="let tag of frame?.tagData">
+          <li *ngIf="tag.tagName">{{ tag.tagName }}</li>    
+        </ng-container>
+      </ul>
+      <ul>
+        <ng-container *ngFor="let obj of frame?.objectData">
+          <li *ngIf="obj.objectName">{{ obj.objectName }}</li>    
+        </ng-container>
+      </ul>
     </div>
     <div class="top-bar-wrapper" (mousedown)="drag($event)">  
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>  
