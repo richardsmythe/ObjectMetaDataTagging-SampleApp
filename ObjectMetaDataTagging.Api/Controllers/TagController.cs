@@ -29,7 +29,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             {
                 var objectName = obj.First().Key.ToString();
                 var objectId = obj.GetHashCode();
-                var tags = obj.Select(kv => new KeyValuePair<string, string>(objectName, kv.Value.ToString())).ToList();
+                var tags = obj.Select(kv => kv.Value.ToString().Split(',')[1].TrimEnd(']')).ToList();
 
                 objectModels.Add(new ObjectModel
                 {
@@ -37,11 +37,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     ObjectName = objectName
                 });
 
-                tagModels.AddRange(tags.Select(tag => new TagModel
+                tagModels.AddRange(tags.Select(tagName => new TagModel
                 {
-
-                    TagName = tag.Value,
-                    AssociatedObject = tag.Key,
+                    TagName = tagName,
+                    AssociatedObject = objectName,
                     AssociatedObjectId = objectId
                 }));
             }
