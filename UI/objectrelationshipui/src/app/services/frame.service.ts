@@ -67,28 +67,34 @@ export class FrameService {
     return frame;
   }
 
-  calculateFrameSize(objectData: ObjectModel[] | TagModel[]): { w: number, h: number } {
+  calculateFrameSize(data: ObjectModel[] | TagModel[]): { w: number, h: number } {
     let width = 0;
     let height = 0;
   
-    if (Array.isArray(objectData)) {
-      for (const object of objectData as ObjectModel[]) {
-        // Access the necessary properties from the ObjectModel
-        // Adjust the property names based on your actual ObjectModel structure
-        const objectWidth = object.width;
-        const objectHeight = object.height;
-  
-        width += objectWidth;
-        height += objectHeight;
-      }
-    } else {
-      for (const tag of objectData as TagModel[]) {
-        // Access the necessary properties from the TagModel
-        // Adjust the property names based on your actual TagModel structure
-        const tagName = tag.tagName.length;
-  
-        width += tagName * 50;
-        height += tagName * 25;
+    if (Array.isArray(data)) {
+      for (const item of data) {
+        if (Array.isArray(item)) {
+          for (const tag of item as TagModel[]) {
+            const tagName = tag?.tagName?.length || 0; // Use optional chaining and provide a default length of 0
+            if (tagName > 40) {
+              width = 300; // Use Math.max to determine the maximum width
+              height = 100; // Add to the height
+            } else {
+              width = 200;
+              height = 100;
+            }
+          }
+        } else {
+          const object = item as ObjectModel;
+          const objectNameLength = object?.objectName?.length || 0; // Use optional chaining and provide a default length of 0
+          if (objectNameLength > 40) {
+            width =400;
+            height = 150;
+          } else {
+            width = 250;
+            height = 200;
+          }
+        }
       }
     }
   
@@ -108,9 +114,6 @@ export class FrameService {
     console.log(tags);
     return tags;
   }
-
-
-
 
   destroyFrame(frameId: number): void {
     const currentFrames = this.frames.value.slice();
