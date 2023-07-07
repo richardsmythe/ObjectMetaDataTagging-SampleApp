@@ -35,6 +35,13 @@ export class FrameComponent {
       if (frameSize) {
         this.size = { w: frameSize.width, h: frameSize.height };
       }
+    
+      const objectIds = this.frame.objectData?.map(obj => obj.id);
+      if (objectIds) {
+        for (const objectId of objectIds) {
+          this.frameService.getAssociatedTagFrames(objectId);
+        }
+      }
     }
   }
 

@@ -10,6 +10,7 @@ import { TagModel } from '../models/TagModel';
 })
 export class FrameService {
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
+  private frameIdCounter: number = 1;
 
   constructor(private http: HttpClient) { }
 
@@ -23,7 +24,7 @@ export class FrameService {
           if (frameData.objectData) {
             frameData.objectData.forEach((object: ObjectModel) => {
               // Create an object frame
-              const objectFrame = this.createNewFrame([object], [], 'Object', frameData.id, frameData.origin);
+              const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
               frames.push(objectFrame);
   
               // Filter the tags associated with the current object
@@ -31,7 +32,7 @@ export class FrameService {
               
               // Create a tag frame and populate the grouped tags
               if (associatedTags.length > 0) {
-                const tagFrame = this.createNewFrame([], associatedTags, 'Tag', frameData.id, frameData.origin);
+                const tagFrame = this.createNewFrame([], associatedTags, 'Tag', frameData.origin);
                 frames.push(tagFrame);
               }
             });
@@ -48,11 +49,11 @@ export class FrameService {
     );
   }
   
-  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, id: number, origin: string): Frame {
+  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string,  origin: string): Frame {
     const frame: Frame = {
-      id,
+      id: this.frameIdCounter++,
       position: { x: 100, y: 100 },
-      size: { w: 450, h: 250 },
+      size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData),
       frameType,
       origin,
       objectData,
@@ -66,66 +67,33 @@ export class FrameService {
     return frame;
   }
 
-
-
-
-
-
-
-  // getFrameData(): Observable<Frame[]> {
-  //   return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
-  //     switchMap(response => {
-  //       const frames: Frame[] = [];
+  calculateFrameSize(objectData: ObjectModel[] | TagModel[]): { w: number, h: number } {
+    let width = 0;
+    let height = 0;
   
-  //       response.forEach(frameData => {
-  //         // Check if there are objects
-  //         if (frameData.objectData) {
-  //           frameData.objectData.forEach((object: ObjectModel) => {
-  //             // Create an object frame
-  //             const objectFrame = this.createNewFrame(object.objectName, 'Object', frameData.id, frameData.origin);
-  //             frames.push(objectFrame);
+    if (Array.isArray(objectData)) {
+      for (const object of objectData as ObjectModel[]) {
+        // Access the necessary properties from the ObjectModel
+        // Adjust the property names based on your actual ObjectModel structure
+        const objectWidth = object.width;
+        const objectHeight = object.height;
   
-  //             // Filter the tags associated with the current object
-  //             const associatedTags = frameData.tagData.filter((tag: { associatedObjectId: number; }) => tag.associatedObjectId === object.id);
-              
-  //             // Create a tag frame and populate the grouped tags
-  //             if (associatedTags.length > 0) {
-  //               const tagNames = associatedTags.map((tag: { tagName: any; }) => tag.tagName);
-  //               const tagFrame = this.createNewFrame(tagNames.join(', '), 'Tag', frameData.id, frameData.origin);
-  //               frames.push(tagFrame);
-  //             }
-  //           });
-  //         }
-  //       });
+        width += objectWidth;
+        height += objectHeight;
+      }
+    } else {
+      for (const tag of objectData as TagModel[]) {
+        // Access the necessary properties from the TagModel
+        // Adjust the property names based on your actual TagModel structure
+        const tagName = tag.tagName.length;
   
-  //       this.frames.next(frames);
-  //       return of(frames);
-  //     }),
-  //     catchError(error => {
-  //       console.error('Error fetching frame data:', error);
-  //       return of([]);
-  //     })
-  //   );
-  // }
+        width += tagName * 50;
+        height += tagName * 25;
+      }
+    }
   
-  // createNewFrame(data: string, frameType: string, id: number, origin: string): Frame {
-  //   const frame: Frame = {
-  //     id,
-  //     position: { x: 100, y: 100 },
-  //     size: { w: 450, h: 250 },
-  //     data,
-  //     origin,
-  //     frameType,
-  //     objectData: [],
-  //     tagData: []
-  //   };
-  
-  //   const currentFrames = this.frames.value.slice();
-  //   currentFrames.push(frame);
-  //   this.frames.next(currentFrames);
-  
-  //   return frame;
-  // }
+    return { w: width, h: height };
+  }
 
   getFrameSize(frame: Frame): { width: number, height: number } | undefined {
     if (frame && frame.size) {
@@ -133,6 +101,16 @@ export class FrameService {
     }
     return undefined;
   }
+
+  getAssociatedTagFrames(objectId: number): Frame[] {
+    const tags = this.frames.value.filter(frame => frame.frameType === 'Tag' && 
+      frame.tagData?.some(tag => tag.associatedObjectId === objectId));
+    console.log(tags);
+    return tags;
+  }
+
+
+
 
   destroyFrame(frameId: number): void {
     const currentFrames = this.frames.value.slice();
@@ -142,4 +120,5 @@ export class FrameService {
       this.frames.next(currentFrames);
     }
   }
+
 }
