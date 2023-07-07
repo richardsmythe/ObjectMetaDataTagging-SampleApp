@@ -75,25 +75,15 @@ export class FrameService {
       for (const item of data) {
         if (Array.isArray(item)) {
           for (const tag of item as TagModel[]) {
-            const tagName = tag?.tagName?.length || 40; // Use optional chaining and provide a default length of 0
-            if (tagName > 40) {
-              width = 300; // Use Math.max to determine the maximum width
-              height = 100; // Add to the height
-            } else {
-              width = 200;
-              height = 100;
-            }
+            const tagNameLength = tag?.tagName?.length || 0;
+            width = Math.max(width, tagNameLength > 40 ? 300 : 200);
+            height = tagNameLength > 40 ? 100 : 0;
           }
         } else {
           const object = item as ObjectModel;
-          const objectNameLength = object?.objectName?.length || 40; // Use optional chaining and provide a default length of 0
-          if (objectNameLength > 40) {
-            width =400;
-            height = 150;
-          } else {
-            width = 250;
-            height = 200;
-          }
+          const objectNameLength = object?.objectName?.length || 0;
+          width = Math.max(width, objectNameLength > 40 ? 400 : 250);
+          height = objectNameLength > 40 ? 150 : 200;
         }
       }
     }
