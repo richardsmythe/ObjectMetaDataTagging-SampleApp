@@ -75,7 +75,7 @@ export class FrameService {
       for (const item of data) {
         if (Array.isArray(item)) {
           for (const tag of item as TagModel[]) {
-            const tagName = tag?.tagName?.length || 0; // Use optional chaining and provide a default length of 0
+            const tagName = tag?.tagName?.length || 40; // Use optional chaining and provide a default length of 0
             if (tagName > 40) {
               width = 300; // Use Math.max to determine the maximum width
               height = 100; // Add to the height
@@ -86,7 +86,7 @@ export class FrameService {
           }
         } else {
           const object = item as ObjectModel;
-          const objectNameLength = object?.objectName?.length || 0; // Use optional chaining and provide a default length of 0
+          const objectNameLength = object?.objectName?.length || 40; // Use optional chaining and provide a default length of 0
           if (objectNameLength > 40) {
             width =400;
             height = 150;
