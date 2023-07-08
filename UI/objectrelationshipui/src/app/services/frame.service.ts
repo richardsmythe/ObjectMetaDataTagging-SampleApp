@@ -49,11 +49,11 @@ export class FrameService {
     );
   }
   
-  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string,  origin: string): Frame {
+  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
       id: this.frameIdCounter++,
-      position: { x: 100, y: 100 },
       size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData),
+      position: this.calculateFramePosition(),
       frameType,
       origin,
       objectData,
@@ -66,6 +66,58 @@ export class FrameService {
   
     return frame;
   }
+  
+  calculateFramePosition(): { x: number, y: number } {
+    const margin = 20;
+    const containerWidth = window.innerWidth;
+    const containerHeight = window.innerHeight;
+    const frames = this.frames.value;
+    
+    let posX = 100;
+    let posY = 100;
+    let overlapping = true;
+  
+    while (overlapping) {
+      overlapping = false;
+      
+      let maxWidth = 0;
+      let maxHeight = 0;
+      
+      for (const frame of frames) {
+        const currentFrameSize = this.getFrameSize(frame);
+        const currentFrameWidth = currentFrameSize?.width || 0;
+        const currentFrameHeight = currentFrameSize?.height || 0;
+    
+        maxWidth = Math.max(maxWidth, currentFrameWidth);
+        maxHeight = Math.max(maxHeight, currentFrameHeight);
+    
+        if (
+          posX < frame.position.x + currentFrameWidth + margin &&
+          posX + maxWidth + margin > frame.position.x &&
+          posY < frame.position.y + currentFrameHeight + margin &&
+          posY + maxHeight + margin > frame.position.y
+        ) {
+          overlapping = true;
+          break;
+        }
+      }
+    
+      if (overlapping) {
+        // Shift the position horizontally
+        posX += maxWidth + margin;
+    
+        // If it reaches the right edge of the container, move to the next row
+        if (posX + maxWidth + margin > containerWidth) {
+          posX = 100;
+          posY += maxHeight + margin;
+        }
+      }
+    }
+  
+    return { x: posX, y: posY };
+  }
+  
+
 
   calculateFrameSize(data: ObjectModel[] | TagModel[]): { w: number, h: number } {
     let width = 0;
