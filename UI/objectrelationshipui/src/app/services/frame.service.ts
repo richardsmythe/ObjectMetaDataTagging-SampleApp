@@ -72,51 +72,53 @@ export class FrameService {
     const containerWidth = window.innerWidth;
     const containerHeight = window.innerHeight;
     const frames = this.frames.value;
-    
-    let posX = 100;
-    let posY = 100;
+  
+    let posX = 10;
+    let posY = 10;
     let overlapping = true;
+    let rowWidth = 0;
+    let rowHeight = 0;
   
     while (overlapping) {
       overlapping = false;
-      
-      let maxWidth = 0;
-      let maxHeight = 0;
-      
+  
       for (const frame of frames) {
         const currentFrameSize = this.getFrameSize(frame);
         const currentFrameWidth = currentFrameSize?.width || 0;
         const currentFrameHeight = currentFrameSize?.height || 0;
-    
-        maxWidth = Math.max(maxWidth, currentFrameWidth);
-        maxHeight = Math.max(maxHeight, currentFrameHeight);
-    
+  
+        rowWidth = Math.max(rowWidth, currentFrameWidth);
+        rowHeight = Math.max(rowHeight, currentFrameHeight);
+  
         if (
           posX < frame.position.x + currentFrameWidth + margin &&
-          posX + maxWidth + margin > frame.position.x &&
+          posX + rowWidth + margin > frame.position.x &&
           posY < frame.position.y + currentFrameHeight + margin &&
-          posY + maxHeight + margin > frame.position.y
+          posY + rowHeight + margin > frame.position.y
         ) {
           overlapping = true;
           break;
         }
       }
-    
+  
       if (overlapping) {
-        // Shift the position horizontally
-        posX += maxWidth + margin;
-    
-        // If it reaches the right edge of the container, move to the next row
-        if (posX + maxWidth + margin > containerWidth) {
-          posX = 100;
-          posY += maxHeight + margin;
+        // Move to the next row if there is not enough space in the current row
+        if (posX + rowWidth + margin > containerWidth) {
+          posX = 10;
+          posY += rowHeight + margin;
+          rowHeight = 0;
+        } else if (posY + rowHeight + margin > containerHeight) {
+          // Stop generating positions if it exceeds the container height
+          break;
+        } else {
+          // Shift the position horizontally
+          posX += rowWidth + margin;
         }
       }
     }
   
     return { x: posX, y: posY };
   }
-  
 
 
   calculateFrameSize(data: ObjectModel[] | TagModel[]): { w: number, h: number } {

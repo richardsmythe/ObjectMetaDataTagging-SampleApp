@@ -16,12 +16,12 @@ export class FrameComponent {
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
-  
-  position = { x: 200, y: 200 };
+
+  position: { x: number, y: number } = { x: 0, y: 0 };
   size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
-  minSize = { w: 200, h: 200 };
+  minSize = { w: 100, h: 100 };
   _document: any;
 
   constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef, private frameService: FrameService) {
@@ -35,7 +35,12 @@ export class FrameComponent {
       if (frameSize) {
         this.size = { w: frameSize.width, h: frameSize.height };
       }
-    
+      
+      // Get frame position if available
+      if (this.frame.position) {
+        this.position = { x: this.frame.position.x, y: this.frame.position.y };
+      }
+
       const objectIds = this.frame.objectData?.map(obj => obj.id);
       if (objectIds) {
         for (const objectId of objectIds) {
@@ -76,11 +81,11 @@ export class FrameComponent {
     const lastY = this.position.y;
     const dimensionWidth = this.size.w;
     const dimensionHeight = this.size.h;
-  
+
     const duringResize = (e: MouseEvent) => {
       let dw = dimensionWidth;
       let dh = dimensionHeight;
-  
+
       if (direction === 'x' || direction === 'xy') {
         if (anchors.includes('left')) {
           const offsetX = e.clientX - mouseX;
@@ -95,7 +100,7 @@ export class FrameComponent {
           dw += (e.clientX - mouseX);
         }
       }
-  
+
       if (direction === 'y' || direction === 'xy') {
         if (anchors.includes('top')) {
           const offsetY = e.clientY - mouseY;
@@ -115,17 +120,17 @@ export class FrameComponent {
         dw = Math.max(dw, this.minSize.w);
         dh = Math.max(dh, this.minSize.h);
       }
-  
+
       this.size.w = dw;
       this.size.h = dh;
       this.lastSize = { ...this.size };
     };
-  
+
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
     };
-  
+
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
   }
@@ -136,6 +141,4 @@ export class FrameComponent {
       this.frameService.destroyFrame(frameId);
     }
   }
-
-
 }
