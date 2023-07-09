@@ -8,6 +8,8 @@
         <ng-container *ngIf="frame?.frameType === 'Object'">
           <li *ngFor="let obj of frame?.objectData">
             Object Name: {{ obj.objectName }}
+          </li>
+          <li *ngFor="let obj of frame?.objectData">
             Object Id: {{ obj?.id }}
           </li>
         </ng-container>

@@ -76,8 +76,8 @@ export class FrameService {
     let posX = 10;
     let posY = 10;
     let overlapping = true;
-    let rowWidth = 0;
-    let rowHeight = 0;
+    let maxWidth = 0;
+    let maxHeight = 0;
   
     while (overlapping) {
       overlapping = false;
@@ -87,14 +87,14 @@ export class FrameService {
         const currentFrameWidth = currentFrameSize?.width || 0;
         const currentFrameHeight = currentFrameSize?.height || 0;
   
-        rowWidth = Math.max(rowWidth, currentFrameWidth);
-        rowHeight = Math.max(rowHeight, currentFrameHeight);
+        maxWidth = Math.max(maxWidth, currentFrameWidth);
+        maxHeight = Math.max(maxHeight, currentFrameHeight);
   
         if (
           posX < frame.position.x + currentFrameWidth + margin &&
-          posX + rowWidth + margin > frame.position.x &&
+          posX + maxWidth + margin > frame.position.x &&
           posY < frame.position.y + currentFrameHeight + margin &&
-          posY + rowHeight + margin > frame.position.y
+          posY + maxHeight + margin > frame.position.y
         ) {
           overlapping = true;
           break;
@@ -103,16 +103,16 @@ export class FrameService {
   
       if (overlapping) {
         // Move to the next row if there is not enough space in the current row
-        if (posX + rowWidth + margin > containerWidth) {
+        if (posX + maxWidth + margin > containerWidth) {
           posX = 10;
-          posY += rowHeight + margin;
-          rowHeight = 0;
-        } else if (posY + rowHeight + margin > containerHeight) {
+          posY += maxHeight + margin;
+          maxHeight = 0;
+        } else if (posY + maxHeight + margin > containerHeight) {
           // Stop generating positions if it exceeds the container height
           break;
         } else {
           // Shift the position horizontally
-          posX += rowWidth + margin;
+          posX += maxWidth + margin;
         }
       }
     }
@@ -130,19 +130,25 @@ export class FrameService {
         if (Array.isArray(item)) {
           for (const tag of item as TagModel[]) {
             const tagNameLength = tag?.tagName?.length || 0;
-            width = Math.max(width, tagNameLength > 40 ? 300 : 200);
+            width = Math.max(width, tagNameLength > 40 ? 300 : 100);
             height = tagNameLength > 40 ? 100 : 0;
           }
         } else {
           const object = item as ObjectModel;
           const objectNameLength = object?.objectName?.length || 0;
-          width = Math.max(width, objectNameLength > 40 ? 400 : 250);
+          width = Math.max(width, objectNameLength > 40 ? 450 : 250);
           height = objectNameLength > 40 ? 150 : 200;
         }
       }
     }
   
     return { w: width, h: height };
+  }
+
+  getFramePosition(frameId: number): { x: number, y: number } | undefined {
+    const frames = this.frames.value;
+    const frame = frames.find(fr => fr.id === frameId);
+    return frame?.position;
   }
 
   getFrameSize(frame: Frame): { width: number, height: number } | undefined {

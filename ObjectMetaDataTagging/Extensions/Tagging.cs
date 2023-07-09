@@ -114,6 +114,10 @@ namespace ObjectMetaDataTagging.Extensions
             trans3.SetTag(Tags.FundsTransfer);
             testData.Add(trans3.GetAllTags().ToList()); // Convert to List
 
+            var trans4 = new PersonTransaction { Sender = "Adam", Receiver = "Sue", Amount = 5000.52 };
+            trans4.SetTag(Tags.FundsTransfer);
+            testData.Add(trans4.GetAllTags().ToList()); // Convert to List
+
             return testData;
         }
 
