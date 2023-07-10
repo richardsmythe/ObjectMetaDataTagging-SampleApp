@@ -9,6 +9,7 @@ import { TagModel } from '../models/TagModel';
   providedIn: 'root'
 })
 export class FrameService {
+
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
   private frameIdCounter: number = 1;
 
@@ -59,6 +60,13 @@ export class FrameService {
       objectData,
       tagData
     };
+
+    // Populate relatedFrameIds for object frames
+    if (frameType === 'Object') {
+      frame.objectData?.forEach(obj => {
+        obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
+      });
+    }
   
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
@@ -145,6 +153,12 @@ export class FrameService {
     return { w: width, h: height };
   }
 
+  getFrameById(frameId: number): Frame | undefined {
+    const frames = this.frames.value;
+    const frame = frames.find(fr => fr.id === frameId);
+    return frame !== undefined ? frame : undefined;
+  }
+
   getFramePosition(frameId: number): { x: number, y: number } | undefined {
     const frames = this.frames.value;
     const frame = frames.find(fr => fr.id === frameId);
@@ -158,11 +172,13 @@ export class FrameService {
     return undefined;
   }
 
-  getAssociatedTagFrames(objectId: number): Frame[] {
-    const tags = this.frames.value.filter(frame => frame.frameType === 'Tag' && 
-      frame.tagData?.some(tag => tag.associatedObjectId === objectId));
-    console.log(tags);
-    return tags;
+  getAssociatedTagFrameIds(objectId: number): number[] {
+    const tagFrames = this.frames.value.filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
+    const associatedFrames = tagFrames.map(frame => frame.id);
+
+    console.log("objectId:"+objectId +"related frame id:"+associatedFrames)   
+
+    return associatedFrames;
   }
 
   destroyFrame(frameId: number): void {

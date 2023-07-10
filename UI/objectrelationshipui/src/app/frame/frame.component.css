@@ -1,4 +1,17 @@
 
+.frame-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.frame-lines line {
+  stroke: #000;
+  stroke-width: 1px;
+}
+
+
 .top-bar-title {
   cursor: grab;
   position: relative;

@@ -17,6 +17,13 @@ export class FrameComponent {
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
 
+  points: {
+    startingPosition: { x: number; y: number };
+    endingPosition: { x: number; y: number };
+  } = {
+    startingPosition: { x: 0, y: 0 },
+    endingPosition: { x: 0, y: 0 }
+  };
   position: { x: number, y: number } = { x: 0, y: 0 };
   size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
@@ -30,6 +37,7 @@ export class FrameComponent {
   }
 
   ngOnInit(): void {
+    
     if (this.frame) {
       const frameSize = this.frameService.getFrameSize(this.frame);
       if (frameSize) {
@@ -44,8 +52,9 @@ export class FrameComponent {
       const objectIds = this.frame.objectData?.map(obj => obj.id);
       if (objectIds) {
         for (const objectId of objectIds) {
-          this.frameService.getAssociatedTagFrames(objectId);
+          this.frameService.getAssociatedTagFrameIds(objectId);
         }
+        this.points = this.getPoints();
       }
     }
   }
@@ -134,6 +143,36 @@ export class FrameComponent {
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
   }
+
+  getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
+    let startingPosition: { x: number; y: number } | undefined = undefined;
+    let endingPosition: { x: number; y: number } | undefined = undefined;
+  
+    if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
+      const objectData = this.frame.objectData;
+      if (objectData.length > 0 && objectData[0].relatedFrames && objectData[0].relatedFrames.length > 0) {
+        const startingFrameId = this.frame.id;
+        const endingFrameId = objectData[0].relatedFrames[0]; // assuming there is only one related frame
+        startingPosition = this.getFramePosition(startingFrameId);
+        endingPosition = this.getFramePosition(endingFrameId);
+      }
+    }  
+    return {
+      startingPosition: startingPosition || { x: 0, y: 0 },
+      endingPosition: endingPosition || { x: 0, y: 0 }
+    };
+  }
+
+  getFramePosition(frameId: number): { x: number; y: number } | undefined {
+    console.log(frameId)
+    const frame = this.frameService.getFrameById(frameId);
+    if (frame && frame.position) {
+      console.log("frame pos:" + frame.position.x + frame.position.y)
+      return { x: frame.position.x, y: frame.position.y };
+    }
+    return undefined;
+  }
+
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
