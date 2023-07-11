@@ -54,7 +54,8 @@ export class FrameComponent {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
         }
-        this.points = this.getPoints();        
+        this.points = this.getPoints();      
+        console.log(this.points)  ;
       }
     }
   }
@@ -156,17 +157,14 @@ export class FrameComponent {
         const startingFrameId = this.frame.id;
         const endingFrameId = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
 
-        console.log("startingFrameId:"+startingFrameId)
-        console.log("endingFrameId:"+endingFrameId)
-
-        //const endingFrameId = objectData[0].relatedFrames[0] // assuming there is only one related frame
-
+        // console.log("startingFrameId:"+startingFrameId)
+        // console.log("endingFrameId:"+endingFrameId)
 
         startingPosition = this.getFramePosition(startingFrameId);
         endingPosition = this.getFramePosition(endingFrameId[0]);
 
-        console.log(this.getFramePosition(startingFrameId))
-        console.log(this.getFramePosition(endingFrameId[0]))
+        //console.log(this.getFramePosition(startingFrameId))
+        //console.log(this.getFramePosition(endingFrameId[0]))
       }
     }  
     return {

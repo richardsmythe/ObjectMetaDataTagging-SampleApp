@@ -1,4 +1,4 @@
-
+  
 .frame-lines {
   position: absolute;
   top: 0;
@@ -8,8 +8,9 @@
 
 .frame-lines line {
   stroke: #000;
-  stroke-width: 1px;
+  stroke-width: 4px;
 }
+
 
 
 .top-bar-title {
@@ -56,6 +57,7 @@
     background-color: rgb(158, 237, 218);
     overflow: auto;
   }
+
 
   .object-frame {
     background-color:  rgb(188, 207, 248);;
