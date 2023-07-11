@@ -173,10 +173,11 @@ export class FrameService {
   }
 
   getAssociatedTagFrameIds(objectId: number): number[] {
+   
     const tagFrames = this.frames.value.filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
     const associatedFrames = tagFrames.map(frame => frame.id);
 
-    console.log("objectId:"+objectId +"related frame id:"+associatedFrames)   
+    // console.log("objectId:"+objectId +" related frame id:"+associatedFrames)   
 
     return associatedFrames;
   }

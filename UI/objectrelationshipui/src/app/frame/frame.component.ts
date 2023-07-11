@@ -54,7 +54,7 @@ export class FrameComponent {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
         }
-        this.points = this.getPoints();
+        this.points = this.getPoints();        
       }
     }
   }
@@ -145,16 +145,28 @@ export class FrameComponent {
   }
 
   getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
+    
     let startingPosition: { x: number; y: number } | undefined = undefined;
     let endingPosition: { x: number; y: number } | undefined = undefined;
   
     if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
       const objectData = this.frame.objectData;
-      if (objectData.length > 0 && objectData[0].relatedFrames && objectData[0].relatedFrames.length > 0) {
+      if (objectData && objectData[0].relatedFrames) {
+
         const startingFrameId = this.frame.id;
-        const endingFrameId = objectData[0].relatedFrames[0]; // assuming there is only one related frame
+        const endingFrameId = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
+
+        console.log("startingFrameId:"+startingFrameId)
+        console.log("endingFrameId:"+endingFrameId)
+
+        //const endingFrameId = objectData[0].relatedFrames[0] // assuming there is only one related frame
+
+
         startingPosition = this.getFramePosition(startingFrameId);
-        endingPosition = this.getFramePosition(endingFrameId);
+        endingPosition = this.getFramePosition(endingFrameId[0]);
+
+        console.log(this.getFramePosition(startingFrameId))
+        console.log(this.getFramePosition(endingFrameId[0]))
       }
     }  
     return {
@@ -164,10 +176,8 @@ export class FrameComponent {
   }
 
   getFramePosition(frameId: number): { x: number; y: number } | undefined {
-    console.log(frameId)
     const frame = this.frameService.getFrameById(frameId);
-    if (frame && frame.position) {
-      console.log("frame pos:" + frame.position.x + frame.position.y)
+    if (frame && frame.position) {      
       return { x: frame.position.x, y: frame.position.y };
     }
     return undefined;
