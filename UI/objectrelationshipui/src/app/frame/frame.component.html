@@ -1,12 +1,6 @@
 <div #wrapper class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x">
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h"
     [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
-    <svg class="frame-lines">
-      <line [attr.x1]="points.startingPosition.x" [attr.y1]="points.startingPosition.y" 
-        [attr.x2]="points.endingPosition.x" [attr.y2]="points.endingPosition.y" 
-        />
-  Sorry, your browser does not support inline SVG.
-</svg>
     <div class="frame-body">
       <ul>
         <li *ngIf="frame?.frameType === 'Object'">Origin: {{ frame?.origin }}</li>
@@ -33,8 +27,7 @@
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
     </div>
   </div>
-
-
+  
   <div class="resizers" [style.width.px]="size.w" [style.height.px]="size.h">
     <div (mousedown)="resize($event, ['right'], 'x')" class="resizer right"></div>
     <div (mousedown)="resize($event, ['left'], 'x')" class="resizer left"></div>
@@ -45,4 +38,13 @@
     <div (mousedown)="resize($event, ['bottom','left'], 'xy')" class="resizer bottom-left"></div>
     <div #resizeCorner (mousedown)="resize($event, ['bottom','right'], 'xy')" class="resizer bottom-right"></div>
   </div>
+
 </div>
+
+<svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
+  <line *ngIf="frame?.frameType === 'Object' && points"
+    [attr.x1]="points.startingPosition.x + position.x + size.w / 2"
+    [attr.y1]="points.startingPosition.y + position.y + size.h / 2"
+    [attr.x2]="points.endingPosition.x" [attr.y2]="points.endingPosition.y">
+  </line>
+</svg>

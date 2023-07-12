@@ -71,8 +71,6 @@ export class FrameComponent {
         const startingFrameId = this.frame.id;
         const endingFrameId = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
 
-
-
         startingPosition = this.frameService.getFramePosition(startingFrameId);
         endingPosition = this.frameService.getFramePosition(endingFrameId[0]);
 
