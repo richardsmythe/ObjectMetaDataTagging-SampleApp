@@ -1,9 +1,11 @@
-<div #wrapper class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x">
+<div class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x" (mousedown)="drag($event)">
+  
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h"
-    [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
-    <div class="frame-body">
-      <ul>
-        <li *ngIf="frame?.frameType === 'Object'">Origin: {{ frame?.origin }}</li>
+  [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
+  <div class="frame-body">
+    <ul>
+      <li *ngIf="frame?.frameType === 'Object'">Origin: {{ frame?.origin }}</li>
+
         <ng-container *ngIf="frame?.frameType === 'Object'">
           <li *ngFor="let obj of frame?.objectData">
             Object Name: {{ obj.objectName }}
@@ -19,6 +21,13 @@
           </ng-container>
         </ng-container>
       </ul>
+      <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
+        <line *ngIf="frame?.frameType === 'Object' && points"
+          [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
+          [attr.x2]="points.endingPosition.x - position.x + size.w / 2"
+          [attr.y2]="points.endingPosition.y - position.y + size.h / 2">
+        </line>
+      </svg>
     </div>
     <div class="top-bar-wrapper" (mousedown)="drag($event)">
       <div class="top-bar-title">
@@ -38,13 +47,5 @@
     <div (mousedown)="resize($event, ['bottom','left'], 'xy')" class="resizer bottom-left"></div>
     <div #resizeCorner (mousedown)="resize($event, ['bottom','right'], 'xy')" class="resizer bottom-right"></div>
   </div>
-
+  
 </div>
-
-<svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
-  <line *ngIf="frame?.frameType === 'Object' && points"
-    [attr.x1]="points.startingPosition.x + position.x + size.w / 2"
-    [attr.y1]="points.startingPosition.y + position.y + size.h / 2"
-    [attr.x2]="points.endingPosition.x" [attr.y2]="points.endingPosition.y">
-  </line>
-</svg>

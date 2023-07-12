@@ -24,11 +24,12 @@ export class FrameComponent {
       startingPosition: { x: 0, y: 0 },
       endingPosition: { x: 0, y: 0 }
     };
+  centerPosition: { x: number; y: number } = { x: 0, y: 0 };
   position: { x: number, y: number } = { x: 0, y: 0 };
   size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
-  minSize = { w: 100, h: 100 };
+  minSize = { w: 0, h: 0 };
   _document: any;
 
   constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef, private frameService: FrameService) {
@@ -58,6 +59,13 @@ export class FrameComponent {
       }
     }
   }
+
+
+
+updateCenterPosition(): void {
+  this.centerPosition.x = this.position.x + this.size.w / 2;
+  this.centerPosition.y = this.position.y + this.size.h / 2;
+}
   
   getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
 
