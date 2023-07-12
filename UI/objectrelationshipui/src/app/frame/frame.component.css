@@ -11,8 +11,6 @@
   stroke-width: 4px;
 }
 
-
-
 .top-bar-title {
   cursor: grab;
   position: relative;
@@ -21,7 +19,6 @@
   font-size: 18px;
   color: rgb(0, 0, 0);
 }
-
 
 .frame-body {
   position: absolute;

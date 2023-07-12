@@ -1,11 +1,12 @@
-<svg class="frame-lines">
-  <line *ngIf="frame?.frameType === 'Object' && points" [attr.x1]="points.startingPosition.x" [attr.y1]="points.startingPosition.y"
-        [attr.x2]="points.endingPosition.x" [attr.y2]="points.endingPosition.y"></line>
-</svg>  
-
 <div #wrapper class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x">
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h"
     [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
+    <svg class="frame-lines">
+      <line [attr.x1]="points.startingPosition.x" [attr.y1]="points.startingPosition.y" 
+        [attr.x2]="points.endingPosition.x" [attr.y2]="points.endingPosition.y" 
+        />
+  Sorry, your browser does not support inline SVG.
+</svg>
     <div class="frame-body">
       <ul>
         <li *ngIf="frame?.frameType === 'Object'">Origin: {{ frame?.origin }}</li>
@@ -26,11 +27,10 @@
       </ul>
     </div>
     <div class="top-bar-wrapper" (mousedown)="drag($event)">
-      <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
       <div class="top-bar-title">
         {{ frame?.frameType}} - {{frame?.id}}
-        <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
       </div>
+      <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
     </div>
   </div>
 
