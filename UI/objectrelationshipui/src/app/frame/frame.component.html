@@ -21,13 +21,6 @@
           </ng-container>
         </ng-container>
       </ul>
-      <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
-        <line *ngIf="frame?.frameType === 'Object' && points"
-          [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
-          [attr.x2]="points.endingPosition.x - position.x + size.w / 2"
-          [attr.y2]="points.endingPosition.y - position.y + size.h / 2">
-        </line>
-      </svg>
     </div>
     <div class="top-bar-wrapper" (mousedown)="drag($event)">
       <div class="top-bar-title">
@@ -35,8 +28,7 @@
       </div>
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
     </div>
-  </div>
-  
+  </div>  
   <div class="resizers" [style.width.px]="size.w" [style.height.px]="size.h">
     <div (mousedown)="resize($event, ['right'], 'x')" class="resizer right"></div>
     <div (mousedown)="resize($event, ['left'], 'x')" class="resizer left"></div>
@@ -46,6 +38,12 @@
     <div (mousedown)="resize($event, ['top','left'], 'xy')" class="resizer top-left"></div>
     <div (mousedown)="resize($event, ['bottom','left'], 'xy')" class="resizer bottom-left"></div>
     <div #resizeCorner (mousedown)="resize($event, ['bottom','right'], 'xy')" class="resizer bottom-right"></div>
-  </div>
-  
+  </div>  
+  <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
+    <line *ngIf="frame?.frameType === 'Object' && points"
+      [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
+      [attr.x2]="points.endingPosition.x - position.x + size.w / 2"
+      [attr.y2]="points.endingPosition.y - position.y + size.h / 2">
+    </line>
+  </svg>
 </div>
