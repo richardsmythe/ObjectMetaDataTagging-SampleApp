@@ -56,7 +56,7 @@ export class FrameComponent {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
         }
-        // this.points = this.getPoints();
+         this.points = this.getPoints();
       }
     }
   }
@@ -92,56 +92,42 @@ export class FrameComponent {
         endingPosition = this.frameService.getFramePosition(firstEndingFrameId);
       }      
     }
-  } else if (this.frame && this.frame.frameType === 'Tag' && this.frame.tagData) {
-  
-    const tagData = this.frame.tagData;
-    if (tagData) {
-      const startingFrameId = this.frame.id;      
-      console.log("tagFrame",startingFrameId);
-      startingPosition = this.frameService.getFramePosition(startingFrameId);
-      console.log("Starting position:", startingPosition);
-      // console.log("Ending position:", endingPosition);
-    }
   }
-
   return {
     startingPosition: startingPosition || { x: 0, y: 0 },
     endingPosition: endingPosition || { x: 0, y: 0 }
   };
 }
-  
-  drag(event: MouseEvent): void {
-    event.preventDefault();
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
 
-    const { x: positionX, y: positionY } = this.position;
+updateFramePosition(newPosition: { x: number; y: number }): void {
+  this.position = { x: newPosition.x, y: newPosition.y };
+}
 
-    const duringDrag = (e: MouseEvent) => {
-      const dx = e.clientX - mouseX;
-      const dy = e.clientY - mouseY;
-      this.position = { x: positionX + dx, y: positionY + dy };
-      this.lastPosition = { ...this.position };
+drag(event: MouseEvent): void {
+  event.preventDefault();
+  const mouseX = event.clientX;
+  const mouseY = event.clientY;
 
-      this.points = {
-        startingPosition: {
-          x: this.position.x + this.size.w / 2,
-          y: this.position.y + this.size.h / 2
-        },
-        endingPosition: this.points.endingPosition
-      };
-    };
+  const { x: positionX, y: positionY } = this.position;
+  let dx: number;
+  let dy: number;
 
-    const finishDrag = () => {
-      this.document.removeEventListener('mousemove', duringDrag);
-      this.document.removeEventListener('mouseup', finishDrag);
-      this.points = this.getPoints();
-    };  
+  const duringDrag = (e: MouseEvent) => {
+    dx = e.clientX - mouseX;
+    dy = e.clientY - mouseY;
+    this.position = { x: positionX + dx, y: positionY + dy };
+    this.lastPosition = { ...this.position };
+  };
 
-    this.document.addEventListener('mousemove', duringDrag);
-    this.document.addEventListener('mouseup', finishDrag);
+  const finishDrag = () => {
+    this.document.removeEventListener('mousemove', duringDrag);
+    this.document.removeEventListener('mouseup', finishDrag);
+    this.updateFramePosition(this.position);  
+  };
 
-  }
+  this.document.addEventListener('mousemove', duringDrag);
+  this.document.addEventListener('mouseup', finishDrag);
+}
 
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
     event.preventDefault();

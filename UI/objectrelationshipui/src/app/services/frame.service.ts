@@ -19,7 +19,7 @@ export class FrameService {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
         const frames: Frame[] = [];
-  
+
         response.forEach(frameData => {
           // Check if there are objects
           if (frameData.objectData) {
@@ -27,10 +27,10 @@ export class FrameService {
               // Create an object frame
               const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
               frames.push(objectFrame);
-  
+
               // Filter the tags associated with the current object
               const associatedTags = frameData.tagData.filter((tag: { associatedObjectId: number; }) => tag.associatedObjectId === object.id);
-              
+
               // Create a tag frame and populate the grouped tags
               if (associatedTags.length > 0) {
                 const tagFrame = this.createNewFrame([], associatedTags, 'Tag', frameData.origin);
@@ -39,7 +39,7 @@ export class FrameService {
             });
           }
         });
-  
+
         this.frames.next(frames);
         return of(frames);
       }),
@@ -49,7 +49,7 @@ export class FrameService {
       })
     );
   }
-  
+
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
       id: this.frameIdCounter++,
@@ -67,37 +67,37 @@ export class FrameService {
         obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
       });
     }
-  
+
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-  
+
     return frame;
   }
-  
+
   calculateFramePosition(): { x: number, y: number } {
     const margin = 20;
     const containerWidth = window.innerWidth;
     const containerHeight = window.innerHeight;
     const frames = this.frames.value;
-  
+
     let posX = 10;
     let posY = 10;
     let overlapping = true;
     let maxWidth = 0;
     let maxHeight = 0;
-  
+
     while (overlapping) {
       overlapping = false;
-  
+
       for (const frame of frames) {
         const currentFrameSize = this.getFrameSize(frame);
         const currentFrameWidth = currentFrameSize?.width || 0;
         const currentFrameHeight = currentFrameSize?.height || 0;
-  
+
         maxWidth = Math.max(maxWidth, currentFrameWidth);
         maxHeight = Math.max(maxHeight, currentFrameHeight);
-  
+
         if (
           posX < frame.position.x + currentFrameWidth + margin &&
           posX + maxWidth + margin > frame.position.x &&
@@ -108,7 +108,7 @@ export class FrameService {
           break;
         }
       }
-  
+
       if (overlapping) {
         // Move to the next row if there is not enough space in the current row
         if (posX + maxWidth + margin > containerWidth) {
@@ -124,7 +124,7 @@ export class FrameService {
         }
       }
     }
-  
+
     return { x: posX, y: posY };
   }
 
@@ -132,7 +132,7 @@ export class FrameService {
   calculateFrameSize(data: ObjectModel[] | TagModel[]): { w: number, h: number } {
     let width = 0;
     let height = 0;
-  
+
     if (Array.isArray(data)) {
       for (const item of data) {
         if (Array.isArray(item)) {
@@ -149,7 +149,7 @@ export class FrameService {
         }
       }
     }
-  
+
     return { w: width, h: height };
   }
 
@@ -159,18 +159,18 @@ export class FrameService {
     return frame !== undefined ? frame : undefined;
   }
 
-  getFramePosition(frameId: number): { x: number; y: number } | undefined {
-    const frameElement = document.getElementById(`${frameId}`);
-    console.log("frameElement", frameElement);
-    if (frameElement) {
-      const rect = frameElement.getBoundingClientRect();
-      const { left, top } = rect;
-      return { x: left, y: top };
+   getFramePosition(frameId: number): { x: number; y: number } | undefined {
+    // NB: this only gets the stored position, not current
+    const frame = this.getFrameById(frameId);
+    if (frame && frame.position) {
+      // console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
+      return { x: frame.position.x, y: frame.position.y };
     }
-    return undefined;
+    return undefined; 
   }
 
   getFrameSize(frame: Frame): { width: number, height: number } | undefined {
+      // NB: this only gets the stored size, not current
     if (frame && frame.size) {
       return { width: frame.size.w, height: frame.size.h };
     }
@@ -178,11 +178,11 @@ export class FrameService {
   }
 
   getAssociatedTagFrameIds(objectId: number): number[] {
-   
+
     const tagFrames = this.frames.value.filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
     const associatedFrames = tagFrames.map(frame => frame.id);
 
-    // console.log("objectId:"+objectId +" related frame id:"+associatedFrames)   
+    // console.log("objectId:"+objectId +" related frame id:"+associatedFrames)
 
     return associatedFrames;
   }
