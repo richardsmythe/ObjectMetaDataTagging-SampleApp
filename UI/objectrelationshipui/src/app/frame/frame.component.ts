@@ -16,7 +16,8 @@ export class FrameComponent {
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
-
+  @ViewChild('topBarWrapperRef') topBarWrapperRef!: ElementRef;
+  
   points: {
     startingPosition: { x: number; y: number };
     endingPosition: { x: number; y: number };
@@ -55,42 +56,59 @@ export class FrameComponent {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
         }
-        this.points = this.getPoints();
+        // this.points = this.getPoints();
       }
     }
   }
 
 
+  // updatePoints() {
+  //   // Calculate the starting and ending positions based on the frame's position and size
+  //   const startingX = this.position.x + this.size.w / 2;
+  //   const startingY = this.position.y + this.size.h / 2;
+  //   const endingX = this.points.endingPosition.x;
+  //   const endingY = this.points.endingPosition.y;
+  
+  //   // Update the points property with the new positions
+  //   this.points = { startingPosition: { x: startingX, y: startingY }, endingPosition: { x: endingX, y: endingY } };
+  //   console.log(this.points);
+  // }
 
-updateCenterPosition(): void {
-  this.centerPosition.x = this.position.x + this.size.w / 2;
-  this.centerPosition.y = this.position.y + this.size.h / 2;
-}
   
   getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
-
+    // Todo: account for tag frames too so that their position can be updated for the lines
     let startingPosition: { x: number; y: number } | undefined = undefined;
     let endingPosition: { x: number; y: number } | undefined = undefined;
 
-    if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
-      const objectData = this.frame.objectData;
-      if (objectData && objectData[0].relatedFrames) {
+  if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
+    const objectData = this.frame.objectData;
+    if (objectData && objectData[0].relatedFrames) {
+      const startingFrameId = this.frame.id;
+      const endingFrameIds = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
 
-        const startingFrameId = this.frame.id;
-        const endingFrameId = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
-
-        startingPosition = this.frameService.getFramePosition(startingFrameId);
-        endingPosition = this.frameService.getFramePosition(endingFrameId[0]);
-
-        console.log("Starting position:", startingPosition);
-        console.log("Ending position:", endingPosition);
-      }
+      startingPosition = this.frameService.getFramePosition(startingFrameId);
+      if (endingFrameIds.length > 0) {
+        const firstEndingFrameId = endingFrameIds[0];
+        endingPosition = this.frameService.getFramePosition(firstEndingFrameId);
+      }      
     }
-    return {
-      startingPosition: startingPosition || { x: 0, y: 0 },
-      endingPosition: endingPosition || { x: 0, y: 0 }
-    };
+  } else if (this.frame && this.frame.frameType === 'Tag' && this.frame.tagData) {
+  
+    const tagData = this.frame.tagData;
+    if (tagData) {
+      const startingFrameId = this.frame.id;      
+      console.log("tagFrame",startingFrameId);
+      startingPosition = this.frameService.getFramePosition(startingFrameId);
+      console.log("Starting position:", startingPosition);
+      // console.log("Ending position:", endingPosition);
+    }
   }
+
+  return {
+    startingPosition: startingPosition || { x: 0, y: 0 },
+    endingPosition: endingPosition || { x: 0, y: 0 }
+  };
+}
   
   drag(event: MouseEvent): void {
     event.preventDefault();
@@ -104,15 +122,25 @@ updateCenterPosition(): void {
       const dy = e.clientY - mouseY;
       this.position = { x: positionX + dx, y: positionY + dy };
       this.lastPosition = { ...this.position };
+
+      this.points = {
+        startingPosition: {
+          x: this.position.x + this.size.w / 2,
+          y: this.position.y + this.size.h / 2
+        },
+        endingPosition: this.points.endingPosition
+      };
     };
 
     const finishDrag = () => {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
-    };
+      this.points = this.getPoints();
+    };  
 
     this.document.addEventListener('mousemove', duringDrag);
     this.document.addEventListener('mouseup', finishDrag);
+
   }
 
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
@@ -123,11 +151,11 @@ updateCenterPosition(): void {
     const lastY = this.position.y;
     const dimensionWidth = this.size.w;
     const dimensionHeight = this.size.h;
-
+  
     const duringResize = (e: MouseEvent) => {
       let dw = dimensionWidth;
       let dh = dimensionHeight;
-
+  
       if (direction === 'x' || direction === 'xy') {
         if (anchors.includes('left')) {
           const offsetX = e.clientX - mouseX;
@@ -142,7 +170,7 @@ updateCenterPosition(): void {
           dw += (e.clientX - mouseX);
         }
       }
-
+  
       if (direction === 'y' || direction === 'xy') {
         if (anchors.includes('top')) {
           const offsetY = e.clientY - mouseY;
@@ -157,35 +185,26 @@ updateCenterPosition(): void {
           dh += (e.clientY - mouseY);
         }
       }
-
+  
       if (anchors.includes('left') || anchors.includes('top') || anchors.includes('bottom') || anchors.includes('right')) {
         dw = Math.max(dw, this.minSize.w);
         dh = Math.max(dh, this.minSize.h);
       }
-
+  
       this.size.w = dw;
       this.size.h = dh;
       this.lastSize = { ...this.size };
-    };
 
+    };
+  
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
     };
-
+  
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
   }
-
-  // getFramePosition(frameId: number): { x: number; y: number } | undefined {
-  //   const frame = this.frameService.getFrameById(frameId);
-  //   if (frame && frame.position) {
-  //     console.log("frameId:",frameId, "framePosition: ",frame.position);
-  //     return { x: frame.position.x, y: frame.position.y };
-  //   }
-  //   return undefined;
-  // }
-
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {

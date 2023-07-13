@@ -22,8 +22,8 @@
         </ng-container>
       </ul>
     </div>
-    <div class="top-bar-wrapper" (mousedown)="drag($event)">
-      <div class="top-bar-title">
+    <div class="top-bar-wrapper" [attr.id]="frame?.id" (mousedown)="drag($event)">
+      <div class="top-bar-title" >
         {{ frame?.frameType}} - {{frame?.id}}
       </div>
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>

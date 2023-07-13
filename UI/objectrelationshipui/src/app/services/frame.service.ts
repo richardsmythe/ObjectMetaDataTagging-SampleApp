@@ -159,11 +159,13 @@ export class FrameService {
     return frame !== undefined ? frame : undefined;
   }
 
-   getFramePosition(frameId: number): { x: number; y: number } | undefined {
-    const frame = this.getFrameById(frameId);
-    if (frame && frame.position) {
-      console.log("frameId:",frameId, "framePosition: ",frame.position);
-      return { x: frame.position.x, y: frame.position.y };
+  getFramePosition(frameId: number): { x: number; y: number } | undefined {
+    const frameElement = document.getElementById(`${frameId}`);
+    console.log("frameElement", frameElement);
+    if (frameElement) {
+      const rect = frameElement.getBoundingClientRect();
+      const { left, top } = rect;
+      return { x: left, y: top };
     }
     return undefined;
   }
