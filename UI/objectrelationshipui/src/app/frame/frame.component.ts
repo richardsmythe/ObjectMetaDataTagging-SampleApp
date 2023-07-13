@@ -99,11 +99,36 @@ export class FrameComponent {
   };
 }
 
-updateFramePosition(newPosition: { x: number; y: number }): void {
-  this.position = { x: newPosition.x, y: newPosition.y };
+updateFramePosition(newPosition: { x: number; y: number }, frameId: number | undefined): void {
+  if (frameId !== undefined) {
+    // Update the frame's position if the frameId matches
+    if (this.frame && this.frame.id === frameId) {
+      this.position = { x: newPosition.x, y: newPosition.y };
+ 
+      console.log("Frame:", frameId, "New Position:", this.position);
+
+      // Update the ending position of the line
+      this.points.endingPosition.x = this.position.x + this.size.w / 2;
+      this.points.endingPosition.y = this.position.y + this.size.h / 2;
+
+      console.log( this.points.endingPosition.x ,  this.points.endingPosition.y)
+    }
+  }
 }
 
-drag(event: MouseEvent): void {
+// updateLinePosition(): void {
+//   const startingX = this.position.x + this.size.w / 2;
+//   const startingY = this.position.y + this.size.h / 2;
+//   const endingX = this.points.endingPosition.x - this.position.x + this.size.w / 2;
+//   const endingY = this.points.endingPosition.y - this.position.y + this.size.h / 2;
+
+//   this.points = {
+//     startingPosition: { x: startingX, y: startingY },
+//     endingPosition: { x: endingX, y: endingY }
+//   };
+// }
+
+drag(event: MouseEvent, frameId: number | undefined): void {
   event.preventDefault();
   const mouseX = event.clientX;
   const mouseY = event.clientY;
@@ -117,12 +142,13 @@ drag(event: MouseEvent): void {
     dy = e.clientY - mouseY;
     this.position = { x: positionX + dx, y: positionY + dy };
     this.lastPosition = { ...this.position };
+   
   };
 
   const finishDrag = () => {
     this.document.removeEventListener('mousemove', duringDrag);
     this.document.removeEventListener('mouseup', finishDrag);
-    this.updateFramePosition(this.position);  
+    this.updateFramePosition(this.position, frameId);  
   };
 
   this.document.addEventListener('mousemove', duringDrag);

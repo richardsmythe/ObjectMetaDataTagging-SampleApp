@@ -1,4 +1,4 @@
-<div class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x" (mousedown)="drag($event)">
+<div class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x">
   
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h"
   [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
@@ -22,7 +22,7 @@
         </ng-container>
       </ul>
     </div>
-    <div class="top-bar-wrapper" [attr.id]="frame?.id" (mousedown)="drag($event)">
+    <div class="top-bar-wrapper" [attr.id]="frame?.id" (mousedown)="drag($event, frame?.id)">
       <div class="top-bar-title" >
         {{ frame?.frameType}} - {{frame?.id}}
       </div>
