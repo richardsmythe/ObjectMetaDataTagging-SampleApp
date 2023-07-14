@@ -116,18 +116,6 @@ updateFramePosition(newPosition: { x: number; y: number }, frameId: number | und
   }
 }
 
-// updateLinePosition(): void {
-//   const startingX = this.position.x + this.size.w / 2;
-//   const startingY = this.position.y + this.size.h / 2;
-//   const endingX = this.points.endingPosition.x - this.position.x + this.size.w / 2;
-//   const endingY = this.points.endingPosition.y - this.position.y + this.size.h / 2;
-
-//   this.points = {
-//     startingPosition: { x: startingX, y: startingY },
-//     endingPosition: { x: endingX, y: endingY }
-//   };
-// }
-
 drag(event: MouseEvent, frameId: number | undefined): void {
   event.preventDefault();
   const mouseX = event.clientX;
@@ -148,12 +136,16 @@ drag(event: MouseEvent, frameId: number | undefined): void {
   const finishDrag = () => {
     this.document.removeEventListener('mousemove', duringDrag);
     this.document.removeEventListener('mouseup', finishDrag);
-    this.updateFramePosition(this.position, frameId);  
+
+    if (this.frame?.frameType === 'Tag') {
+    this.updateFramePosition(this.position, frameId);
+    }
   };
 
   this.document.addEventListener('mousemove', duringDrag);
   this.document.addEventListener('mouseup', finishDrag);
 }
+
 
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
     event.preventDefault();
