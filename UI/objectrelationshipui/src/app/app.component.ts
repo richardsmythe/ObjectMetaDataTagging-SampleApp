@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FrameService } from './services/frame.service';
-import { Frame } from './models/Frame';
+import { Frame } from './models/FrameModel';
 
 @Component({
   selector: 'app-root',

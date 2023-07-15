@@ -1,7 +1,8 @@
 import { Component, ElementRef, Inject, Input, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Frame } from '../models/Frame';
+import { Frame } from '../models/FrameModel';
 import { FrameService } from '../services/frame.service';
+import { LineModel } from '../models/LineModel';
 
 export type ResizeAnchorType = 'top' | 'left' | 'bottom' | 'right';
 export type ResizeDirectionType = 'x' | 'y' | 'xy';
@@ -17,15 +18,8 @@ export class FrameComponent {
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
   @ViewChild('topBarWrapperRef') topBarWrapperRef!: ElementRef;
-  
-  points: {
-    startingPosition: { x: number; y: number };
-    endingPosition: { x: number; y: number };
-  } = {
-      startingPosition: { x: 0, y: 0 },
-      endingPosition: { x: 0, y: 0 }
-    };
-  centerPosition: { x: number; y: number } = { x: 0, y: 0 };
+ 
+  public lines: LineModel[] = [];
   position: { x: number, y: number } = { x: 0, y: 0 };
   size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
@@ -39,44 +33,40 @@ export class FrameComponent {
   }
 
   ngOnInit(): void {
-
+    this.frameService.getLines().subscribe(lines => {
+      this.lines = lines;
+      console.log("Lines:", this.lines); // Log the lines array
+    });
     if (this.frame) {
-      const frameSize = this.frameService.getFrameSize(this.frame);
+      const frameSize = this.frameService.getFrameSize(this.frame);      
+      // set initial sizes
       if (frameSize) {
         this.size = { w: frameSize.width, h: frameSize.height };
       }
-
-      // Get frame position if available
+      // set initial positions
       if (this.frame.position) {
         this.position = { x: this.frame.position.x, y: this.frame.position.y };
       }
 
+      // if object frame, get associated tags
       const objectIds = this.frame.objectData?.map(obj => obj.id);
       if (objectIds) {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
         }
-         this.points = this.getPoints();
+         
       }
     }
   }
-
-
-  // updatePoints() {
-  //   // Calculate the starting and ending positions based on the frame's position and size
-  //   const startingX = this.position.x + this.size.w / 2;
-  //   const startingY = this.position.y + this.size.h / 2;
-  //   const endingX = this.points.endingPosition.x;
-  //   const endingY = this.points.endingPosition.y;
   
-  //   // Update the points property with the new positions
-  //   this.points = { startingPosition: { x: startingX, y: startingY }, endingPosition: { x: endingX, y: endingY } };
-  //   console.log(this.points);
-  // }
+  getLines(): void {   
+    this.frameService.getLines().subscribe(lines => {
+      this.lines = lines;
+    });
+  }
 
-  
   getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
-    // Todo: account for tag frames too so that their position can be updated for the lines
+    // get initial positions
     let startingPosition: { x: number; y: number } | undefined = undefined;
     let endingPosition: { x: number; y: number } | undefined = undefined;
 
@@ -99,22 +89,6 @@ export class FrameComponent {
   };
 }
 
-updateFramePosition(newPosition: { x: number; y: number }, frameId: number | undefined): void {
-  if (frameId !== undefined) {
-    // Update the frame's position if the frameId matches
-    if (this.frame && this.frame.id === frameId) {
-      this.position = { x: newPosition.x, y: newPosition.y };
- 
-      console.log("Frame:", frameId, "New Position:", this.position);
-
-      // Update the ending position of the line
-      this.points.endingPosition.x = this.position.x + this.size.w / 2;
-      this.points.endingPosition.y = this.position.y + this.size.h / 2;
-
-      console.log( this.points.endingPosition.x ,  this.points.endingPosition.y)
-    }
-  }
-}
 
 drag(event: MouseEvent, frameId: number | undefined): void {
   event.preventDefault();
@@ -137,16 +111,14 @@ drag(event: MouseEvent, frameId: number | undefined): void {
     this.document.removeEventListener('mousemove', duringDrag);
     this.document.removeEventListener('mouseup', finishDrag);
 
-    if (this.frame?.frameType === 'Tag') {
-    this.updateFramePosition(this.position, frameId);
-    }
+    this.frameService.updateFramePosition(this.position, frameId);
+    this.frameService.updateLinePositions();
+    console.log("LINES",this.frameService.lines);
   };
 
   this.document.addEventListener('mousemove', duringDrag);
   this.document.addEventListener('mouseup', finishDrag);
 }
-
-
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
     event.preventDefault();
     const mouseX = event.clientX;

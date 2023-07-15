@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
-import { Frame } from '../models/Frame';
+import { Frame } from '../models/FrameModel';
 import { ObjectModel } from '../models/ObjectModel';
 import { TagModel } from '../models/TagModel';
+import { LineModel } from '../models/LineModel';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,18 @@ import { TagModel } from '../models/TagModel';
 export class FrameService {
 
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
+  public lines: BehaviorSubject<LineModel[]> = new BehaviorSubject<LineModel[]>([]);
+
   private frameIdCounter: number = 1;
 
   constructor(private http: HttpClient) { }
 
+getLines(): Observable<LineModel[]> {
+    return this.lines.asObservable();
+  }
+  getFrames(): Frame[] {
+    return this.frames.getValue();
+  }
   getFrameData(): Observable<Frame[]> {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
@@ -159,11 +168,20 @@ export class FrameService {
     return frame !== undefined ? frame : undefined;
   }
 
+  updateFramePosition(position: { x: number; y: number }, frameId: number | undefined): void {
+    const frames = this.frames.getValue();
+    const frameIndex = frames.findIndex((frame) => frame.id === frameId);
+    if (frameIndex !== -1) {
+      frames[frameIndex].position = { ...position };
+      this.frames.next(frames);
+      console.log("Frame:",frames[frameIndex].id," New Position:",frames[frameIndex].position);
+    }
+  }
+
    getFramePosition(frameId: number): { x: number; y: number } | undefined {
-    // NB: this only gets the stored position, not current
     const frame = this.getFrameById(frameId);
     if (frame && frame.position) {
-      // console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
+      //console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
       return { x: frame.position.x, y: frame.position.y };
     }
     return undefined; 
@@ -178,11 +196,8 @@ export class FrameService {
   }
 
   getAssociatedTagFrameIds(objectId: number): number[] {
-
     const tagFrames = this.frames.value.filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
     const associatedFrames = tagFrames.map(frame => frame.id);
-
-    // console.log("objectId:"+objectId +" related frame id:"+associatedFrames)
 
     return associatedFrames;
   }
@@ -196,4 +211,19 @@ export class FrameService {
     }
   }
 
+  updateLinePositions(): void {
+    const frames = this.frames.getValue();
+    const lines: LineModel[] = [];
+  
+    for (const frame of frames) {
+      if (frame.frameType === 'Object') {
+        const startingPosition = frame.position;
+        const childId = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
+        const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
+        lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
+      }
+    }
+  
+    this.lines.next(lines);
+  }
 }
