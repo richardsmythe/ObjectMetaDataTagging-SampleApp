@@ -35,7 +35,7 @@ export class FrameComponent {
   ngOnInit(): void {
     this.frameService.getLines().subscribe(lines => {
       this.lines = lines;
-      console.log("Lines:", this.lines); // Log the lines array
+      //console.log("Lines:", this.lines); // Log the lines array
     });
     if (this.frame) {
       const frameSize = this.frameService.getFrameSize(this.frame);      
@@ -114,7 +114,7 @@ drag(event: MouseEvent, frameId: number | undefined): void {
 
     this.frameService.updateFramePosition(this.position, frameId);
     this.frameService.updateLinePositions();
-    console.log("LINES",this.frameService.lines);
+    //console.log("LINES",this.frameService.lines);
   };
 
   this.document.addEventListener('mousemove', duringDrag);
