@@ -60,6 +60,7 @@ export class FrameComponent {
   }
   
   getLines(): void {   
+    this.frameService.updateLinePositions();
     this.frameService.getLines().subscribe(lines => {
       this.lines = lines;
     });

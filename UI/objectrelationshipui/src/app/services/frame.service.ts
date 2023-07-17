@@ -219,6 +219,13 @@ getLines(): Observable<LineModel[]> {
       if (frame.frameType === 'Object') {
         const startingPosition = frame.position;
         const childId = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
+       
+        const associatedTagFrame = frames.find(f => f.id === childId[0] && f.frameType === 'Tag');
+        console.log("associated",associatedTagFrame);
+        if (childId[0] === associatedTagFrame?.id  ){
+          console.log("TEST");
+        }
+        
         const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
         lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
       }
