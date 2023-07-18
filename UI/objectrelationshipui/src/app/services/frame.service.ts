@@ -212,26 +212,25 @@ getLines(): Observable<LineModel[]> {
     }
   }
 
-  updateLinePositions(): void {
+  updateLinePositions(frameId?: number): void {
     const frames = this.frames.getValue();
-    const lines: LineModel[] = [];  
-   
-  for (const frame of frames) {
-    if (frame.frameType === 'Object') {
-      const startingPosition = frame.position;
-      const childId = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];      
-
-      const associatedTagFrame = frames.find(f => f.id === childId[0] && f.frameType === 'Tag');
-    
-      // console.log( "frameId: ", frame.id, "frame.objectData.id:", frame.objectData?.[0]?.id);
-      // console.log("tag frame associated object id:",associatedTagFrame?.tagData[0].associatedObjectId );
-      
-      if (associatedTagFrame?.objectData && associatedTagFrame?.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
-        const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
-        lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
-      }
+    const lines: LineModel[] = [];
+    const frame = frames.find(f => f.id === frameId);
+  
+    if (!frame || frame.frameType !== 'Object') {
+      // If the frame is not found or its frame type is not 'Object', return early
+      return;
     }
-  }
+  
+    const startingPosition = frame.position;
+    const childId = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
+    const associatedTagFrame = frames.find(f => f.id === childId[0] && f.frameType === 'Tag');
+  
+    if (associatedTagFrame?.objectData && associatedTagFrame?.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
+      const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
+      lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
+    }
+  
     this.lines.next(lines);
     console.log("Lines array:", lines);
   }
