@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, of, switchMap } from 'rxjs';
 import { Frame } from '../models/FrameModel';
 import { ObjectModel } from '../models/ObjectModel';
 import { TagModel } from '../models/TagModel';
@@ -10,7 +10,7 @@ import { LineModel } from '../models/LineModel';
   providedIn: 'root'
 })
 export class FrameService {
-
+  private initialisedFramesCounter = 0;
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
   public lines: BehaviorSubject<LineModel[]> = new BehaviorSubject<LineModel[]>([]);
 
@@ -18,6 +18,14 @@ export class FrameService {
 
   constructor(private http: HttpClient) { }
 
+  public frameInitialised(): void {
+    this.initialisedFramesCounter++;
+    const frames = this.frames.getValue();
+    if (this.initialisedFramesCounter === frames.length) {
+      console.log(this.initialisedFramesCounter, 'frames initialised');
+      // Do whatever you need to do when all frames are initialized
+    }
+  }
 getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
   }
@@ -218,7 +226,6 @@ getLines(): Observable<LineModel[]> {
     const frame = frames.find(f => f.id === frameId);
   
     if (!frame || frame.frameType !== 'Object') {
-      // If the frame is not found or its frame type is not 'Object', return early
       return;
     }
   
@@ -229,9 +236,9 @@ getLines(): Observable<LineModel[]> {
     if (associatedTagFrame?.objectData && associatedTagFrame?.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
       const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
       lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
+      this.lines.next(lines);
     }
   
-    this.lines.next(lines);
     console.log("Lines array:", lines);
   }
 }

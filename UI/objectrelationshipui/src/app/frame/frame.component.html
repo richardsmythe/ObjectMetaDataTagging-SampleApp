@@ -41,11 +41,15 @@
   </div>  
   <ng-container *ngIf="lines as linesArray">
     <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
-      <line *ngFor="let line of linesArray"
-        [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
-        [attr.x2]="line.endingPosition.x - position.x + size.w / 2"
-        [attr.y2]="line.endingPosition.y - position.y + size.h / 2">
-      </line>
+      <ng-container *ngFor="let line of linesArray">
+        <ng-container *ngIf="frame?.frameType === 'Object'">
+          <line
+            [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
+            [attr.x2]="line.endingPosition.x - position.x + size.w / 2"
+            [attr.y2]="line.endingPosition.y - position.y + size.h / 2"
+          ></line>
+        </ng-container>
+      </ng-container>
     </svg>
   </ng-container>
 </div>

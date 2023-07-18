@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, Input, ViewChild } from '@angular/core';
+import { OnInit , ViewChildren ,QueryList, Component, ElementRef, Inject, Input, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Frame } from '../models/FrameModel';
 import { FrameService } from '../services/frame.service';
@@ -12,7 +12,8 @@ export type ResizeDirectionType = 'x' | 'y' | 'xy';
   templateUrl: './frame.component.html',
   styleUrls: ['./frame.component.css']
 })
-export class FrameComponent {
+export class FrameComponent implements OnInit  {
+ @ViewChildren(FrameComponent) frameComponents!: QueryList<FrameComponent>;
   @Input() frame: Frame | undefined;
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
@@ -25,26 +26,18 @@ export class FrameComponent {
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
   minSize = { w: 0, h: 0 };
-  _document: any;
+  
 
-  constructor(@Inject(DOCUMENT) private document: Document, private elementRef: ElementRef, private frameService: FrameService) {
+  constructor(@Inject(DOCUMENT) private document: Document,
+   private frameService: FrameService) {
     this.lastPosition = undefined;
     this.lastSize = undefined;
   }
-
-  ngAfterViewInit(): void {
-    // Subscribe to getLines() after the view has been initialized
-    this.frameService.getLines().subscribe(lines => {
-      this.lines = lines;
-      console.log("LinesFrameComponent:", this.lines); // Log the lines array
-    });
-  }
-
-
-  ngOnInit(): void {
+ 
+  ngOnInit(): void {    
     // this.frameService.getLines().subscribe(lines => {
     //   this.lines = lines;
-    //   console.log("LinesFrameComponent:", this.lines); // Log the lines array
+    //   // console.log("LinesFrameComponent:", this.lines); // Log the lines array
     // });
     if (this.frame) {
       const frameSize = this.frameService.getFrameSize(this.frame);      
@@ -66,6 +59,7 @@ export class FrameComponent {
          
       }
     }
+    this.frameService.frameInitialised();
   }
   
   getLines(): void {   
@@ -120,10 +114,10 @@ drag(event: MouseEvent, frameId: number | undefined): void {
     this.document.removeEventListener('mousemove', duringDrag);
     this.document.removeEventListener('mouseup', finishDrag);
     
-    if (this.frame?.frameType === 'Object') {
+
       this.frameService.updateFramePosition(this.position, frameId);
       this.frameService.updateLinePositions(frameId);
-    }
+
    
     //console.log("LINES",this.frameService.lines);
   };
