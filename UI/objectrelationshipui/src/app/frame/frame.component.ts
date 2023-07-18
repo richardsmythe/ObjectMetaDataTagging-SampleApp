@@ -35,7 +35,7 @@ export class FrameComponent {
   ngOnInit(): void {
     this.frameService.getLines().subscribe(lines => {
       this.lines = lines;
-      //console.log("Lines:", this.lines); // Log the lines array
+      console.log("LinesFrameComponent:", this.lines); // Log the lines array
     });
     if (this.frame) {
       const frameSize = this.frameService.getFrameSize(this.frame);      
@@ -59,36 +59,36 @@ export class FrameComponent {
     }
   }
   
-  getLines(): void {   
-    this.frameService.updateLinePositions();
-    this.frameService.getLines().subscribe(lines => {
-      this.lines = lines;
-    });
-  }
+  // getLines(): void {   
+  //   this.frameService.updateLinePositions();
+  //   this.frameService.getLines().subscribe(lines => {
+  //     this.lines = lines;
+  //   });
+  // }
 
-  getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
-    // get initial positions
-    let startingPosition: { x: number; y: number } | undefined = undefined;
-    let endingPosition: { x: number; y: number } | undefined = undefined;
+//   getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
+//     // get initial positions
+//     let startingPosition: { x: number; y: number } | undefined = undefined;
+//     let endingPosition: { x: number; y: number } | undefined = undefined;
 
-  if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
-    const objectData = this.frame.objectData;
-    if (objectData && objectData[0].relatedFrames) {
-      const startingFrameId = this.frame.id;
-      const endingFrameIds = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
+//   if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
+//     const objectData = this.frame.objectData;
+//     if (objectData && objectData[0].relatedFrames) {
+//       const startingFrameId = this.frame.id;
+//       const endingFrameIds = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
 
-      startingPosition = this.frameService.getFramePosition(startingFrameId);
-      if (endingFrameIds.length > 0) {
-        const firstEndingFrameId = endingFrameIds[0];
-        endingPosition = this.frameService.getFramePosition(firstEndingFrameId);
-      }      
-    }
-  }
-  return {
-    startingPosition: startingPosition || { x: 0, y: 0 },
-    endingPosition: endingPosition || { x: 0, y: 0 }
-  };
-}
+//       startingPosition = this.frameService.getFramePosition(startingFrameId);
+//       if (endingFrameIds.length > 0) {
+//         const firstEndingFrameId = endingFrameIds[0];
+//         endingPosition = this.frameService.getFramePosition(firstEndingFrameId);
+//       }      
+//     }
+//   }
+//   return {
+//     startingPosition: startingPosition || { x: 0, y: 0 },
+//     endingPosition: endingPosition || { x: 0, y: 0 }
+//   };
+// }
 
 
 drag(event: MouseEvent, frameId: number | undefined): void {
@@ -105,7 +105,6 @@ drag(event: MouseEvent, frameId: number | undefined): void {
     dy = e.clientY - mouseY;
     this.position = { x: positionX + dx, y: positionY + dy };
     this.lastPosition = { ...this.position };
-   
   };
 
   const finishDrag = () => {
@@ -114,11 +113,14 @@ drag(event: MouseEvent, frameId: number | undefined): void {
 
     this.frameService.updateFramePosition(this.position, frameId);
     this.frameService.updateLinePositions();
+   
     //console.log("LINES",this.frameService.lines);
   };
 
   this.document.addEventListener('mousemove', duringDrag);
   this.document.addEventListener('mouseup', finishDrag);
+
+
 }
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
     event.preventDefault();
