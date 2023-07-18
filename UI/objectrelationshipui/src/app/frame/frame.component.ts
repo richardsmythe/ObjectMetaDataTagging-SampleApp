@@ -60,38 +60,10 @@ export class FrameComponent implements OnInit  {
       }
     }
     this.frameService.frameInitialised();
-  }
-  
-  getLines(): void {   
-    this.frameService.updateLinePositions();
     this.frameService.getLines().subscribe(lines => {
       this.lines = lines;
     });
-  }
-
-  getPoints(): { startingPosition: { x: number; y: number }; endingPosition: { x: number; y: number } } {
-    // get initial positions
-    let startingPosition: { x: number; y: number } | undefined = undefined;
-    let endingPosition: { x: number; y: number } | undefined = undefined;
-
-  if (this.frame && this.frame.frameType === 'Object' && this.frame.objectData) {
-    const objectData = this.frame.objectData;
-    if (objectData && objectData[0].relatedFrames) {
-      const startingFrameId = this.frame.id;
-      const endingFrameIds = this.frameService.getAssociatedTagFrameIds(objectData[0].id);
-
-      startingPosition = this.frameService.getFramePosition(startingFrameId);
-      if (endingFrameIds.length > 0) {
-        const firstEndingFrameId = endingFrameIds[0];
-        endingPosition = this.frameService.getFramePosition(firstEndingFrameId);
-      }      
-    }
-  }
-  return {
-    startingPosition: startingPosition || { x: 0, y: 0 },
-    endingPosition: endingPosition || { x: 0, y: 0 }
-  };
-}
+  } 
 
 
 drag(event: MouseEvent, frameId: number | undefined): void {

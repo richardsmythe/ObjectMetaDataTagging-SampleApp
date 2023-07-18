@@ -13,7 +13,6 @@ export class FrameService {
   private initialisedFramesCounter = 0;
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
   public lines: BehaviorSubject<LineModel[]> = new BehaviorSubject<LineModel[]>([]);
-
   private frameIdCounter: number = 1;
 
   constructor(private http: HttpClient) { }
@@ -22,8 +21,7 @@ export class FrameService {
     this.initialisedFramesCounter++;
     const frames = this.frames.getValue();
     if (this.initialisedFramesCounter === frames.length) {
-      console.log(this.initialisedFramesCounter, 'frames initialised');
-      // Do whatever you need to do when all frames are initialized
+      console.log(this.initialisedFramesCounter, 'frames initialised');      
     }
   }
 getLines(): Observable<LineModel[]> {
