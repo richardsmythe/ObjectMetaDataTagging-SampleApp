@@ -42,7 +42,7 @@
   <ng-container *ngIf="lines as linesArray">
     <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
       <ng-container *ngFor="let line of linesArray">
-        <ng-container *ngIf="frame?.frameType === 'Object'">
+        <ng-container *ngIf="frame?.frameType === 'Object' && frame?.id === line.parentId">
           <line
             [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
             [attr.x2]="line.endingPosition.x - position.x + size.w / 2"

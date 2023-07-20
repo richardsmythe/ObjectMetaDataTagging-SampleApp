@@ -88,7 +88,8 @@ drag(event: MouseEvent, frameId: number | undefined): void {
     
 
       this.frameService.updateFramePosition(this.position, frameId);
-      this.frameService.updateLinePositions(frameId);
+      this.frameService.updateLinePositions();
+      // this.frameService.updateLinePositions(frameId);
 
    
     //console.log("LINES",this.frameService.lines);
