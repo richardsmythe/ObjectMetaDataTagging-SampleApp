@@ -1,5 +1,5 @@
 <div class="frame-wrapper" [style.top.px]="position.y" [style.left.px]="position.x">
-  
+
   <div class="content-wrapper" [style.width.px]="size.w" [style.height.px]="size.h"
   [ngClass]="{ 'object-frame': frame?.frameType === 'Object', 'tag-frame': frame?.frameType === 'Tag' }">
   <div class="frame-body">
@@ -17,7 +17,7 @@
         <ng-container *ngIf="frame?.frameType === 'Tag'">
           <ng-container *ngFor="let tag of frame?.tagData; let isFirst = first">
             <li *ngIf="isFirst">Object Id: {{ tag?.associatedObjectId }}</li>
-            <li>Tag Name: {{ tag?.tagName }}</li>          
+            <li>Tag Name: {{ tag?.tagName }}</li>
           </ng-container>
         </ng-container>
       </ul>
@@ -28,7 +28,7 @@
       </div>
       <span class="delete-icon" (click)="deleteFrame(frame?.id)">&times;</span>
     </div>
-  </div>  
+  </div>
   <div class="resizers" [style.width.px]="size.w" [style.height.px]="size.h">
     <div (mousedown)="resize($event, ['right'], 'x')" class="resizer right"></div>
     <div (mousedown)="resize($event, ['left'], 'x')" class="resizer left"></div>
@@ -38,18 +38,14 @@
     <div (mousedown)="resize($event, ['top','left'], 'xy')" class="resizer top-left"></div>
     <div (mousedown)="resize($event, ['bottom','left'], 'xy')" class="resizer bottom-left"></div>
     <div #resizeCorner (mousedown)="resize($event, ['bottom','right'], 'xy')" class="resizer bottom-right"></div>
-  </div>  
-  <ng-container *ngIf="lines as linesArray">
-    <svg class="frame-lines" [attr.width]="size.w" [attr.height]="size.h">
-      <ng-container *ngFor="let line of linesArray">
-        <ng-container *ngIf="frame?.frameType === 'Object' && frame?.id === line.parentId">
-          <line
-            [attr.x1]="size.w / 2" [attr.y1]="size.h / 2"
-            [attr.x2]="line.endingPosition.x - position.x + size.w / 2"
-            [attr.y2]="line.endingPosition.y - position.y + size.h / 2"
-          ></line>
-        </ng-container>
-      </ng-container>
-    </svg>
+  </div>
+  <ng-container *ngIf="frame">
+    <app-line
+      *ngFor="let lineComponent of lineComponents; let i = index"
+      [linesArray]="getLinesForParentId(i + 1)"
+      [width]="size.w"
+      [height]="size.h"
+    ></app-line>
   </ng-container>
+  
 </div>

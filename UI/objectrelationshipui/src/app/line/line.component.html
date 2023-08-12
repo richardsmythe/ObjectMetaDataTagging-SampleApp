@@ -1,0 +1,14 @@
+<ng-container *ngIf="linesArray.length > 0; else noLines">
+  <svg class="line" [attr.width]="width" [attr.height]="height">
+    <line
+      *ngFor="let line of linesArray"
+      [attr.x1]="line.startingPosition.x"
+      [attr.y1]="line.startingPosition.y"
+      [attr.x2]="line.endingPosition.x"
+      [attr.y2]="line.endingPosition.y"
+    ></line>
+  </svg>
+</ng-container>
+<ng-template #noLines>
+  <p>error: no lines</p>
+</ng-template>

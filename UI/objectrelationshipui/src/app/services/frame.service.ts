@@ -14,6 +14,7 @@ export class FrameService {
   private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
   public lines: BehaviorSubject<LineModel[]> = new BehaviorSubject<LineModel[]>([]);
   private frameIdCounter: number = 1;
+  public allFramesInitialised: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private http: HttpClient) { }
 
@@ -21,10 +22,12 @@ export class FrameService {
     this.initialisedFramesCounter++;
     const frames = this.frames.getValue();
     if (this.initialisedFramesCounter === frames.length) {
-      console.log(this.initialisedFramesCounter, 'frames initialised');  
-      //this.updateLinePositions();    
+        console.log(this.initialisedFramesCounter, 'frames initialised');
+        this.updateLinePositions(); 
+        this.allFramesInitialised.next(true);
     }
-  }
+}
+
 getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
   }
@@ -259,6 +262,6 @@ getLines(): Observable<LineModel[]> {
     }
   
     this.lines.next(lines);
-    console.log("Lines array:", lines);
+    //console.log("Lines array:", lines);
   }
 }
