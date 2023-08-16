@@ -1,16 +1,6 @@
-  
-.frame-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  /* z-index: -1; */
-}
 
-.frame-lines line {
-  stroke: #000;
-  stroke-width: 4px;
-}
+
+
 
 .top-bar-title {
   cursor: grab;
@@ -48,6 +38,7 @@
     position: absolute;
     border: 2px solid black;
     border-radius: 8px;
+
   }
   
   .content-wrapper {
@@ -58,7 +49,7 @@
 
 
   .object-frame {
-    background-color:  rgb(188, 207, 248);;
+    background-color:  rgb(188, 207, 248);
   }
   
   .tag-frame {

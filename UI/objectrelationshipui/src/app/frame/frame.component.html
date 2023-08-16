@@ -39,13 +39,9 @@
     <div (mousedown)="resize($event, ['bottom','left'], 'xy')" class="resizer bottom-left"></div>
     <div #resizeCorner (mousedown)="resize($event, ['bottom','right'], 'xy')" class="resizer bottom-right"></div>
   </div>
-  <ng-container *ngIf="frame">
-    <app-line
-      *ngFor="let lineComponent of lineComponents; let i = index"
-      [linesArray]="getLinesForParentId(i + 1)"
-      [width]="size.w"
-      [height]="size.h"
-    ></app-line>
-  </ng-container>
-  
+
+</div>
+
+<div *ngFor="let line of lines">
+  <app-line [startingPosition]="line.startingPosition" [endingPosition]="line.endingPosition"[width]="size.w" [height]="size.h"></app-line>
 </div>

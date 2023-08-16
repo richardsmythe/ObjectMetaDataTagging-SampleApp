@@ -68,26 +68,26 @@ export class FrameComponent implements OnInit {
     // Inform the service that this frame has been initialised
     this.frameService.frameInitialised();
 
-    // Setup a subscription to fetch the lines once all frames are initialized
+    // Setup a subscription to fetch the lines once all frames are initialised
     this.frameService.allFramesInitialised.pipe(
       take(1),
       switchMap(initialised => {
         if (initialised) {
           return this.frameService.getLines();
         } else {
-          return of([]);  // Don't fetch lines if frames are not initialized.
+          return of([]);  // Don't fetch lines if frames are not initialised.
         }
       })
     ).subscribe(lines => {
-      console.log('Lines:', lines);
       this.lines = lines;
+      console.log(lines);
     });
   }
 
-
-
-  getLinesForParentId(parentId: number): LineModel[] {
-    return this.lines.filter((line: { parentId: number; }) => line.parentId === parentId);
+  getLinesForParentId(id: number): LineModel[] {
+    const linesForThisParent = this.lines.filter(line => line.parentId === id);
+    console.log(`Lines for parent ID ${id}:`, linesForThisParent);
+    return linesForThisParent;
   }
 
   drag(event: MouseEvent, frameId: number | undefined): void {
