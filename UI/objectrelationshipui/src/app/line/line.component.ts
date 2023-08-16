@@ -34,8 +34,8 @@ export class LineComponent implements OnChanges {
     const endY = this.endingPosition.y + this.height / 2;
   
     // The SVG's top-left corner should be at the minimum x,y 
-    this.svgLeft = Math.min(startX, endX) - this.width / 2;
-    this.svgTop = Math.min(startY, endY) - this.height / 2;
+    this.svgLeft = Math.min(startX, endX) - this.width;
+    this.svgTop = Math.min(startY, endY) - this.height;
   
     // Line coordinates relative to the SVG's top-left corner
     this.lineX1 = startX - this.svgLeft;
@@ -50,18 +50,7 @@ export class LineComponent implements OnChanges {
 }
   
   ngOnChanges(changes: SimpleChanges){  
-
-      this.cdRef.detectChanges();
- 
-  
-  
-    // Filter the linesArray based on the parentId to get the right lines for each instance
-    // console.log("LINESARRAY:",this.linesArray);
-    // console.log("PARENT ID:", this.parentId);
-    // if (this.parentId && this.linesArray.length > 0) {
-    //   this.linesArray = this.linesArray.filter((line) => line.parentId === this.parentId);
-    //   this.cdRef.detectChanges();
-    // }
-  }
+      this.cdRef.detectChanges();   
+   }
 }
 
