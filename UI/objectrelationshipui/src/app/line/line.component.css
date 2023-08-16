@@ -2,3 +2,7 @@ svg {
     position: absolute;
     z-index: -1;
 }
+
+line {
+    stroke-dasharray: 5,5;
+}
