@@ -17,7 +17,6 @@ export type ResizeDirectionType = 'x' | 'y' | 'xy';
 })
 export class FrameComponent implements OnInit {
 
-  // @ViewChild(LineComponent) lineComponent: LineComponent | undefined;
   @ViewChildren(LineComponent) lineComponents!: QueryList<LineComponent>;
 
   @Input() frame: Frame | undefined;
@@ -80,14 +79,7 @@ export class FrameComponent implements OnInit {
       })
     ).subscribe(lines => {
       this.lines = lines;
-      console.log(lines);
     });
-  }
-
-  getLinesForParentId(id: number): LineModel[] {
-    const linesForThisParent = this.lines.filter(line => line.parentId === id);
-    console.log(`Lines for parent ID ${id}:`, linesForThisParent);
-    return linesForThisParent;
   }
 
   drag(event: MouseEvent, frameId: number | undefined): void {
@@ -188,6 +180,7 @@ export class FrameComponent implements OnInit {
     if (frameId !== undefined) {
       console.log(frameId);
       this.frameService.destroyFrame(frameId);
+
     }
   }
 }

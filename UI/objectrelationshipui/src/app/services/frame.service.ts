@@ -222,27 +222,6 @@ getLines(): Observable<LineModel[]> {
     }
   }
 
-  // updateLinePositions(frameId?: number): void {
-  //   const frames = this.frames.getValue();
-  //   const lines: LineModel[] = [];
-  //   const frame = frames.find(f => f.id === frameId);
-  
-  //   if (!frame || frame.frameType !== 'Object') {
-  //     return;
-  //   }
-  
-  //   const startingPosition = frame.position;
-  //   const childId = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
-  //   const associatedTagFrame = frames.find(f => f.id === childId[0] && f.frameType === 'Tag');
-  
-  //   if (associatedTagFrame?.objectData && associatedTagFrame?.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
-  //     const endingPosition = this.getFramePosition(childId[0]) || { x: 0, y: 0 };
-  //     lines.push({ parentId: frame.id, childId, startingPosition, endingPosition });
-  //     this.lines.next(lines);
-  //   }
-  
-  //   //console.log("Lines array:", lines);
-  // }
 
   updateLinePositions(): void {
     const frames = this.frames.getValue();
@@ -262,6 +241,5 @@ getLines(): Observable<LineModel[]> {
     }
   
     this.lines.next(lines);
-    //console.log("Lines array:", lines);
   }
 }
