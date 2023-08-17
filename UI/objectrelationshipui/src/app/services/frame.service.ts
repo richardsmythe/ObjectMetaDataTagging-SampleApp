@@ -46,15 +46,16 @@ getLines(): Observable<LineModel[]> {
               // Create an object frame
               const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
               frames.push(objectFrame);
-
-              // Filter the tags associated with the current object
-              const associatedTags = frameData.tagData.filter((tag: { associatedObjectId: number; }) => tag.associatedObjectId === object.id);
-
-              // Create a tag frame and populate the grouped tags
-              if (associatedTags.length > 0) {
-                const tagFrame = this.createNewFrame([], associatedTags, 'Tag', frameData.origin);
-                frames.push(tagFrame);
-              }
+              
+              // Iterate over the tags associated with the current object
+              frameData.tagData.forEach((tag: any) => {
+                // Check if the tag is associated with the current object
+                if(tag.associatedObjectId === object.id) {
+                  // Create a tag frame for each individual tag
+                  const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
+                  frames.push(tagFrame);
+                }
+              });
             });
           }
         });
@@ -67,7 +68,7 @@ getLines(): Observable<LineModel[]> {
         return of([]);
       })
     );
-  }
+}
 
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
@@ -210,7 +211,7 @@ getLines(): Observable<LineModel[]> {
     
     const associatedFrames = tagFrames.map(frame => frame.id);
     
-    //console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
+    console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
     return associatedFrames;
   }
   destroyFrame(frameId: number): void {
@@ -228,18 +229,20 @@ getLines(): Observable<LineModel[]> {
     const lines: LineModel[] = [];
   
     for (const frame of frames) {
-      if (frame.frameType === 'Object') {
-        const startingPosition = frame.position;
-        const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
-        const associatedTagFrame = frames.find(f => childIds.includes(f.id) && f.frameType === 'Tag');
-  
-        if (associatedTagFrame?.objectData && associatedTagFrame?.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
-          const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
-          lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });     
+        if (frame.frameType === 'Object') {
+            const startingPosition = frame.position;
+            const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
+
+            childIds.forEach(childId => {
+                const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
+                if (associatedTagFrame && associatedTagFrame.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
+                  const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
+                  lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });
+              }
+            });
         }
-      }
     }
   
     this.lines.next(lines);
-  }
+}
 }
