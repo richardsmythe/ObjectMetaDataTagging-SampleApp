@@ -103,7 +103,6 @@ export class FrameComponent implements OnInit {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
 
-
       this.frameService.updateFramePosition(this.position, frameId);
       this.frameService.updateLinePositions();
     };
@@ -113,12 +112,12 @@ export class FrameComponent implements OnInit {
 
 
   }
-  resize(event: MouseEvent, 
-    anchors: ResizeAnchorType[], 
+  resize(event: MouseEvent,
+    anchors: ResizeAnchorType[],
     direction: ResizeDirectionType,
     frameId: number | undefined): void {
     event.preventDefault();
-    
+
     const mouseX = event.clientX;
     const mouseY = event.clientY;
     const lastX = this.position.x;
@@ -176,13 +175,12 @@ export class FrameComponent implements OnInit {
       this.document.removeEventListener('mouseup', finishResize);
 
       this.frameService.updateFramePosition(this.position, frameId);
-      this.frameService.updateFrameSize(this.size, frameId);
       this.frameService.updateLinePositions();
     };
 
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
-    
+
   }
 
   deleteFrame(frameId: number | undefined): void {
