@@ -113,8 +113,12 @@ export class FrameComponent implements OnInit {
 
 
   }
-  resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType): void {
+  resize(event: MouseEvent, 
+    anchors: ResizeAnchorType[], 
+    direction: ResizeDirectionType,
+    frameId: number | undefined): void {
     event.preventDefault();
+    
     const mouseX = event.clientX;
     const mouseY = event.clientY;
     const lastX = this.position.x;
@@ -170,10 +174,15 @@ export class FrameComponent implements OnInit {
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
+
+      this.frameService.updateFramePosition(this.position, frameId);
+      this.frameService.updateFrameSize(this.size, frameId);
+      this.frameService.updateLinePositions();
     };
 
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
+    
   }
 
   deleteFrame(frameId: number | undefined): void {

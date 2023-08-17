@@ -25,8 +25,8 @@ export class LineComponent implements OnChanges {
 
     if (this.endingPosition && this.startingPosition) {
       // Calculate the midpoints of the starting and ending boxes
-      const startX = this.startingPosition.x + this.width /2;
-      const startY = this.startingPosition.y + this.height / 2;
+      const startX = this.startingPosition.x + this.width;
+      const startY = this.startingPosition.y + this.height /2 ;
 
       const endX = this.endingPosition.x + this.width / 2;
       const endY = this.endingPosition.y + this.height / 2;

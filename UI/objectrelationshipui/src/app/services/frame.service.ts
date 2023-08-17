@@ -22,13 +22,13 @@ export class FrameService {
     this.initialisedFramesCounter++;
     const frames = this.frames.getValue();
     if (this.initialisedFramesCounter === frames.length) {
-        console.log(this.initialisedFramesCounter, 'frames initialised');
-        this.updateLinePositions(); 
-        this.allFramesInitialised.next(true);
+      console.log(this.initialisedFramesCounter, 'frames initialised');
+      this.updateLinePositions();
+      this.allFramesInitialised.next(true);
     }
-}
+  }
 
-getLines(): Observable<LineModel[]> {
+  getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
   }
   getFrames(): Frame[] {
@@ -46,11 +46,11 @@ getLines(): Observable<LineModel[]> {
               // Create an object frame
               const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
               frames.push(objectFrame);
-              
+
               // Iterate over the tags associated with the current object
               frameData.tagData.forEach((tag: any) => {
                 // Check if the tag is associated with the current object
-                if(tag.associatedObjectId === object.id) {
+                if (tag.associatedObjectId === object.id) {
                   // Create a tag frame for each individual tag
                   const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
                   frames.push(tagFrame);
@@ -68,7 +68,7 @@ getLines(): Observable<LineModel[]> {
         return of([]);
       })
     );
-}
+  }
 
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
@@ -189,28 +189,41 @@ getLines(): Observable<LineModel[]> {
     }
   }
 
-   getFramePosition(frameId: number): { x: number; y: number } | undefined {
-    const frame = this.getFrameById(frameId);
-    if (frame && frame.position) {
-      //console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
-      return { x: frame.position.x, y: frame.position.y };
+  updateFrameSize(size: { w: number; h: number }, frameId: number | undefined): void {
+    const frames = this.frames.getValue();
+    const frameIndex = frames.findIndex((frame) => frame.id === frameId);
+    if (frameIndex !== -1) {
+      frames[frameIndex].size = { ...size };
+      this.frames.next(frames);
+
     }
-    return undefined; 
   }
 
   getFrameSize(frame: Frame): { width: number, height: number } | undefined {
-      // NB: this only gets the stored size, not current
+    // NB: this only gets the stored size, not current
     if (frame && frame.size) {
       return { width: frame.size.w, height: frame.size.h };
     }
     return undefined;
   }
 
+
+  getFramePosition(frameId: number): { x: number; y: number } | undefined {
+    const frame = this.getFrameById(frameId);
+    if (frame && frame.position) {
+      //console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
+      return { x: frame.position.x, y: frame.position.y };
+    }
+    return undefined;
+  }
+
+
+
   getAssociatedTagFrameIds(objectId: number): number[] {
     const tagFrames = this.frames.getValue().filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
-    
+
     const associatedFrames = tagFrames.map(frame => frame.id);
-    
+
     console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
     return associatedFrames;
   }
@@ -227,22 +240,22 @@ getLines(): Observable<LineModel[]> {
   updateLinePositions(): void {
     const frames = this.frames.getValue();
     const lines: LineModel[] = [];
-  
-    for (const frame of frames) {
-        if (frame.frameType === 'Object') {
-            const startingPosition = frame.position;
-            const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
 
-            childIds.forEach(childId => {
-                const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
-                if (associatedTagFrame && associatedTagFrame.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
-                  const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
-                  lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });
-              }
-            });
-        }
+    for (const frame of frames) {
+      if (frame.frameType === 'Object') {
+        const startingPosition = frame.position;
+        const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
+
+        childIds.forEach(childId => {
+          const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
+          if (associatedTagFrame && associatedTagFrame.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
+            const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
+            lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });
+          }
+        });
+      }
     }
-  
+
     this.lines.next(lines);
-}
+  }
 }
