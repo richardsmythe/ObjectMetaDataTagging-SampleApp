@@ -104,11 +104,11 @@ namespace ObjectMetaDataTagging.Extensions
             trans1.SetTag(Tags.FundsTransfer);
             trans1.SetTag(Tags.Suspicious);
             trans1.SetTag(Tags.PaymentExpired);
-            testData.Add(trans1.GetAllTags().ToList()); 
+            testData.Add(trans1.GetAllTags().ToList());
 
-            //var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
-            //trans2.SetTag(Tags.PaymentExpired);
-            //testData.Add(trans2.GetAllTags().ToList());
+            var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
+            trans2.SetTag(Tags.PaymentExpired);
+            testData.Add(trans2.GetAllTags().ToList());
 
             //var trans3 = new PersonTransaction { Sender = "Sam", Receiver = "James", Amount = 31.50 };
             //trans3.SetTag(Tags.FundsTransfer);

@@ -106,7 +106,6 @@ export class FrameComponent implements OnInit {
 
 
       this.frameService.updateFramePosition(this.position, frameId);
-      //this.frameService.updateFrameSize(this.size,frameId);
       this.frameService.updateLinePositions();
     };
 
@@ -181,8 +180,7 @@ export class FrameComponent implements OnInit {
       const newSize = { w: dw, h: dh };
       this.frameService.updateFramePosition(this.position, frameId);
       this.frameService.updateFrameSize(newSize, frameId);
-      console.log("SIZE: ",this.frameService.getFrameSize(frameId))
-      console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
+      this.frameService.updateLinePositions();
 
     };
 
