@@ -112,14 +112,10 @@ export class FrameComponent implements OnInit {
     const finishDrag = () => {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
-
-
     };
 
     this.document.addEventListener('mousemove', duringDrag);
     this.document.addEventListener('mouseup', finishDrag);
-
-
   }
   resize(event: MouseEvent,
     anchors: ResizeAnchorType[],
