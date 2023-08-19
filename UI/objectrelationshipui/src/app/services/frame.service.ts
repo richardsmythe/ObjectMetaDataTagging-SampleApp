@@ -11,7 +11,7 @@ import { LineModel } from '../models/LineModel';
 })
 export class FrameService {
   private initialisedFramesCounter = 0;
-  private frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
+  public frames: BehaviorSubject<Frame[]> = new BehaviorSubject<Frame[]>([]);
   public lines: BehaviorSubject<LineModel[]> = new BehaviorSubject<LineModel[]>([]);
   private frameIdCounter: number = 1;
   public allFramesInitialised: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -111,7 +111,7 @@ export class FrameService {
       overlapping = false;
 
       for (const frame of frames) {
-        const currentFrameSize = this.getFrameSize(frame);
+        const currentFrameSize = this.getFrameSize(frame.id);
         const currentFrameWidth = currentFrameSize?.width || 0;
         const currentFrameHeight = currentFrameSize?.height || 0;
 
@@ -160,6 +160,7 @@ export class FrameService {
             const tagNameLength = tag?.tagName?.length || 0;
             width = Math.max(width, tagNameLength > 40 ? 300 : 100);
             height = tagNameLength > 40 ? 100 : 0;
+
           }
         } else {
           const object = item as ObjectModel;
@@ -189,20 +190,37 @@ export class FrameService {
     }
   }
 
-  updateFrameSize(size: { w: number; h: number }, frameId: number | undefined): void {
+  updateFrameSize(newSize: { w: number; h: number }, frameId: number | undefined): void {
     const frames = this.frames.getValue();
-    const frameIndex = frames.findIndex((frame) => frame.id === frameId);
-    if (frameIndex !== -1) {
-      frames[frameIndex].size = { ...size };
-      this.frames.next(frames);
-
-    }
+    const updatedFrames = frames.map(frame =>
+      frame.id === frameId ? { ...frame, size: newSize } : frame
+    );
+    this.frames.next(updatedFrames);
+    //console.log('Updated frames data:', this.frames.getValue());
   }
 
-  getFrameSize(frame: Frame): { width: number, height: number } | undefined {
-    // NB: this only gets the stored size, not current
-    if (frame && frame.size) {
-      return { width: frame.size.w, height: frame.size.h };
+
+
+  getFrameSize(frameId: number | undefined): { width: number, height: number } | undefined {
+    if (frameId === undefined) {
+      return undefined;
+    }
+    const frames = this.frames.getValue();
+    const frameIndex = frames.findIndex((frame) => frame.id === frameId);
+
+    if (frameIndex !== -1) {
+      return { width: frames[frameIndex].size.w, height: frames[frameIndex].size.h };
+    }
+    return undefined;
+  }
+
+  getCenterOfFrame(frameId: number): { x: number, y: number } | undefined {
+    const frame = this.getFrameById(frameId);
+    if (frame) {
+      return {
+        x: frame.position.x + frame.size.w / 2,
+        y: frame.position.y + frame.size.h / 2
+      };
     }
     return undefined;
   }
@@ -221,10 +239,8 @@ export class FrameService {
 
   getAssociatedTagFrameIds(objectId: number): number[] {
     const tagFrames = this.frames.getValue().filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
-
     const associatedFrames = tagFrames.map(frame => frame.id);
-
-    console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
+    // console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
     return associatedFrames;
   }
   destroyFrame(frameId: number): void {

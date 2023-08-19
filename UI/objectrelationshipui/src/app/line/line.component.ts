@@ -11,6 +11,8 @@ export class LineComponent implements OnChanges {
   @Input() endingPosition: { x: number; y: number; } | undefined;
   @Input() width: number = 0;
   @Input() height: number = 0;
+  @Input() id: number = 0;
+
   svgLeft: number | undefined;
   svgTop: number | undefined;
   lineX1: number | undefined;
@@ -23,10 +25,14 @@ export class LineComponent implements OnChanges {
 
   ngOnInit() {
 
+    this.updateLineData();
+  }
+
+  updateLineData() {
     if (this.endingPosition && this.startingPosition) {
       // Calculate the midpoints of the starting and ending boxes
-      const startX = this.startingPosition.x + this.width;
-      const startY = this.startingPosition.y + this.height /2 ;
+      const startX = this.startingPosition.x + this.width / 2;
+      const startY = this.startingPosition.y + this.height / 2;
 
       const endX = this.endingPosition.x + this.width / 2;
       const endY = this.endingPosition.y + this.height / 2;

@@ -42,11 +42,14 @@
 
 </div>
 
-<div *ngFor="let line of lines">
+<div *ngFor="let line of lines">  
   <app-line  
           [startingPosition]="line.startingPosition" 
           [endingPosition]="line.endingPosition" 
           [width]="frame?.size?.w ?? 0"
-          [height]="frame?.size?.h ?? 0">
+          [height]="frame?.size?.h ?? 0"    
+          >
+          
 </app-line>
+
 </div>

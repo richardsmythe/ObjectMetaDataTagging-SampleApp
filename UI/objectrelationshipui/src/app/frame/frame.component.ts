@@ -1,10 +1,10 @@
-import { OnInit, ViewChildren, QueryList, Component, ElementRef, Inject, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { OnInit, ViewChildren, QueryList, Component, ElementRef, Inject, Input, ViewChild, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Frame } from '../models/FrameModel';
 import { FrameService } from '../services/frame.service';
 import { LineModel } from '../models/LineModel';
 import { LineComponent } from '../line/line.component';
-import { of, switchMap, take } from 'rxjs';
+import { Subscription, of, switchMap, take } from 'rxjs';
 
 export type ResizeAnchorType = 'top' | 'left' | 'bottom' | 'right';
 export type ResizeDirectionType = 'x' | 'y' | 'xy';
@@ -24,18 +24,18 @@ export class FrameComponent implements OnInit {
   @ViewChild('topBar') topBarRef!: ElementRef;
   @ViewChild('resizeCorner') resizeCornerRef!: ElementRef;
   @ViewChild('topBarWrapperRef') topBarWrapperRef!: ElementRef;
-
+  private subs: Subscription = new Subscription();
   public lines: LineModel[] = [];
   position: { x: number, y: number } = { x: 0, y: 0 };
   size = { w: 0, h: 0 };
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
-  minSize = { w: 0, h: 0 };
-
+  minSize = { w: 150, h: 150 };
 
   constructor(@Inject(DOCUMENT) private document: Document,
     private frameService: FrameService,
     private cdRef: ChangeDetectorRef) {
+
     this.lastPosition = undefined;
     this.lastSize = undefined;
   }
@@ -43,27 +43,28 @@ export class FrameComponent implements OnInit {
 
   ngOnInit(): void {
     this.cdRef.detectChanges();
-    if (this.frame) {
-      const frameSize = this.frameService.getFrameSize(this.frame);
-      // set initial sizes
-      if (frameSize) {
-        this.size = { w: frameSize.width, h: frameSize.height };
-      }
-      // set initial positions
-      if (this.frame.position) {
-        this.position = { x: this.frame.position.x, y: this.frame.position.y };
-      }
 
+    // Subscription to update the component's state whenever frames data changes
+    this.subs.add(
+      this.frameService.frames.subscribe(frames => {
+        const currentFrame = frames.find(f => f.id === this.frame?.id);
+        if (currentFrame) {
+          this.size = { w: currentFrame.size.w, h: currentFrame.size.h };
+          this.position = { x: currentFrame.position.x, y: currentFrame.position.y };    
+        }
+      })
+    );
+
+    if (this.frame) {
       // if object frame, get associated tags
       const objectIds = this.frame.objectData?.map(obj => obj.id);
       if (objectIds) {
         for (const objectId of objectIds) {
           this.frameService.getAssociatedTagFrameIds(objectId);
-
         }
-
       }
     }
+
     // Inform the service that this frame has been initialised
     this.frameService.frameInitialised();
 
@@ -82,6 +83,12 @@ export class FrameComponent implements OnInit {
     });
   }
 
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+
   drag(event: MouseEvent, frameId: number | undefined): void {
     event.preventDefault();
     const mouseX = event.clientX;
@@ -97,14 +104,17 @@ export class FrameComponent implements OnInit {
       this.position = { x: positionX + dx, y: positionY + dy };
       this.lastPosition = { ...this.position };
 
+
+      this.frameService.updateFramePosition(this.position, frameId);
+      //this.frameService.updateFrameSize(this.size,frameId);
+      this.frameService.updateLinePositions();
     };
 
     const finishDrag = () => {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
 
-      this.frameService.updateFramePosition(this.position, frameId);
-      this.frameService.updateLinePositions();
+
     };
 
     this.document.addEventListener('mousemove', duringDrag);
@@ -168,14 +178,24 @@ export class FrameComponent implements OnInit {
       this.size.h = dh;
       this.lastSize = { ...this.size };
 
+      const newSize = { w: dw, h: dh };
+      console.log('Resizing frame to:', newSize);
+      this.frameService.updateFrameSize(newSize, frameId);
+      console.log("SIZE: ",this.frameService.getFrameSize(frameId))
+      console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
+
     };
 
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
 
-      this.frameService.updateFramePosition(this.position, frameId);
-      this.frameService.updateLinePositions();
+   
+
+      // this.frameService.updateFrameSize(this.size, frameId);
+      //console.log(this.frameService.getFrameSize(frameId))
+      //console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
+
     };
 
     this.document.addEventListener('mousemove', duringResize);
