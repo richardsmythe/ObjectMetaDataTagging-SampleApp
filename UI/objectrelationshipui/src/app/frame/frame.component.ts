@@ -179,11 +179,10 @@ export class FrameComponent implements OnInit {
       this.lastSize = { ...this.size };
 
       const newSize = { w: dw, h: dh };
-      console.log('Resizing frame to:', newSize);
       this.frameService.updateFramePosition(this.position, frameId);
       this.frameService.updateFrameSize(newSize, frameId);
       console.log("SIZE: ",this.frameService.getFrameSize(frameId))
-      //console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
+      console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
 
     };
 

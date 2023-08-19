@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { LineModel } from '../models/LineModel';
+import { FrameService } from '../services/frame.service'; // Ensure you have the correct path here
 
 @Component({
   selector: 'app-line',
@@ -7,11 +7,10 @@ import { LineModel } from '../models/LineModel';
   styleUrls: ['./line.component.css'],
 })
 export class LineComponent implements OnChanges {
-  @Input() startingPosition: { x: number; y: number; } | undefined;
-  @Input() endingPosition: { x: number; y: number; } | undefined;
+  @Input() parentId: number | undefined;
+  @Input() childId: number | undefined;
   @Input() width: number = 0;
   @Input() height: number = 0;
-  @Input() id: number = 0;
 
   svgLeft: number | undefined;
   svgTop: number | undefined;
@@ -20,36 +19,37 @@ export class LineComponent implements OnChanges {
   lineX2: number | undefined;
   lineY2: number | undefined;
 
-  constructor(private cdRef: ChangeDetectorRef) {
+  constructor(private cdRef: ChangeDetectorRef, private frameService: FrameService) { // Inject FrameService here
   }
 
   ngOnInit() {
-
     this.updateLineData();
   }
 
   updateLineData() {
-    if (this.endingPosition && this.startingPosition) {
-      // Calculate the midpoints of the starting and ending boxes
-      const startX = this.startingPosition.x + this.width / 2;
-      const startY = this.startingPosition.y + this.height / 2;
 
-      const endX = this.endingPosition.x + this.width / 2;
-      const endY = this.endingPosition.y + this.height / 2;
+    if (this.parentId !== undefined && this.childId !== undefined) {
+      const startingPosition = this.frameService.getCenterOfFrame(this.parentId);
+      const endingPosition = this.frameService.getCenterOfFrame(this.childId);
 
-      // The SVG's top-left corner should be at the minimum x,y 
-      this.svgLeft = Math.min(startX, endX) - this.width;
-      this.svgTop = Math.min(startY, endY) - this.height;
+      if (endingPosition && startingPosition) {
+        const startX = startingPosition.x;
+        const startY = startingPosition.y;
 
-      // Line coordinates relative to the SVG's top-left corner
-      this.lineX1 = startX - this.svgLeft;
-      this.lineY1 = startY - this.svgTop;
-      this.lineX2 = endX - this.svgLeft;
-      this.lineY2 = endY - this.svgTop;
+        const endX = endingPosition.x;
+        const endY = endingPosition.y;
 
-      // SVG's dimensions should be the distance between the two midpoints + width and height
-      this.width = Math.abs(endX - startX) + this.width;
-      this.height = Math.abs(endY - startY) + this.height;
+        this.svgLeft = Math.min(startX, endX) - this.width;
+        this.svgTop = Math.min(startY, endY) - this.height;
+
+        this.lineX1 = startX - this.svgLeft;
+        this.lineY1 = startY - this.svgTop;
+        this.lineX2 = endX - this.svgLeft;
+        this.lineY2 = endY - this.svgTop;
+
+        this.width = Math.abs(endX - startX) + this.width;
+        this.height = Math.abs(endY - startY) + this.height;
+      }
     }
   }
 
@@ -57,4 +57,3 @@ export class LineComponent implements OnChanges {
     this.cdRef.detectChanges();
   }
 }
-
