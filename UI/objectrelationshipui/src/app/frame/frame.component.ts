@@ -180,21 +180,16 @@ export class FrameComponent implements OnInit {
 
       const newSize = { w: dw, h: dh };
       console.log('Resizing frame to:', newSize);
+      this.frameService.updateFramePosition(this.position, frameId);
       this.frameService.updateFrameSize(newSize, frameId);
       console.log("SIZE: ",this.frameService.getFrameSize(frameId))
-      console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
+      //console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
 
     };
 
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
-
-   
-
-      // this.frameService.updateFrameSize(this.size, frameId);
-      //console.log(this.frameService.getFrameSize(frameId))
-      //console.log("CENTER:", this.frameService.getCenterOfFrame(frameId!));
 
     };
 

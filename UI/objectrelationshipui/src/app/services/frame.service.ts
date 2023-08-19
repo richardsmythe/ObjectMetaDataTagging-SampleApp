@@ -186,7 +186,7 @@ export class FrameService {
     if (frameIndex !== -1) {
       frames[frameIndex].position = { ...position };
       this.frames.next(frames);
-      //console.log("Frame:",frames[frameIndex].id," New Position:",frames[frameIndex].position);
+
     }
   }
 
@@ -196,7 +196,6 @@ export class FrameService {
       frame.id === frameId ? { ...frame, size: newSize } : frame
     );
     this.frames.next(updatedFrames);
-    //console.log('Updated frames data:', this.frames.getValue());
   }
 
 

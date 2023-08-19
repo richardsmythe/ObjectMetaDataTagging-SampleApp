@@ -103,19 +103,20 @@ namespace ObjectMetaDataTagging.Extensions
             var trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00 };
             trans1.SetTag(Tags.FundsTransfer);
             trans1.SetTag(Tags.Suspicious);
-            testData.Add(trans1.GetAllTags().ToList()); // Convert to List
+            trans1.SetTag(Tags.PaymentExpired);
+            testData.Add(trans1.GetAllTags().ToList()); 
 
-            var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
-            trans2.SetTag(Tags.PaymentExpired);
-            testData.Add(trans2.GetAllTags().ToList()); // Convert to List
+            //var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
+            //trans2.SetTag(Tags.PaymentExpired);
+            //testData.Add(trans2.GetAllTags().ToList());
 
             //var trans3 = new PersonTransaction { Sender = "Sam", Receiver = "James", Amount = 31.50 };
             //trans3.SetTag(Tags.FundsTransfer);
-            //testData.Add(trans3.GetAllTags().ToList()); // Convert to List
+            //testData.Add(trans3.GetAllTags().ToList());
 
             //var trans4 = new PersonTransaction { Sender = "Adam", Receiver = "Sue", Amount = 5000.52 };
             //trans4.SetTag(Tags.FundsTransfer);
-            //testData.Add(trans4.GetAllTags().ToList()); // Convert to List
+            //testData.Add(trans4.GetAllTags().ToList()); 
 
             return testData;
         }
