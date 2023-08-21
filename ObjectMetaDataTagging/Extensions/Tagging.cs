@@ -1,11 +1,13 @@
 ﻿using ObjectMetaDataTagging.Models;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace ObjectMetaDataTagging.Extensions
 {
     public static class ObjectTaggingExtensions
     {
-        private static Dictionary<WeakReference, List<object>> data = new Dictionary<WeakReference, List<object>>();
+        private static ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
+
         private static readonly TaggingEventManager _eventManager = new TaggingEventManager();
 
         public static event EventHandler<TagAddedEventArgs> TagAdded
@@ -17,50 +19,53 @@ namespace ObjectMetaDataTagging.Extensions
         public static T? GetTag<T>(this object o, int tagIndex)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && data[key].Count > tagIndex && data[key][tagIndex] is T)
+            if (key != null && data.TryGetValue(key, out var tagList))
             {
-                return (T)data[key][tagIndex];
+                lock (tagList)
+                {
+                    if (tagList.Count > tagIndex && tagList[tagIndex] is T)
+                    {
+                        return (T)tagList[tagIndex];
+                    }
+                }
             }
-            else
-            {
-                return default;
-            }
+            return default;
         }
+
 
         public static bool HasTag<T>(this object o, T tag)
         {
-            // true if the object has the specificied tag already attached to it
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null)
+            if (key != null && data.TryGetValue(key, out var tagList))
             {
-                var existingTags = data[key];
-                // checks t is T
-                return existingTags.Any(t => t is T 
-                    && EqualityComparer<T>.Default.Equals((T)t, tag));
+                lock (tagList)
+                {
+                    return tagList.Any(t => t is T && EqualityComparer<T>.Default.Equals((T)t, tag));
+                }
             }
-
             return false;
         }
 
         public static void SetTag<T>(this object o, T tag)
         {
-            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && tag != null)
+            // try to find the existing weak reference
+            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
+            if (weakRef == null)
             {
-                var existingTags = data[key];
-                if (!existingTags.Contains(tag))
+                weakRef = new WeakReference(o);
+            }
+
+            var tagList = data.GetOrAdd(weakRef, new List<object>());
+
+            lock (tagList)  // only one thread can update this specific list at a time
+            {
+                if (!tagList.Contains(tag))
                 {
-                    // tag is added to the existing list
-                    existingTags.Add(tag);
-                    _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+                    tagList.Add(tag);
                 }
             }
-            else
-            {
-                // A new key value pair is added to the dict
-                data.Add(new WeakReference(o), new List<object> { tag! });
-                _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
-            }
+
+            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
         }
 
         public static void RemoveAllTags(this object o)
@@ -68,7 +73,7 @@ namespace ObjectMetaDataTagging.Extensions
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null)
             {
-                data.Remove(key);
+                data.Remove(key, out _);
             }
         }
 
@@ -79,7 +84,12 @@ namespace ObjectMetaDataTagging.Extensions
 
             foreach (var key in keys)
             {
-                var values = data[key];
+                List<object> values;
+                lock (data[key])
+                {
+                    values = new List<object>(data[key]); // create a copy while under lock
+                }
+
                 foreach (var value in values)
                 {
                     if (value is KeyValuePair<string, object> tag)

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ObjectMetaDataTagging.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using ObjectMetaDataTagging.Extensions;
 using ObjectMetaDataTagging.Api.Models;
 using System.Reflection;
