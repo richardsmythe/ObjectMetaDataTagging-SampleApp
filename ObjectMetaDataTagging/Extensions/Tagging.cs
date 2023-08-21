@@ -131,8 +131,6 @@ namespace ObjectMetaDataTagging.Extensions
             return testData;
         }
 
-
-
         public class TagAddedEventArgs : EventArgs
         {
             public object Object { get; set; }
