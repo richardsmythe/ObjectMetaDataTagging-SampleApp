@@ -1,6 +1,7 @@
 ﻿using ObjectMetaDataTagging.Extensions;
 using ObjectMetaDataTagging.NewFolder;
 using System.Collections.Concurrent;
+using System.Reflection.Metadata.Ecma335;
 using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Interfaces
@@ -24,11 +25,11 @@ namespace ObjectMetaDataTagging.Interfaces
         }
 
         /*  Methods are virtual so defualt behaviour can be override. 
-         *  Strategy pattern, where behavior is encapsulated in 
+         *  Strategy pattern, where behaviour is encapsulated in 
          *  separate strategy objects rather than overridden methods.        
          */
         public virtual IEnumerable<KeyValuePair<string, object>> GetAllTags(object o)
-        {            
+        {
             var tags = new List<KeyValuePair<string, object>>();
             var keys = data.Keys.Where(k => k.IsAlive && k.Target == o);
 
@@ -72,7 +73,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return default;
         }
 
-        public virtual bool HasTag<T>(object o , T tag)
+        public virtual bool HasTag<T>(object o, T tag)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tagList))
@@ -137,6 +138,28 @@ namespace ObjectMetaDataTagging.Interfaces
             }
 
             _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
+        }
+
+        public bool UpdateTag<T>(object o, T oldTag, T newTag)
+        {
+            if (oldTag == null || newTag == null) return false;
+            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
+            if (weakRef == null) return false;
+            if (data.TryGetValue(weakRef, out var tagList))
+            {
+                lock (tagList)
+                {
+                    int index = tagList.IndexOf(oldTag);
+                    if (index < 0) return false;
+                    tagList[index] = newTag;
+
+                    // raise update event here if needed
+
+                    return true;
+
+                }
+            }
+            return false;
         }
     }
 }
