@@ -8,7 +8,7 @@ namespace ObjectMetaDataTagging.Extensions
     {
         private static ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
 
-        private static readonly TaggingEventManager _eventManager = new TaggingEventManager();
+        private static readonly TaggingEventManager _eventManager = new TaggingEventManager(null);
 
         public static event EventHandler<TagAddedEventArgs> TagAdded
         {

@@ -8,15 +8,27 @@ namespace ObjectMetaDataTagging.Interfaces
     public class DefaultTaggingService : IDefaultTaggingService
     {
         private readonly ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
-        private readonly TaggingEventManager _eventManager = new TaggingEventManager();
+        private readonly IAlertService _alertService;
+        private readonly TaggingEventManager _eventManager;
+
+        public DefaultTaggingService(IAlertService alertService, TaggingEventManager eventManager)
+        {
+            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
+        }
 
         public event EventHandler<TagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
             remove => _eventManager.TagAdded -= value;
         }
-        public IEnumerable<KeyValuePair<string, object>> GetAllTags(object o)
-        {
+
+        /*  Methods are virtual so defualt behaviour can be override. 
+         *  Strategy pattern, where behavior is encapsulated in 
+         *  separate strategy objects rather than overridden methods.        
+         */
+        public virtual IEnumerable<KeyValuePair<string, object>> GetAllTags(object o)
+        {            
             var tags = new List<KeyValuePair<string, object>>();
             var keys = data.Keys.Where(k => k.IsAlive && k.Target == o);
 
@@ -44,7 +56,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return tags;
         }
 
-        public T? GetTag<T>(object o, int tagIndex)
+        public virtual T? GetTag<T>(object o, int tagIndex)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tagList))
@@ -60,7 +72,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return default;
         }
 
-        public bool HasTag<T>(object o , T tag)
+        public virtual bool HasTag<T>(object o , T tag)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tagList))
@@ -73,7 +85,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return false;
         }
 
-        public void RemoveAllTags(object o)
+        public virtual void RemoveAllTags(object o)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null)
@@ -82,7 +94,7 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public void RemoveTag(object o, int tagIndex)
+        public virtual void RemoveTag(object o, int tagIndex)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tagList))
@@ -103,8 +115,10 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public void SetTag<T>(object o, T tag)
+        public virtual void SetTag<T>(object o, T tag)
         {
+            if (tag == null) return;
+
             // try to find the existing weak reference
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (weakRef == null)
