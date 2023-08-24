@@ -26,7 +26,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             foreach (var obj in testData)
             {
-                var objectName = obj.First().Key.ToString();
+                // gets type --> obj.First().Key.GetType().Name.ToString(); 
+                var objectName = obj.First().Key.ToString().Split('.').Last();
                 var objectId = Guid.NewGuid();
                 var tags = obj.Select(kv => kv.Value.ToString()?.Split(',')[1].TrimEnd(']')).ToList();
 

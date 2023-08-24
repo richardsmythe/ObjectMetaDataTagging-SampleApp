@@ -1,6 +1,8 @@
-﻿namespace ObjectMetaDataTagging.Api.Models
+﻿using ObjectMetaDataTagging.Models;
+
+namespace ObjectMetaDataTagging.Api.Models
 {
-    public class TagModel
+    public class TagModel 
     {
         public string AssociatedObject { get; set; }
         public Guid AssociatedObjectId { get; set; }

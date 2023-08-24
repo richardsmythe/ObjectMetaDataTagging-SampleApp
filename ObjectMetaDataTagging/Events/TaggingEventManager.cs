@@ -1,50 +1,62 @@
-﻿using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
+﻿using ObjectMetaDataTagging.Interfaces;
+using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Events
 {
     // Manage the event related to the tag
-    public class TaggingEventManager
+    public class TaggingEventManager<TAdded, TRemoved, TUpdated>
+        where TAdded : TagAddedEventArgs
+        where TRemoved : TagRemovedEventArgs
+        where TUpdated : TagUpdatedEventArgs
     {
-        private readonly IAlertService _alertServiceNEW; // used for demo purposes
-        private IAlertService _alertService; // this is used for the old version as a demo
 
-        public event EventHandler<TagAddedEventArgs>? TagAdded; // To do: TagRemoved, TagUpdated etc 
+        public event EventHandler<TagAddedEventArgs>? TagAdded;
         public event EventHandler<TagRemovedEventArgs>? TagRemoved;
         public event EventHandler<TagUpdatedEventArgs>? TagUpdated;
-        public TaggingEventManager(IAlertService alertServiceNEW)
+
+        private readonly IEventHandler<TAdded> _addedHandler;
+        private readonly IEventHandler<TRemoved> _removedHandler;
+        private readonly IEventHandler<TUpdated> _updatedHandler;
+
+
+        public TaggingEventManager(IEventHandler<TAdded> addedHandler,
+                               IEventHandler<TRemoved> removedHandler,
+                               IEventHandler<TUpdated> updatedHandler)
         {
-            _alertServiceNEW = alertServiceNEW; // TO DO clean this up
-            _alertService = new AlertService(); // old way of passing the alertService, left in for demo purposes
-            
-            TagAdded += HandleTagAdded!;
-            TagRemoved += HandleTagRemoved!;
+
+            _addedHandler = addedHandler;
+            _removedHandler = removedHandler;
+            _updatedHandler = updatedHandler;
         }
 
-        public void RaiseTagAdded(TagAddedEventArgs e)
+        public void RaiseTagAdded(TAdded e)
         {
+            _addedHandler.Handle(e);
             TagAdded?.Invoke(this, e);
         }
-        public void RaiseTagRemoved (TagRemovedEventArgs e)
+        public void RaiseTagRemoved(TRemoved e)
         {
+            _removedHandler.Handle(e);
             TagRemoved?.Invoke(this, e);
         }
-        public void RaiseTagUpdated(TagUpdatedEventArgs e)
+        public void RaiseTagUpdated(TUpdated e)
         {
+            _updatedHandler.Handle(e);
             TagUpdated?.Invoke(this, e);
         }
-        private void HandleTagAdded(object sender, TagAddedEventArgs e)
-        {
-            _alertService.CheckForSuspiciousTransaction(e.TaggedObject);
-        }
+        //private void HandleTagAdded(object sender, TagAddedEventArgs e)
+        //{
+        //    _alertService.CheckForSuspiciousTransaction(e.TaggedObject);
+        //}
 
-        private void HandleTagRemoved(object sender, TagRemovedEventArgs e)
-        {
-            Console.WriteLine($"Removed tag: " + e.Tag + "from object: " + e.TaggedObject);          
-        }
+        //private void HandleTagRemoved(object sender, TagRemovedEventArgs e)
+        //{
+        //    Console.WriteLine($"Removed tag: " + e.Tag + "from object: " + e.TaggedObject);          
+        //}
 
-        private void HandleTagUpdated(object sender, TagUpdatedEventArgs e)
-        {
-            Console.WriteLine($"Updated tag: " + e.Tag + "on object: " + e.TaggedObject);
-        }
+        //private void HandleTagUpdated(object sender, TagUpdatedEventArgs e)
+        //{
+        //    Console.WriteLine($"Updated tag: " + e.Tag + "on object: " + e.TaggedObject);
+        //}
     }
 }

@@ -14,26 +14,26 @@ namespace ObjectMetaDataTagging
             // To do: Querying tags 
 
           
-            ExamplePersonTransaction trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
+            //ExamplePersonTransaction trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
 
-            trans1.SetTag(ExampleTags.FundsTransfer);
+            //trans1.SetTag(ExampleTags.FundsTransfer);
 
-            var allTags = trans1.GetAllTags();
-            foreach (var tag in allTags)
-            {
-                Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
-            }
+            //var allTags = trans1.GetAllTags();
+            //foreach (var tag in allTags)
+            //{
+            //    Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
+            //}
 
          
-            ExamplePersonTransaction trans2 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
+            //ExamplePersonTransaction trans2 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
 
-            trans2.SetTag(ExampleTags.FundsTransfer);
+            //trans2.SetTag(ExampleTags.FundsTransfer);
 
-            allTags = trans2.GetAllTags();
-            foreach (var tag in allTags)
-            {
-                Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
-            }
+            //allTags = trans2.GetAllTags();
+            //foreach (var tag in allTags)
+            //{
+            //    Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
+            //}
 
 
             Console.Read();

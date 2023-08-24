@@ -9,12 +9,10 @@ namespace ObjectMetaDataTagging.Interfaces
     public class DefaultTaggingService : IDefaultTaggingService
     {
         private readonly ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
-        private readonly IAlertService _alertService;
         private readonly TaggingEventManager _eventManager;
 
         public DefaultTaggingService(IAlertService alertService, TaggingEventManager eventManager)
         {
-            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
 
@@ -22,6 +20,16 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             add => _eventManager.TagAdded += value;
             remove => _eventManager.TagAdded -= value;
+        }
+        public event EventHandler<TagRemovedEventArgs> TagRemoved
+        {
+            add => _eventManager.TagRemoved += value;
+            remove => _eventManager.TagRemoved -= value;
+        }
+        public event EventHandler<TagUpdatedEventArgs> TagUpdated
+        {
+            add => _eventManager.TagUpdated += value;
+            remove => _eventManager.TagUpdated -= value;
         }
 
         /*  Methods are virtual so defualt behaviour can be override. 
@@ -113,6 +121,7 @@ namespace ObjectMetaDataTagging.Interfaces
                         data.TryRemove(key, out _);
                     }
                 }
+            _eventManager.RaiseTagRemoved(new TagRemovedEventArgs(o, tagIndex));
             }
         }
 
@@ -129,7 +138,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var tagList = data.GetOrAdd(weakRef, new List<object>());
 
-            lock (tagList)  // only one thread can update this specific list at a time
+            lock (tagList) 
             {
                 if (!tagList.Contains(tag))
                 {
@@ -152,8 +161,8 @@ namespace ObjectMetaDataTagging.Interfaces
                     int index = tagList.IndexOf(oldTag);
                     if (index < 0) return false;
                     tagList[index] = newTag;
-
-                    // raise update event here if needed
+     
+                    _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o,oldTag));
 
                     return true;
 

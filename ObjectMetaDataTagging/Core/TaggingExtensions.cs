@@ -9,7 +9,7 @@ namespace ObjectMetaDataTagging.Extensions
     {
         private static ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
 
-        private static readonly TaggingEventManager _eventManager = new TaggingEventManager(null);
+        //private static readonly TaggingEventManager _eventManager = new TaggingEventManager(null);
 
         public static event EventHandler<TagAddedEventArgs> TagAdded
         {
@@ -105,34 +105,7 @@ namespace ObjectMetaDataTagging.Extensions
                 }
             }
             return tags;
-        }
-
-        //public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
-        //{
-            //var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
-
-            //var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00 };        
-            //trans1.SetTag(ExampleTags.FundsTransfer);
-            //trans1.SetTag(ExampleTags.Suspicious);
-            //trans1.SetTag(ExampleTags.PaymentExpired);
-            //testData.Add(trans1.GetAllTags().ToList());
-
-            //var trans2 = new ExamplePersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
-            //trans2.SetTag(ExampleTags.PaymentExpired);
-            //testData.Add(trans2.GetAllTags().ToList());
-
-            //var trans3 = new PersonTransaction { Sender = "Sam", Receiver = "James", Amount = 31.50 };
-            //trans3.SetTag(Tags.FundsTransfer);
-            //testData.Add(trans3.GetAllTags().ToList());
-
-            //var trans4 = new PersonTransaction { Sender = "Adam", Receiver = "Sue", Amount = 5000.52 };
-            //trans4.SetTag(Tags.FundsTransfer);
-            //testData.Add(trans4.GetAllTags().ToList()); 
-
-        //    return testData;
-        //}
-
-      
+        }      
 
     }
 }
