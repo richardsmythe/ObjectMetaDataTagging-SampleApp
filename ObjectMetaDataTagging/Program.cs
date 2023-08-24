@@ -14,9 +14,9 @@ namespace ObjectMetaDataTagging
             // To do: Querying tags 
 
           
-            PersonTransaction trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
+            ExamplePersonTransaction trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00};
 
-            trans1.SetTag(Tags.FundsTransfer);
+            trans1.SetTag(ExampleTags.FundsTransfer);
 
             var allTags = trans1.GetAllTags();
             foreach (var tag in allTags)
@@ -25,9 +25,9 @@ namespace ObjectMetaDataTagging
             }
 
          
-            PersonTransaction trans2 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
+            ExamplePersonTransaction trans2 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 588.50 };
 
-            trans2.SetTag(Tags.FundsTransfer);
+            trans2.SetTag(ExampleTags.FundsTransfer);
 
             allTags = trans2.GetAllTags();
             foreach (var tag in allTags)

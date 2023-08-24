@@ -2,6 +2,7 @@
 using ObjectMetaDataTagging.Extensions;
 using ObjectMetaDataTagging.Api.Models;
 using System.Reflection;
+using ObjectMetaDataTagging.Models;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -18,7 +19,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         [HttpGet]
         public IActionResult GetObjectsAndTags()
         {
-            var testData = ObjectTaggingExtensions.GenerateTestData();
+            var testData = GenerateTestData();
 
             var objectModels = new List<ObjectModel>();
             var tagModels = new List<TagModel>();
@@ -26,15 +27,15 @@ namespace ObjectMetaDataTagging.Api.Controllers
             foreach (var obj in testData)
             {
                 var objectName = obj.First().Key.ToString();
-                var objectId = obj.GetHashCode();
-                var tags = obj.Select(kv => kv.Value.ToString().Split(',')[1].TrimEnd(']')).ToList();
+                var objectId = Guid.NewGuid();
+                var tags = obj.Select(kv => kv.Value.ToString()?.Split(',')[1].TrimEnd(']')).ToList();
 
                 objectModels.Add(new ObjectModel
                 {
                     Id = objectId,
                     ObjectName = objectName
                 });
-
+                
                 tagModels.AddRange(tags.Select(tagName => new TagModel
                 {
                     TagName = tagName,
@@ -46,12 +47,24 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var frameModel = new Frame
             {
                 Id = Guid.NewGuid(),
+
                 Origin = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectData = objectModels,
                 TagData = tagModels
             };
 
             return Ok(new List<Frame> { frameModel });
+        }
+
+        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
+        {
+            var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
+            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
+            trans1.SetTag(fundTransferTag);
+            testData.Add(trans1.GetAllTags().ToList());          
+
+            return testData;
         }
     }
 }

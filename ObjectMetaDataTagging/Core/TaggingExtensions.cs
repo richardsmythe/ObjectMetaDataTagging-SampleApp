@@ -1,4 +1,5 @@
-﻿using ObjectMetaDataTagging.Models;
+﻿using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Models;
 using System.Collections.Concurrent;
 using System.Linq;
 
@@ -106,19 +107,19 @@ namespace ObjectMetaDataTagging.Extensions
             return tags;
         }
 
-        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
-        {
-            var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
+        //public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
+        //{
+            //var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var trans1 = new PersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00 };
-            trans1.SetTag(Tags.FundsTransfer);
-            trans1.SetTag(Tags.Suspicious);
-            trans1.SetTag(Tags.PaymentExpired);
-            testData.Add(trans1.GetAllTags().ToList());
+            //var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 1433.00 };        
+            //trans1.SetTag(ExampleTags.FundsTransfer);
+            //trans1.SetTag(ExampleTags.Suspicious);
+            //trans1.SetTag(ExampleTags.PaymentExpired);
+            //testData.Add(trans1.GetAllTags().ToList());
 
-            var trans2 = new PersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
-            trans2.SetTag(Tags.PaymentExpired);
-            testData.Add(trans2.GetAllTags().ToList());
+            //var trans2 = new ExamplePersonTransaction { Sender = "Greg", Receiver = "Tom", Amount = 355.00 };
+            //trans2.SetTag(ExampleTags.PaymentExpired);
+            //testData.Add(trans2.GetAllTags().ToList());
 
             //var trans3 = new PersonTransaction { Sender = "Sam", Receiver = "James", Amount = 31.50 };
             //trans3.SetTag(Tags.FundsTransfer);
@@ -128,19 +129,10 @@ namespace ObjectMetaDataTagging.Extensions
             //trans4.SetTag(Tags.FundsTransfer);
             //testData.Add(trans4.GetAllTags().ToList()); 
 
-            return testData;
-        }
+        //    return testData;
+        //}
 
-        public class TagAddedEventArgs : EventArgs
-        {
-            public object Object { get; set; }
-            public object Tag { get; set; }
+      
 
-            public TagAddedEventArgs(object obj, object tag)
-            {
-                Object = obj;
-                Tag = tag;
-            }
-        }
     }
 }

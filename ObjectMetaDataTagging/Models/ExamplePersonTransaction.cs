@@ -2,7 +2,7 @@
 {
     // A flexible mechanism for associating metadata with object instances.
 
-    public class PersonTransaction
+    public class ExamplePersonTransaction
     {
         public string Sender { get; set; }
         public string Receiver { get; set; }

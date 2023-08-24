@@ -8,9 +8,9 @@ namespace ObjectMetaDataTagging
     {
         public bool IsSuspiciousTransaction(object obj)
         {
-            if (obj is PersonTransaction transaction &&
+            if (obj is ExamplePersonTransaction transaction &&
                            transaction.Amount > 1000 &&
-                           !transaction.HasTag(Tags.Suspicious))
+                           !transaction.HasTag(ExampleTags.Suspicious))
             {
                 return true;
             }
@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging
         {
             if (IsSuspiciousTransaction(obj))
             {
-                obj.SetTag(Tags.Suspicious);
+                obj.SetTag(ExampleTags.Suspicious);
             }
         }
     }
