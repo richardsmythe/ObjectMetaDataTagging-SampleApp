@@ -82,9 +82,9 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
 
-            trans1.SetTag(fundTransferTag);
+            taggingService.SetTag(trans1,fundTransferTag);
             
-            testData.Add(trans1.GetAllTags().ToList());
+            testData.Add(taggingService.GetAllTags(trans1).ToList());
 
             return testData;
         }
