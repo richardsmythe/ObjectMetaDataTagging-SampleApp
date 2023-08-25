@@ -15,7 +15,12 @@ namespace ObjectMetaDataTagging
         }
         public bool IsSuspiciousTransaction(ExamplePersonTransaction transaction)
         {
-            return transaction.Amount > 1000 && !_taggingService.HasTag(transaction, ExampleTags.Suspicious);
+            if (transaction.Amount > 1000 && !_taggingService.HasTag(transaction, ExampleTags.Suspicious))
+            {
+                MarkAsSuspicious(transaction);
+                return true;
+            }
+            return false;
         }
 
         public void MarkAsSuspicious(ExamplePersonTransaction transaction)
