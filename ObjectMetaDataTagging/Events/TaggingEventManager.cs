@@ -1,5 +1,4 @@
 ﻿using ObjectMetaDataTagging.Interfaces;
-using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Events
 {
@@ -23,7 +22,6 @@ namespace ObjectMetaDataTagging.Events
                                IEventHandler<TRemoved> removedHandler,
                                IEventHandler<TUpdated> updatedHandler)
         {
-
             _addedHandler = addedHandler;
             _removedHandler = removedHandler;
             _updatedHandler = updatedHandler;

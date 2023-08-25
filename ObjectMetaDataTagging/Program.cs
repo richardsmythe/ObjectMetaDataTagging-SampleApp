@@ -1,6 +1,4 @@
-﻿using ObjectMetaDataTagging.Extensions;
-using ObjectMetaDataTagging.Models;
-
+﻿
 namespace ObjectMetaDataTagging
 {
     public class Program
@@ -35,8 +33,7 @@ namespace ObjectMetaDataTagging
             //    Console.WriteLine($"Tag: {tag.Key}, Value: {tag.Value}");
             //}
 
-
-            Console.Read();
+            //Console.Read();
         }
     }  
 }

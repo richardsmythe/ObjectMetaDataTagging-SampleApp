@@ -1,8 +1,11 @@
 ﻿
+using ObjectMetaDataTagging.Models;
+
 namespace ObjectMetaDataTagging
 {
     public interface IAlertService
     {
-        void CheckForSuspiciousTransaction(object obj);
+        bool IsSuspiciousTransaction(ExamplePersonTransaction transaction);
+        void MarkAsSuspicious(ExamplePersonTransaction transaction);
     }
 }

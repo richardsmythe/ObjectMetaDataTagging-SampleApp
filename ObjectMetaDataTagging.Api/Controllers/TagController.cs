@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ObjectMetaDataTagging.Extensions;
 using ObjectMetaDataTagging.Api.Models;
 using System.Reflection;
 using ObjectMetaDataTagging.Models;

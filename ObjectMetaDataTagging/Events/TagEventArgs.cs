@@ -29,12 +29,14 @@ namespace ObjectMetaDataTagging.Events
     public class TagUpdatedEventArgs : EventArgs
     {
         public object TaggedObject { get; }
-        public object Tag { get; }
+        public object OldTag { get; }
+        public object NewTag { get; }
 
-        public TagUpdatedEventArgs(object taggedObject, object tag)
+        public TagUpdatedEventArgs(object taggedObject, object oldTag, object newTag)
         {
             TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
-            Tag = tag ?? throw new ArgumentNullException(nameof(tag));
+            OldTag = oldTag ?? throw new ArgumentNullException(nameof(oldTag));
+            NewTag = newTag ?? throw new ArgumentNullException(nameof(newTag));
         }
     }
 }

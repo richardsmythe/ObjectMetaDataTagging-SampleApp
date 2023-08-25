@@ -2,16 +2,15 @@
 using ObjectMetaDataTagging.NewFolder;
 using System.Collections.Concurrent;
 using System.Reflection.Metadata.Ecma335;
-using static ObjectMetaDataTagging.Extensions.ObjectTaggingExtensions;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
     public class DefaultTaggingService : IDefaultTaggingService
     {
         private readonly ConcurrentDictionary<WeakReference, List<object>> data = new ConcurrentDictionary<WeakReference, List<object>>();
-        private readonly TaggingEventManager _eventManager;
+        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
-        public DefaultTaggingService(IAlertService alertService, TaggingEventManager eventManager)
+        public DefaultTaggingService(TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
         {
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
@@ -162,10 +161,9 @@ namespace ObjectMetaDataTagging.Interfaces
                     if (index < 0) return false;
                     tagList[index] = newTag;
      
-                    _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o,oldTag));
+                    _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o,oldTag, newTag));
 
                     return true;
-
                 }
             }
             return false;

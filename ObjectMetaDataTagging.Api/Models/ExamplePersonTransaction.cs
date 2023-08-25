@@ -1,6 +1,7 @@
-﻿namespace ObjectMetaDataTagging.Models
+﻿using ObjectMetaDataTagging.NewFolder;
+
+namespace ObjectMetaDataTagging.Models
 {
-    // A flexible mechanism for associating metadata with object instances.
 
     public class ExamplePersonTransaction
     {

@@ -1,27 +1,28 @@
-﻿using ObjectMetaDataTagging.Extensions;
+﻿
 using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.NewFolder;
 using System.Linq;
 
 namespace ObjectMetaDataTagging
 {
     public class AlertService : IAlertService
     {
-        public bool IsSuspiciousTransaction(object obj)
+        private readonly IDefaultTaggingService _taggingService;
+
+        public AlertService(IDefaultTaggingService taggingService)
         {
-            if (obj is ExamplePersonTransaction transaction &&
-                           transaction.Amount > 1000 &&
-                           !transaction.HasTag(ExampleTags.Suspicious))
-            {
-                return true;
-            }
-            return false;
+            _taggingService = taggingService;
+        }
+        public bool IsSuspiciousTransaction(ExamplePersonTransaction transaction)
+        {
+            return transaction.Amount > 1000 && !_taggingService.HasTag(transaction, ExampleTags.Suspicious);
         }
 
-        public void CheckForSuspiciousTransaction(object obj)
+        public void MarkAsSuspicious(ExamplePersonTransaction transaction)
         {
-            if (IsSuspiciousTransaction(obj))
+            if (IsSuspiciousTransaction(transaction))
             {
-                obj.SetTag(ExampleTags.Suspicious);
+                _taggingService.SetTag(transaction, ExampleTags.Suspicious);
             }
         }
     }
