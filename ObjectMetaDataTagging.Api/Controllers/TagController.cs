@@ -43,14 +43,15 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 {
                     TagName = tagName,
                     AssociatedObject = objectName,
-                    AssociatedObjectId = objectId
+                    AssociatedObjectId = objectId,
+               
                 }));
             }
 
             var frameModel = new Frame
             {
                 Id = Guid.NewGuid(),
-                Origin = Assembly.GetEntryAssembly().GetName().Name,
+                Origin = Assembly.GetEntryAssembly().GetName().Name,               
                 ObjectData = objectModels,
                 TagData = tagModels         
 
@@ -85,7 +86,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
 
             // Create new tag child object
-            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer, "a description here...");
+            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer, "suspicious activity detected");
             taggingService.SetTag(trans1, fundTransferTag);
 
             testData.Add(taggingService.GetAllTags(trans1).ToList());
