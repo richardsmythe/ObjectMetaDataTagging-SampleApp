@@ -6,11 +6,11 @@ namespace ObjectMetaDataTagging.Api.Events
 {
 
 
-    public class TestAddedHandler : IEventHandler<TagAddedEventArgs>
+    public class TagAddedHandler : IEventHandler<TagAddedEventArgs>
     {
         private readonly IAlertService _alertService;
 
-        public TestAddedHandler(IAlertService alertService)
+        public TagAddedHandler(IAlertService alertService)
         {
             _alertService = alertService;
         }
@@ -24,7 +24,7 @@ namespace ObjectMetaDataTagging.Api.Events
         }
     }
 
-    public class TestRemovedHandler : IEventHandler<TagRemovedEventArgs>
+    public class TagRemovedHandler : IEventHandler<TagRemovedEventArgs>
     {
         public void Handle(TagRemovedEventArgs args)
         {
@@ -32,7 +32,7 @@ namespace ObjectMetaDataTagging.Api.Events
         }
     }
 
-    public class TestUpdatedHandler : IEventHandler<TagUpdatedEventArgs>
+    public class TagUpdatedHandler : IEventHandler<TagUpdatedEventArgs>
     {
         public void Handle(TagUpdatedEventArgs args)
         {

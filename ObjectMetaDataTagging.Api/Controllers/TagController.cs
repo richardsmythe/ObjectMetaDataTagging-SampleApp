@@ -63,15 +63,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            // First, create the handlers:
-            var alertService = new AlertService(null); // Temporarily pass in null, we will re-assign it later.
-            var addedHandler = new TestAddedHandler(alertService);
-            var removedHandler = new TestRemovedHandler();
-            var updatedHandler = new TestUpdatedHandler();
+            var alertService = new AlertService(null!); 
+            var tagAddedHandler = new TagAddedHandler(alertService);
+            var tagRemovedHandler = new TagRemovedHandler();
+            var tagUpdatedHandler = new TagUpdatedHandler();
 
             var eventManager = new TaggingEventManager<TagAddedEventArgs,
                                                         TagRemovedEventArgs,
-                                                        TagUpdatedEventArgs>(addedHandler, removedHandler, updatedHandler);
+                                                        TagUpdatedEventArgs>(tagAddedHandler, tagRemovedHandler, tagUpdatedHandler);
 
             var taggingService = new DefaultTaggingService(eventManager);
 
@@ -82,8 +81,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 fieldInfo.SetValue(alertService, taggingService);
             }
 
+            // Create example parent object that will trigger event
             var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
 
+            // Create new tag child object
             var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
             taggingService.SetTag(trans1, fundTransferTag);
 
