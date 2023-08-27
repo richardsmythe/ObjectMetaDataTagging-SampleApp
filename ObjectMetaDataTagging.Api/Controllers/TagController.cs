@@ -4,6 +4,7 @@ using System.Reflection;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Api.Events;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -62,55 +63,35 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var addedHandler = new TestAddedHandler();
-            var removedHandler = new TestRemovedHandler();  
-            var updatedHandler = new TestUpdatedHandler();  
+            // First, create the handlers:
+            var alertService = new AlertService(null); // Temporarily pass in null, we will re-assign it later.
+            var addedHandler = new TestAddedHandler(alertService);
+            var removedHandler = new TestRemovedHandler();
+            var updatedHandler = new TestUpdatedHandler();
+
             var eventManager = new TaggingEventManager<TagAddedEventArgs,
                                                         TagRemovedEventArgs,
                                                         TagUpdatedEventArgs>(addedHandler, removedHandler, updatedHandler);
 
             var taggingService = new DefaultTaggingService(eventManager);
-            var alertService = new AlertService(taggingService);
-        
+
+            // Assign the actual taggingService to the alertService:
+            var fieldInfo = alertService.GetType().GetField("_taggingService", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (fieldInfo != null)
+            {
+                fieldInfo.SetValue(alertService, taggingService);
+            }
 
             var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
 
-            taggingService.TagAdded += (sender, args) =>
-            {
-                alertService.IsSuspiciousTransaction(trans1);
-            };
-
             var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
+            taggingService.SetTag(trans1, fundTransferTag);
 
-            taggingService.SetTag(trans1,fundTransferTag);
-            
             testData.Add(taggingService.GetAllTags(trans1).ToList());
 
             return testData;
         }
-        public class TestAddedHandler : IEventHandler<TagAddedEventArgs>
-        {
-            public void Handle(TagAddedEventArgs args)
-            {
-                // Logic you want to perform when a tag is added.
-            }
-        }
-
-        public class TestRemovedHandler : IEventHandler<TagRemovedEventArgs>
-        {
-            public void Handle(TagRemovedEventArgs args)
-            {
-                // You can leave this empty if you're not interested in this event.
-            }
-        }
-
-        public class TestUpdatedHandler : IEventHandler<TagUpdatedEventArgs>
-        {
-            public void Handle(TagUpdatedEventArgs args)
-            {
-                // Again, you can leave this empty if you're not interested.
-            }
-        }
+      
 
     }
 }
