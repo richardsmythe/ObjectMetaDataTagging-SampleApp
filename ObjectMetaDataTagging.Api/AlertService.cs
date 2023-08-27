@@ -1,5 +1,5 @@
 ﻿using ObjectMetaDataTagging.Models;
-using ObjectMetaDataTagging.NewFolder;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging;
 
 public class AlertService : IAlertService

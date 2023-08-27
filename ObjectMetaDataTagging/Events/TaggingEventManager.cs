@@ -42,19 +42,6 @@ namespace ObjectMetaDataTagging.Events
             _updatedHandler.Handle(e);
             TagUpdated?.Invoke(this, e);
         }
-        //private void HandleTagAdded(object sender, TagAddedEventArgs e)
-        //{
-        //    _alertService.CheckForSuspiciousTransaction(e.TaggedObject);
-        //}
-
-        //private void HandleTagRemoved(object sender, TagRemovedEventArgs e)
-        //{
-        //    Console.WriteLine($"Removed tag: " + e.Tag + "from object: " + e.TaggedObject);          
-        //}
-
-        //private void HandleTagUpdated(object sender, TagUpdatedEventArgs e)
-        //{
-        //    Console.WriteLine($"Updated tag: " + e.Tag + "on object: " + e.TaggedObject);
-        //}
+      
     }
 }

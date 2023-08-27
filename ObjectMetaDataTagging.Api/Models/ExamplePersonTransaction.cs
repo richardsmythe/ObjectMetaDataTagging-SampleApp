@@ -1,6 +1,4 @@
-﻿using ObjectMetaDataTagging.NewFolder;
-
-namespace ObjectMetaDataTagging.Models
+﻿namespace ObjectMetaDataTagging.Models
 {
 
     public class ExamplePersonTransaction

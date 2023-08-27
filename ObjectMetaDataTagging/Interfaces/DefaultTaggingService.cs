@@ -1,7 +1,5 @@
 ﻿using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.NewFolder;
 using System.Collections.Concurrent;
-using System.Reflection.Metadata.Ecma335;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
