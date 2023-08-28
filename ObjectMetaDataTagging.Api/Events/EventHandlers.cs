@@ -19,7 +19,7 @@ namespace ObjectMetaDataTagging.Api.Events
         {
             if (args.TaggedObject is ExamplePersonTransaction transaction)
             {
-                _alertService.MarkAsSuspicious(transaction);
+                _alertService.MarkAsSuspicious(transaction, args.Tag.Id);
             }
         }
     }

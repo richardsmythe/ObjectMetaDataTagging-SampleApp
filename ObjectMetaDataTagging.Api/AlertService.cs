@@ -13,14 +13,23 @@ public class AlertService : IAlertService
 
     public bool IsSuspiciousTransaction(ExamplePersonTransaction transaction)
     {
-        return transaction.Amount > 1000 && !_taggingService.HasTag(transaction, ExampleTags.Suspicious);
+        return transaction.Amount > 1000;
     }
 
-    public void MarkAsSuspicious(ExamplePersonTransaction transaction)
+    public void MarkAsSuspicious(ExamplePersonTransaction transaction, Guid tagId)
     {
         if (IsSuspiciousTransaction(transaction))
         {
-            _taggingService.SetTag(transaction, ExampleTags.Suspicious);
+            var existingTag = _taggingService.GetTag(transaction, tagId);
+            if (existingTag != null)
+            {
+                existingTag.Description = "Transaction marked as suspicious";
+                _taggingService.UpdateTag(transaction, tagId, existingTag);
+            }
+            else
+            {
+                // if tag is not found...  
+            }
         }
     }
 }

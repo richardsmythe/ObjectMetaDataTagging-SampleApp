@@ -8,7 +8,7 @@ namespace ObjectMetaDataTagging.Models
     /// </summary>
     public class BaseTag
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
+        public Guid Id { get; private set; }
         public string Name { get; set; }
         public DateTime DateCreated { get; private set; }
         public DateTime? DateLastUpdated { get; private set; }  

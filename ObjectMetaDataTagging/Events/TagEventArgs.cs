@@ -1,13 +1,15 @@
 ﻿
+using ObjectMetaDataTagging.Models;
+
 namespace ObjectMetaDataTagging.Events
 {
     public class TagAddedEventArgs : EventArgs
     {
 
         public object TaggedObject { get; }
-        public object Tag { get; }
+        public BaseTag Tag { get; }
 
-        public TagAddedEventArgs(object taggedObject, object tag)
+        public TagAddedEventArgs(object taggedObject, BaseTag tag)
         {
             TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
             Tag = tag ?? throw new ArgumentNullException(nameof(tag));
@@ -17,9 +19,9 @@ namespace ObjectMetaDataTagging.Events
     public class TagRemovedEventArgs : EventArgs
     {
         public object TaggedObject { get; }
-        public object Tag { get; }
+        public Object Tag { get; }
 
-        public TagRemovedEventArgs(object taggedObject, object tag)
+        public TagRemovedEventArgs(object taggedObject, Object tag)
         {
             TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
             Tag = tag ?? throw new ArgumentNullException(nameof(tag));
@@ -29,10 +31,10 @@ namespace ObjectMetaDataTagging.Events
     public class TagUpdatedEventArgs : EventArgs
     {
         public object TaggedObject { get; }
-        public object OldTag { get; }
-        public object NewTag { get; }
+        public BaseTag OldTag { get; }
+        public BaseTag NewTag { get; }
 
-        public TagUpdatedEventArgs(object taggedObject, object oldTag, object newTag)
+        public TagUpdatedEventArgs(object taggedObject, BaseTag oldTag, BaseTag newTag)
         {
             TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
             OldTag = oldTag ?? throw new ArgumentNullException(nameof(oldTag));

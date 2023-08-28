@@ -86,10 +86,12 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
 
             // Create new tag child object
-            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer, "suspicious activity detected");
+            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
             taggingService.SetTag(trans1, fundTransferTag);
 
-            testData.Add(taggingService.GetAllTags(trans1).ToList());
+
+            testData.Add(taggingService.GetAllTags(trans1)
+                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
             return testData;
         }

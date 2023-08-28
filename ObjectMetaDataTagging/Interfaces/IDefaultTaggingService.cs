@@ -1,13 +1,21 @@
-﻿namespace ObjectMetaDataTagging.Interfaces
+﻿using ObjectMetaDataTagging.Models;
+
+namespace ObjectMetaDataTagging.Interfaces
 {
     public interface IDefaultTaggingService
     {
-        void SetTag<T>(object o, T tag);
-        bool UpdateTag<T>(object o, T oldTag, T newTag);
-        IEnumerable<KeyValuePair<string, object>> GetAllTags(object o);
-        T? GetTag<T>(object o, int tagIndex);
-        bool HasTag<T>(object o, T tag);
+        void SetTag(object o, BaseTag tag); 
+
+        bool UpdateTag(object o, Guid tagId, BaseTag newTag); 
+
+        IEnumerable<BaseTag> GetAllTags(object o);
+
+        BaseTag? GetTag(object o, Guid tagId); 
+
+        bool HasTag(object o, Guid tagId); 
+
         void RemoveAllTags(object o);
-        void RemoveTag(object o, int tagIndex);
+
+        bool RemoveTag(object o, Guid tagId); 
     }
 }
