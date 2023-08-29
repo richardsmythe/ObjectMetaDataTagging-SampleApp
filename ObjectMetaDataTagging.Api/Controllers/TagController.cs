@@ -25,13 +25,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             var objectModels = new List<ObjectModel>();
             var tagModels = new List<TagModel>();
-
+            var objectName = "";
             foreach (var obj in testData)
             {
                 // gets type --> obj.First().Key.GetType().Name.ToString(); 
-                var objectName = obj.First().Key.ToString().Split('.').Last();
+                if (obj.First().Value is BaseTag baseTag)
+                {
+                    objectName = baseTag.AssociatedParentObjectName.GetType().Name;
+                }
                 var objectId = Guid.NewGuid();
-                var tags = obj.Select(kv => kv.Value.ToString()?.Split(',')[1].TrimEnd(']')).ToList();
+                var tags = obj.Select(kv => kv.Value.ToString());//?.Split(',')[1].TrimEnd(']')).ToList();
 
                 objectModels.Add(new ObjectModel
                 {

@@ -23,7 +23,8 @@ public class AlertService : IAlertService
             var existingTag = _taggingService.GetTag(transaction, tagId);
             if (existingTag != null)
             {
-                existingTag.Description = "Transaction marked as suspicious";
+                existingTag.Description = "Transaction marked as suspicious";               
+                existingTag.Value = ExampleTags.Suspicious;
                 _taggingService.UpdateTag(transaction, tagId, existingTag);
             }
             else

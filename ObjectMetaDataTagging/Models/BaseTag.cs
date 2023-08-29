@@ -11,10 +11,11 @@ namespace ObjectMetaDataTagging.Models
         public Guid Id { get; private set; }
         public string Name { get; set; }
         public DateTime DateCreated { get; private set; }
-        public DateTime? DateLastUpdated { get; private set; }  
+        public DateTime? DateLastUpdated { get; set; }  
         public string Description { get; set; }
         public object Value { get; set; }
-        public Guid AssociatedObjectId { get; set; }
+        public object AssociatedParentObjectName { get; set; }
+        public Guid AssociatedParentObjectId { get; set; }
         public string Type { get; private set; }
 
         public BaseTag(string name, object value, string description = null)
