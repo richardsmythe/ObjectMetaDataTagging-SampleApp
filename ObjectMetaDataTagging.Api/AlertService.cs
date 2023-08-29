@@ -23,13 +23,18 @@ public class AlertService : IAlertService
             var existingTag = _taggingService.GetTag(transaction, tagId);
             if (existingTag != null)
             {
-                existingTag.Description = "Transaction marked as suspicious";               
-                existingTag.Value = ExampleTags.Suspicious;
-                _taggingService.UpdateTag(transaction, tagId, existingTag);
-            }
-            else
-            {
-                // if tag is not found...  
+                //// do proper deep copy?? 
+                var newTag = new BaseTag("Suspicious Transfer", existingTag.Value);
+                newTag.Description = "Transaction marked as suspicious";
+                newTag.Value = ExampleTags.Suspicious;
+                newTag.AssociatedParentObjectName = existingTag.AssociatedParentObjectName;
+                newTag.AssociatedParentObjectId = existingTag.AssociatedParentObjectId;
+                newTag.DateLastUpdated = existingTag.DateLastUpdated;
+
+                //existingTag.Description = "Transaction marked as suspicious";
+                //existingTag.Value = ExampleTags.Suspicious;
+
+                _taggingService.UpdateTag(transaction, tagId, newTag);
             }
         }
     }

@@ -18,7 +18,7 @@
           <ng-container *ngFor="let tag of frame?.tagData; let isFirst = first">
             <li *ngIf="isFirst">Object Id: {{ tag?.associatedObjectId }}</li>
             <li>Tag Name: {{ tag?.tagName }}</li>
-            <li>Description: {{tag?.tagDescription}}</li>
+            <li>Description: {{tag?.description}}</li>
           </ng-container>
         </ng-container>
       </ul>

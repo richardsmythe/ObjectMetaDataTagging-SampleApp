@@ -31,7 +31,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 // gets type --> obj.First().Key.GetType().Name.ToString(); 
                 if (obj.First().Value is BaseTag baseTag)
                 {
-                    objectName = baseTag.AssociatedParentObjectName.GetType().Name;
+                    objectName = baseTag.AssociatedParentObjectName.ToString();
                 }
                 var objectId = Guid.NewGuid();
                 var tags = obj.Select(kv => kv.Value.ToString());//?.Split(',')[1].TrimEnd(']')).ToList();
@@ -42,13 +42,21 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     ObjectName = objectName
                 });
 
-                tagModels.AddRange(tags.Select(tagName => new TagModel
+                tagModels.AddRange(obj.Select(tagPair =>
                 {
-                    TagName = tagName,
-                    AssociatedObject = objectName,
-                    AssociatedObjectId = objectId,
-               
-                }));
+                    var tag = tagPair.Value as BaseTag;
+                    if (tag != null)
+                    {
+                        return new TagModel
+                        {
+                            TagName = tag.Name,
+                            Description = tag.Description,
+                            AssociatedObject = objectName,
+                            AssociatedObjectId = objectId,
+                        };
+                    }
+                    return null;
+                }).Where(tagModel => tagModel != null)!);
             }
 
             var frameModel = new Frame
@@ -86,7 +94,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             }
 
             // Create example parent object that will trigger event
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 3333 };
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 4545 };
 
             // Create new tag child object
             var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
@@ -98,7 +106,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             return testData;
         }
-      
 
     }
 }

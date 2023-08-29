@@ -112,7 +112,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             if (o != null)
             {
-                tag.AssociatedParentObjectName = o;
+                tag.AssociatedParentObjectName = o.GetType().Name;
             }
 
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
@@ -132,7 +132,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public bool UpdateTag(object o, Guid tagId, BaseTag newTag)
         {
-            if (newTag == null || newTag.Id != tagId) return false; // ensure that the id of newTag matches the provided tagId.
+            if (newTag == null ) return false;
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             
             newTag.DateLastUpdated = DateTime.UtcNow;
@@ -145,8 +145,10 @@ namespace ObjectMetaDataTagging.Interfaces
                     if (tags.ContainsKey(tagId))
                     {
                         var oldTag = tags[tagId];
+                        Console.WriteLine($"OldTag: {oldTag.Description}, {oldTag.Value}");
                         tags[tagId] = newTag;
                         _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, newTag)); //possibly don't need oldTag here
+                        Console.WriteLine($"NewTag: {newTag.Description}, {newTag.Value}");
                         return true;
                     }
                 }
