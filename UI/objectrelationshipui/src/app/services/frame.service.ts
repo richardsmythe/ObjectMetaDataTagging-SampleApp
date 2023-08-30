@@ -73,7 +73,7 @@ export class FrameService {
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
       id: this.frameIdCounter++,
-      size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData),
+      size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData, frameType === 'Tag'),
       position: this.calculateFramePosition(),
       frameType,
       origin,
@@ -149,30 +149,29 @@ export class FrameService {
   }
 
 
-  calculateFrameSize(data: ObjectModel[] | TagModel[]): { w: number, h: number } {
+  calculateFrameSize(data: ObjectModel[] | TagModel[], isTagType: boolean): { w: number, h: number } {
     let width = 0;
     let height = 0;
-
     if (Array.isArray(data)) {
       for (const item of data) {
-        if (Array.isArray(item)) {
-          for (const tag of item as TagModel[]) {
-            const tagNameLength = tag?.tagName?.length || 0;
-            width = Math.max(width, tagNameLength > 40 ? 300 : 100);
-            height = tagNameLength > 40 ? 100 : 0;
-
-          }
-        } else {
+        if (isTagType) {
+           const tag = item as TagModel;
+           const tagIdLength = tag?.associatedObjectId.toString().length || 0;
+           console.log(tagIdLength);
+           width = Math.max(width, tagIdLength > 30 ? 400 : 200);;
+           height = 200;
+        } else {        
           const object = item as ObjectModel;
-          const objectNameLength = object?.objectName?.length || 0;
-          width = Math.max(width, objectNameLength > 40 ? 450 : 250);
-          height = objectNameLength > 40 ? 150 : 200;
+          const objectIdLength = object?.id?.toString().length || 0;
+          width = Math.max(width, objectIdLength > 30 ? 350 : 200);
+          height = 200;
         }
       }
     }
-
     return { w: width, h: height };
   }
+
+
 
   getFrameById(frameId: number): Frame | undefined {
     const frames = this.frames.value;
