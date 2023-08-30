@@ -38,22 +38,6 @@ namespace ObjectMetaDataTagging.Models
         }
 
 
-
-        //public void UpdateTag(string newName, string newDescription, object newValue)
-        //{
-        //    if (string.IsNullOrWhiteSpace(newName))
-        //    {
-        //        throw new ArgumentNullException(nameof(newName));
-        //    }
-
-        //    Name = newName;
-        //    Description = newDescription;
-        //    SetValue(newValue);
-        //    DateLastUpdated = DateTime.UtcNow;
-        //}
-
-
-
         public override string ToString()
         {
             return Name;

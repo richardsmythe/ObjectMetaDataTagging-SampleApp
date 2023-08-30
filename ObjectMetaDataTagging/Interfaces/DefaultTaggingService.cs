@@ -42,6 +42,10 @@ namespace ObjectMetaDataTagging.Interfaces
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tags))
             {
+                foreach (var tag in tags)
+                {
+                    Console.WriteLine($"Tag ID: {tag.Key}, Tag Name: {tag.Value.Name}");
+                }
                 return tags.Values.ToList();
             }
             return Enumerable.Empty<BaseTag>();
@@ -125,18 +129,19 @@ namespace ObjectMetaDataTagging.Interfaces
             lock (tagDictionary)
             {
                 tagDictionary[tag.Id] = tag;
+                //Console.WriteLine($"Tag Dictionary after addition: {string.Join(", ", tagDictionary.Select(kvp => kvp.Value.Name))}");
             }
 
             _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
         }
 
-        public bool UpdateTag(object o, Guid tagId, BaseTag newTag)
+        public bool UpdateTag(object o, Guid tagId, BaseTag modifiedTag)
         {
-            if (newTag == null ) return false;
+            if (modifiedTag == null) return false;
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            
-            newTag.DateLastUpdated = DateTime.UtcNow;
             if (weakRef == null) return false;
+
+            modifiedTag.DateLastUpdated = DateTime.UtcNow;
 
             if (data.TryGetValue(weakRef, out var tags))
             {
@@ -145,10 +150,12 @@ namespace ObjectMetaDataTagging.Interfaces
                     if (tags.ContainsKey(tagId))
                     {
                         var oldTag = tags[tagId];
-                        Console.WriteLine($"OldTag: {oldTag.Description}, {oldTag.Value}");
-                        tags[tagId] = newTag;
-                        _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, newTag)); //possibly don't need oldTag here
-                        Console.WriteLine($"NewTag: {newTag.Description}, {newTag.Value}");
+                        Console.WriteLine($"Before Update - Old Tag ID: {oldTag.Id}, Name: {oldTag.Name}, Description: {oldTag.Description}");
+                        //Console.WriteLine($"Before Update - New Tag ID: {newTag.Id}, Name: {newTag.Name}, Description: {newTag.Description}");
+                        tags[tagId] = modifiedTag;
+                        //_eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, modifiedTag));
+                        Console.WriteLine($"After Update - Updated Tag ID: {tags[tagId].Id}, Name: {tags[tagId].Name}, Description: {tags[tagId].Description}");
+               
                         return true;
                     }
                 }

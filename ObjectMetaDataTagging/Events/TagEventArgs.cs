@@ -19,9 +19,9 @@ namespace ObjectMetaDataTagging.Events
     public class TagRemovedEventArgs : EventArgs
     {
         public object TaggedObject { get; }
-        public Object Tag { get; }
+        public object Tag { get; }
 
-        public TagRemovedEventArgs(object taggedObject, Object tag)
+        public TagRemovedEventArgs(object taggedObject, object tag)
         {
             TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
             Tag = tag ?? throw new ArgumentNullException(nameof(tag));

@@ -52,7 +52,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             TagName = tag.Name,
                             Description = tag.Description,
                             AssociatedObject = objectName,
-                            AssociatedObjectId = objectId,
+                            AssociatedObjectId = objectId,                            
                         };
                     }
                     return null;
@@ -93,16 +93,26 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 fieldInfo.SetValue(alertService, taggingService);
             }
 
-            // Create example parent object that will trigger event
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 4545 };
 
-            // Create new tag child object
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 4444 };
+      
             var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
             taggingService.SetTag(trans1, fundTransferTag);
+
+ 
+            var fundTransferTag2 = new BaseTag("Payment Expired", ExampleTags.PaymentExpired);
+            taggingService.SetTag(trans1, fundTransferTag2);
 
 
             testData.Add(taggingService.GetAllTags(trans1)
                 .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+
+            var trans2 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 123 };
+            var fundTransferTag3 = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
+            taggingService.SetTag(trans2, fundTransferTag3);
+
+            testData.Add(taggingService.GetAllTags(trans2)
+             .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
             return testData;
         }

@@ -20,21 +20,18 @@ public class AlertService : IAlertService
     {
         if (IsSuspiciousTransaction(transaction))
         {
-            var existingTag = _taggingService.GetTag(transaction, tagId);
-            if (existingTag != null)
+            var existingTags = _taggingService.GetAllTags(transaction);
+            if (existingTags != null)
             {
-                //// do proper deep copy?? 
-                var newTag = new BaseTag("Suspicious Transfer", existingTag.Value);
-                newTag.Description = "Transaction marked as suspicious";
-                newTag.Value = ExampleTags.Suspicious;
-                newTag.AssociatedParentObjectName = existingTag.AssociatedParentObjectName;
-                newTag.AssociatedParentObjectId = existingTag.AssociatedParentObjectId;
-                newTag.DateLastUpdated = existingTag.DateLastUpdated;
+                // Check if a suspicious tag is already set
+                var suspiciousTagExists = existingTags.Any(tag => Equals(tag.Value, ExampleTags.Suspicious));
 
-                //existingTag.Description = "Transaction marked as suspicious";
-                //existingTag.Value = ExampleTags.Suspicious;
-
-                _taggingService.UpdateTag(transaction, tagId, newTag);
+                if (!suspiciousTagExists)
+                {
+                    var newTag = new BaseTag("Suspicious Transfer", ExampleTags.Suspicious);
+                    newTag.Description = "This object has been tagged as suspicious";
+                    _taggingService.SetTag(transaction, newTag);
+                }
             }
         }
     }
