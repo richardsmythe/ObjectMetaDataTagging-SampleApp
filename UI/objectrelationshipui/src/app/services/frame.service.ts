@@ -155,10 +155,8 @@ export class FrameService {
     if (Array.isArray(data)) {
       for (const item of data) {
         if (isTagType) {
-           const tag = item as TagModel;
-           const tagIdLength = tag?.associatedObjectId.toString().length || 0;
-           console.log(tagIdLength);
-           width = Math.max(width, tagIdLength > 30 ? 400 : 200);;
+           const tag = item as TagModel;          
+           width = Math.max(width, tag?.description?.length > 20 ? 320 : 320);;
            height = 200;
         } else {        
           const object = item as ObjectModel;
@@ -170,9 +168,7 @@ export class FrameService {
     }
     return { w: width, h: height };
   }
-
-
-
+  
   getFrameById(frameId: number): Frame | undefined {
     const frames = this.frames.value;
     const frame = frames.find(fr => fr.id === frameId);

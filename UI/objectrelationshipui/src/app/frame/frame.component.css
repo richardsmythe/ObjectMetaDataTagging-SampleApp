@@ -9,10 +9,15 @@
 }
 
 .frame-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  top: 10px;
+  left: 5px;
+  padding: 20px;
   position: absolute;
-  top: 30px;
-  left: 10px;
-  font-size: 14px;
+  font-size: 15px;
   color: rgb(0, 0, 0);
 }
 
@@ -46,7 +51,7 @@
 
 
   .object-frame {
-    background-color:  rgb(188, 207, 248);
+    background-color:  rgb(146, 180, 255);
   }
   
   .tag-frame {

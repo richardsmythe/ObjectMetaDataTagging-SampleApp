@@ -16,7 +16,7 @@
         </ng-container>
         <ng-container *ngIf="frame?.frameType === 'Tag'">
           <ng-container *ngFor="let tag of frame?.tagData; let isFirst = first">
-            <li *ngIf="isFirst"><b>Parent Object Id</b>: {{ tag?.associatedObjectId }}</li>
+            <li *ngIf="isFirst"><b>Parent:</b> {{ tag?.associatedObject }}</li>
             <li><b>Tag Name:</b> {{ tag?.tagName }}</li>
             <li *ngIf="tag?.description"><b>Description:</b> {{tag?.description}}</li>
           </ng-container>
