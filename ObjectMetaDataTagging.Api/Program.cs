@@ -1,3 +1,5 @@
+using ObjectMetaDataTagging.Interfaces;
+
 namespace ObjectMetaDataTagging.Api
 {
     public class Program

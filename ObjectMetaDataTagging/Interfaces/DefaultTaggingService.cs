@@ -1,7 +1,6 @@
 ﻿using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Models;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
@@ -42,10 +41,6 @@ namespace ObjectMetaDataTagging.Interfaces
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tags))
             {
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"Tag ID: {tag.Key}, Tag Name: {tag.Value.Name}");
-                }
                 return tags.Values.ToList();
             }
             return Enumerable.Empty<BaseTag>();
@@ -96,7 +91,7 @@ namespace ObjectMetaDataTagging.Interfaces
                 {
                     if (tags.Remove(tagId))
                     {
-                        // if there are no tags left for this object, consider removing its entry:
+                        // if there are no tags left for this object, remove entry
                         if (tags.Count == 0)
                         {
                             data.TryRemove(key, out _);
@@ -150,12 +145,10 @@ namespace ObjectMetaDataTagging.Interfaces
                     if (tags.ContainsKey(tagId))
                     {
                         var oldTag = tags[tagId];
-                        Console.WriteLine($"Before Update - Old Tag ID: {oldTag.Id}, Name: {oldTag.Name}, Description: {oldTag.Description}");
-                        //Console.WriteLine($"Before Update - New Tag ID: {newTag.Id}, Name: {newTag.Name}, Description: {newTag.Description}");
+
                         tags[tagId] = modifiedTag;
-                        //_eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, modifiedTag));
-                        Console.WriteLine($"After Update - Updated Tag ID: {tags[tagId].Id}, Name: {tags[tagId].Name}, Description: {tags[tagId].Description}");
-               
+                        _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, modifiedTag));
+              
                         return true;
                     }
                 }

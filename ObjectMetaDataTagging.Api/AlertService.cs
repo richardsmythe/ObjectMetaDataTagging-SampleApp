@@ -5,10 +5,12 @@ using ObjectMetaDataTagging;
 public class AlertService : IAlertService
 {
     private readonly IDefaultTaggingService _taggingService;
+    private readonly ITagFactory _tagFactory;
 
-    public AlertService(IDefaultTaggingService taggingService)
+    public AlertService(IDefaultTaggingService taggingService, ITagFactory tagFactory)
     {
         _taggingService = taggingService;
+        _tagFactory = tagFactory;
     }
 
     public bool IsSuspiciousTransaction(ExamplePersonTransaction transaction)
@@ -28,8 +30,11 @@ public class AlertService : IAlertService
 
                 if (!suspiciousTagExists)
                 {
-                    var newTag = new BaseTag("Suspicious Transfer", ExampleTags.Suspicious);
-                    newTag.Description = "This object has been tagged as suspicious";
+                    var newTag = _tagFactory.CreateBaseTag(
+                        "Suspicious Transfer",
+                        ExampleTags.Suspicious,
+                        "This object has been tagged as suspicious");
+
                     _taggingService.SetTag(transaction, newTag);
                 }
             }

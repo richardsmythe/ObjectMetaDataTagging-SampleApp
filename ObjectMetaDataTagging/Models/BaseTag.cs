@@ -37,7 +37,6 @@ namespace ObjectMetaDataTagging.Models
             Type = value?.GetType().Name;
         }
 
-
         public override string ToString()
         {
             return Name;

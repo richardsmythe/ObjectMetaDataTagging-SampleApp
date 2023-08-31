@@ -75,7 +75,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var alertService = new AlertService(null!); 
+            var tagFactory = new TagFactory();
+            var alertService = new AlertService(null!, tagFactory!); 
             var tagAddedHandler = new TagAddedHandler(alertService);
             var tagRemovedHandler = new TagRemovedHandler();
             var tagUpdatedHandler = new TagUpdatedHandler();
@@ -85,7 +86,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
                                                         TagUpdatedEventArgs>(tagAddedHandler, tagRemovedHandler, tagUpdatedHandler);
 
             var taggingService = new DefaultTaggingService(eventManager);
-
             // Assign the actual taggingService to the alertService:
             var fieldInfo = alertService.GetType().GetField("_taggingService", BindingFlags.NonPublic | BindingFlags.Instance);
             if (fieldInfo != null)
