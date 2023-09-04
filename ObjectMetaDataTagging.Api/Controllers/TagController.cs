@@ -12,16 +12,27 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        private readonly IDefaultTaggingService _taggingService;
+        private readonly ITagFactory _tagFactory;
+        private readonly IAlertService _alertService;
+        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
-        public TagController()
+        public TagController(
+            IDefaultTaggingService taggingService,
+            ITagFactory tagFactory,
+            IAlertService alertService,
+            TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
         {
-
+            _taggingService = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
+            _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
+            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            _eventManager = eventManager;
         }
 
         [HttpGet]
         public IActionResult GetObjectsAndTags()
         {
-            var testData = GenerateTestData();
+            var testData = GenerateTestData(_taggingService, _tagFactory, _alertService);
 
             var objectModels = new List<ObjectModel>();
             var tagModels = new List<TagModel>();
@@ -52,7 +63,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             TagName = tag.Name,
                             Description = tag.Description,
                             AssociatedObject = objectName,
-                            AssociatedObjectId = objectId,                            
+                            AssociatedObjectId = objectId,
                         };
                     }
                     return null;
@@ -62,58 +73,35 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var frameModel = new Frame
             {
                 Id = Guid.NewGuid(),
-                Origin = Assembly.GetEntryAssembly().GetName().Name,               
+                Origin = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectData = objectModels,
-                TagData = tagModels         
+                TagData = tagModels
 
             };
 
             return Ok(new List<Frame> { frameModel });
         }
 
-        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData()
+        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData(
+            IDefaultTaggingService taggingService,
+            ITagFactory tagFactory,
+            IAlertService alertService)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var tagFactory = new TagFactory();
-            var alertService = new AlertService(null!, tagFactory!); 
-            var tagAddedHandler = new TagAddedHandler(alertService);
-            var tagRemovedHandler = new TagRemovedHandler();
-            var tagUpdatedHandler = new TagUpdatedHandler();
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 4445 };
 
-            var eventManager = new TaggingEventManager<TagAddedEventArgs,
-                                                        TagRemovedEventArgs,
-                                                        TagUpdatedEventArgs>(tagAddedHandler, tagRemovedHandler, tagUpdatedHandler);
-
-            var taggingService = new DefaultTaggingService(eventManager);
-            // Assign the actual taggingService to the alertService:
-            var fieldInfo = alertService.GetType().GetField("_taggingService", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (fieldInfo != null)
-            {
-                fieldInfo.SetValue(alertService, taggingService);
-            }
-
-
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 4444 };
-      
-            var fundTransferTag = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
+            var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
             taggingService.SetTag(trans1, fundTransferTag);
 
- 
-            var fundTransferTag2 = new BaseTag("Payment Expired", ExampleTags.PaymentExpired);
+            var fundTransferTag2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
             taggingService.SetTag(trans1, fundTransferTag2);
-
 
             testData.Add(taggingService.GetAllTags(trans1)
                 .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            var trans2 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 123 };
-            var fundTransferTag3 = new BaseTag("Transfering Funds", ExampleTags.FundsTransfer);
-            taggingService.SetTag(trans2, fundTransferTag3);
 
-            testData.Add(taggingService.GetAllTags(trans2)
-             .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-
+        
             return testData;
         }
 

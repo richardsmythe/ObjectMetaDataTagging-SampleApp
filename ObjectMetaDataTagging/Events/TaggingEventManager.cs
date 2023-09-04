@@ -1,4 +1,5 @@
 ﻿using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Models;
 
 namespace ObjectMetaDataTagging.Events
 {
@@ -27,10 +28,11 @@ namespace ObjectMetaDataTagging.Events
             _updatedHandler = updatedHandler;
         }
 
-        public void RaiseTagAdded(TAdded e)
+        public BaseTag RaiseTagAdded(TAdded e)
         {
-            _addedHandler.Handle(e);
+           var result = _addedHandler.Handle(e);
             TagAdded?.Invoke(this, e);
+            return result;
         }
         public void RaiseTagRemoved(TRemoved e)
         {

@@ -1,7 +1,9 @@
-﻿namespace ObjectMetaDataTagging.Interfaces
+﻿using ObjectMetaDataTagging.Models;
+
+namespace ObjectMetaDataTagging.Interfaces
 {
     public interface IEventHandler<T>
     {
-        void Handle(T eventArgs);
+        BaseTag Handle(T eventArgs);
     }
 }

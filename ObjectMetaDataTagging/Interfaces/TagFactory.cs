@@ -12,8 +12,7 @@ namespace ObjectMetaDataTagging.Interfaces
         public BaseTag CreateBaseTag(string name, object value, string description)
         {
             var tag = new BaseTag(name, value, description);
-            tag.Description= description;
-            
+            tag.Description= description;            
             return tag;
         }
     }

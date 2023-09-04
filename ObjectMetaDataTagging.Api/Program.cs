@@ -1,3 +1,8 @@
+using ObjectMetaDataTagging.Api.Events;
+using ObjectMetaDataTagging.Api.Models;
+using ObjectMetaDataTagging.Api.Services;
+using ObjectMetaDataTagging.Configuration;
+using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 
 namespace ObjectMetaDataTagging.Api
@@ -18,7 +23,19 @@ namespace ObjectMetaDataTagging.Api
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+            // Register OMDT
+            builder.Services.AddObjectMetaDataTagging();
+
+            // Web API-specific services
+            builder.Services.AddSingleton<IAlertService, AlertService>();
+            builder.Services.AddScoped<IEventHandler<TagAddedEventArgs>, TagAddedHandler>();
+            builder.Services.AddScoped<IEventHandler<TagRemovedEventArgs>, TagRemovedHandler>();
+            builder.Services.AddScoped<IEventHandler<TagUpdatedEventArgs>, TagUpdatedHandler>();
+
+            // Register CustomTaggingService as a scoped service
+            builder.Services.AddScoped<IDefaultTaggingService, CustomTaggingService>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

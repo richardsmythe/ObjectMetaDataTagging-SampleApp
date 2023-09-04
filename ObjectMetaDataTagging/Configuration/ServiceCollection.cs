@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Models;
 
 namespace ObjectMetaDataTagging.Configuration
 {
@@ -11,10 +13,16 @@ namespace ObjectMetaDataTagging.Configuration
     {
         public static IServiceCollection AddObjectMetaDataTagging(this IServiceCollection services)
         {
-            services.AddSingleton<IDefaultTaggingService, DefaultTaggingService>();
+            // Register default services
+            services.AddScoped<IDefaultTaggingService, DefaultTaggingService>();
             services.AddSingleton<ITagFactory, TagFactory>();
 
+            // Register the EventManager
+            services.AddScoped<TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs>>();
+  
+
             return services;
+        
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Models;
 using System.Collections.Concurrent;
+using System.Security.AccessControl;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
@@ -9,7 +10,8 @@ namespace ObjectMetaDataTagging.Interfaces
         private readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
-        public DefaultTaggingService(TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
+        public DefaultTaggingService(
+            TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
         {
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
@@ -107,12 +109,9 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public virtual void SetTag(object o, BaseTag tag)
         {
-            if (tag == null) return;
-
-            if (o != null)
-            {
-                tag.AssociatedParentObjectName = o.GetType().Name;
-            }
+            if (tag == null || o == null) return;
+           
+            var objectName = o.GetType().Name;
 
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (weakRef == null)
@@ -121,13 +120,13 @@ namespace ObjectMetaDataTagging.Interfaces
             }
 
             var tagDictionary = data.GetOrAdd(weakRef, new Dictionary<Guid, BaseTag>());
+
             lock (tagDictionary)
             {
-                tagDictionary[tag.Id] = tag;
-                //Console.WriteLine($"Tag Dictionary after addition: {string.Join(", ", tagDictionary.Select(kvp => kvp.Value.Name))}");
+                var tagToUse = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
+                tagToUse.AssociatedParentObjectName = objectName;
+                tagDictionary[tagToUse.Id] = tagToUse;
             }
-
-            _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag));
         }
 
         public bool UpdateTag(object o, Guid tagId, BaseTag modifiedTag)
@@ -148,13 +147,12 @@ namespace ObjectMetaDataTagging.Interfaces
 
                         tags[tagId] = modifiedTag;
                         _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, modifiedTag));
-              
+
                         return true;
                     }
                 }
             }
             return false;
         }
-
     }
 }
