@@ -123,9 +123,18 @@ namespace ObjectMetaDataTagging.Interfaces
 
             lock (tagDictionary)
             {
-                var tagToUse = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
-                tagToUse.AssociatedParentObjectName = objectName;
-                tagDictionary[tagToUse.Id] = tagToUse;
+                var tagFromEvent = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
+
+                tagFromEvent.AssociatedParentObjectName = objectName;
+                if (tagFromEvent != null)
+                {     
+                    tagDictionary[tagFromEvent.Id] = tagFromEvent;
+                    tagDictionary[tag.Id] = tag;
+                }
+                else
+                {
+                    Console.WriteLine("Issue with event for adding tag");                    
+                }
             }
         }
 

@@ -31,17 +31,18 @@ namespace ObjectMetaDataTagging.Api.Events
         {
             if (args.TaggedObject is ExamplePersonTransaction transaction)
             {
-
                 if (_alertService.IsSuspiciousTransaction(transaction))
                 {
-                    // Check if there are any tags with the value ExampleTags.Suspicious
-                    if (!transaction.AssociatedTags.Any(tag => (ExampleTags)tag.Value == ExampleTags.Suspicious))
+
+                    //Console.WriteLine($"Number of AssociatedTags: {transaction.AssociatedTags.Count}");
+                    if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))
                     {
                         var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
+                        transaction.AssociatedTags.Add(newTag);
                         return newTag;
                     }
+                   
                 }
-
             }
             return null;
         }

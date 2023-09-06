@@ -18,6 +18,7 @@ namespace ObjectMetaDataTagging.Api.Services
             {
                 transaction.AssociatedTags.Add(tag);
             }
+            //Console.WriteLine($"Tag Id: {tag.Id}   TagName:  {tag.Name}  TagValue:  {tag.Value}");
             base.SetTag(o, tag);
         }
     }
