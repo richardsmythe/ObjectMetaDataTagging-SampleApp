@@ -10,10 +10,8 @@ namespace ObjectMetaDataTagging.Interfaces
     public class TagFactory : ITagFactory
     {
         public BaseTag CreateBaseTag(string name, object value, string description)
-        {
-            var tag = new BaseTag(name, value, description);
-            tag.Description= description;            
-            return tag;
+        {            
+            return new BaseTag(name, value, description);
         }
     }
 }

@@ -33,7 +33,6 @@ namespace ObjectMetaDataTagging.Api.Events
             {
                 if (_alertService.IsSuspiciousTransaction(transaction))
                 {
-
                     //Console.WriteLine($"Number of AssociatedTags: {transaction.AssociatedTags.Count}");
                     if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))
                     {

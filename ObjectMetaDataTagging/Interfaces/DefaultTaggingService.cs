@@ -16,6 +16,10 @@ namespace ObjectMetaDataTagging.Interfaces
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
 
+        /* By exposing these events, it allow consumers to attach event handlers to these events 
+         * to perform additional actions when tags are added, removed, or updated. 
+         * This can be useful if someone wants to extend the behavior of the library. */
+
         public event EventHandler<TagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
@@ -43,8 +47,15 @@ namespace ObjectMetaDataTagging.Interfaces
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tags))
             {
-                return tags.Values.ToList();
+                var allTags = tags.Values.ToList();
+                Console.WriteLine("Tags:");
+                foreach (var tag in allTags)
+                {
+                    Console.WriteLine($"- Tag Id: {tag.Id}, Name: {tag.Name}, Value: {tag.Value}");
+                }
+                return allTags;
             }
+            Console.WriteLine("No tags found for the object.");
             return Enumerable.Empty<BaseTag>();
         }
 
@@ -130,10 +141,6 @@ namespace ObjectMetaDataTagging.Interfaces
                 {     
                     tagDictionary[tagFromEvent.Id] = tagFromEvent;
                     tagDictionary[tag.Id] = tag;
-                }
-                else
-                {
-                    Console.WriteLine("Issue with event for adding tag");                    
                 }
             }
         }
