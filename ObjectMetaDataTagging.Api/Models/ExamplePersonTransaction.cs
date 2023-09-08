@@ -1,4 +1,6 @@
-﻿namespace ObjectMetaDataTagging.Models
+﻿using ObjectMetaDataTagging.Models.TagModels;
+
+namespace ObjectMetaDataTagging.Models
 {
 
     public class ExamplePersonTransaction

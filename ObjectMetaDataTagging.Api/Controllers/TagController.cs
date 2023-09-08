@@ -5,6 +5,7 @@ using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Api.Events;
+using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
