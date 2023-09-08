@@ -3,7 +3,13 @@ using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Events
 {
-    // Manage the event related to the tag
+    /// <summary>
+    /// Manages events related to tagging actions, allowing event handlers to be attached to tagging events.
+    /// </summary>
+    /// <typeparam name="TAdded">The type of event arguments for tag added events.</typeparam>
+    /// <typeparam name="TRemoved">The type of event arguments for tag removed events.</typeparam>
+    /// <typeparam name="TUpdated">The type of event arguments for tag updated events.</typeparam>
+
     public class TaggingEventManager<TAdded, TRemoved, TUpdated>
         where TAdded : TagAddedEventArgs
         where TRemoved : TagRemovedEventArgs

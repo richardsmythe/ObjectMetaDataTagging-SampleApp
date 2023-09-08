@@ -8,12 +8,16 @@ using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
-    /// <summary>
-    /// Build dynamic queries against a collection of objects, based on the given filter.
-    /// The filter is based on the tagName and tagValue properties.
-    /// </summary>
+
     public class DynamicQueryBuilder : IDynamicQueryBuilder
     {
+        /// <summary>
+        /// Constructs a dynamic query to filter a collection of objects based on specified filter criteria.
+        /// </summary>
+        /// <param name="source">The source collection to filter.</param>
+        /// <param name="filterCriteria">A list of filter criteria specifying property names and values to filter by.</param>
+        /// <returns>An IQueryable representing the filtered collection of objects.</returns>
+
         public IQueryable<T> BuildDynamicQuery<T>(IQueryable<T> sourceObject,
             List<FilterCriteria> filters, LogicalOperator logicalOperator = LogicalOperator.AND)
         {

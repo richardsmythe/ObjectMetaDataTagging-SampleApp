@@ -5,16 +5,21 @@ using System.Security.AccessControl;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
+
     public class DefaultTaggingService : IDefaultTaggingService
     {
-        private readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
-        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
-
+        /// <summary>
+        /// Constructs a DefaultTaggingService with the specified TaggingEventManager for event handling.
+        /// </summary>
+        /// <param name="eventManager">The TaggingEventManager used for handling tagging-related events.</param>
         public DefaultTaggingService(
             TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
         {
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
+
+        private readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
+        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         /* By exposing these events, it allow consumers to attach event handlers to these events 
          * to perform additional actions when tags are added, removed, or updated. 
@@ -42,7 +47,7 @@ namespace ObjectMetaDataTagging.Interfaces
          *  Strategy pattern, where behaviour is encapsulated in 
          *  separate strategy objects rather than overridden methods.        
          */
-        #region CRUD Operations
+        #region Default Tag Operations
         public virtual IEnumerable<BaseTag> GetAllTags(object o)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
@@ -158,9 +163,6 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return false;
         }
-        #endregion
-
-        #region Querying & Filtering
 
         public bool HasTag(object o, Guid tagId)
         {
@@ -173,7 +175,12 @@ namespace ObjectMetaDataTagging.Interfaces
                 }
             }
             return false;
-        } 
+        }
+
+
         #endregion
+
+
+
     }
 }
