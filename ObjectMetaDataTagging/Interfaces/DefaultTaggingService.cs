@@ -163,7 +163,6 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return false;
         }
-
         public bool HasTag(object o, Guid tagId)
         {
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);

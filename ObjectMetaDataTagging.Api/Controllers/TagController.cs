@@ -6,6 +6,7 @@ using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Api.Events;
 using ObjectMetaDataTagging.Models.TagModels;
+using ObjectMetaDataTagging.Models.QueryModels;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -13,12 +14,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        private readonly IDynamicQueryBuilder _dynamicQueryBuilder;
         private readonly IDefaultTaggingService _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         public TagController(
+            IDynamicQueryBuilder dynamicQueryBuilder,
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
@@ -28,12 +31,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
             _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             _eventManager = eventManager;
+            _dynamicQueryBuilder = dynamicQueryBuilder;
         }
 
         [HttpGet]
         public IActionResult GetObjectsAndTags()
         {
-            var testData = GenerateTestData(_taggingService, _tagFactory, _alertService);
+            var testData = GenerateTestData(_taggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
 
             var objectModels = new List<ObjectModel>();
             var tagModels = new List<TagModel>();
@@ -86,7 +90,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
         public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData(
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
-            IAlertService alertService)
+            IAlertService alertService,
+            IDynamicQueryBuilder queryBuilder)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
@@ -100,8 +105,28 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             testData.Add(taggingService.GetAllTags(trans1)
                 .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-         
-            
+
+            ///////////
+
+            var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
+            var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
+            var filterTagTest2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
+            var filterTagTest3 = tagFactory.CreateBaseTag("Transfer Funds", ExampleTags.FundsTransfer, null);
+            taggingService.SetTag(trans2, filterTagTest1);
+            taggingService.SetTag(trans2, filterTagTest2);
+            taggingService.SetTag(trans2, filterTagTest3);
+
+            testData.Add(taggingService.GetAllTags(trans2)
+               .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+
+            var filters = new List<FilterCriteria>
+            {
+                new FilterCriteria{TagName = "Payment Expired", TagValue = ExampleTags.PaymentExpired}
+            };
+            var allTags = taggingService.GetAllTags(trans2);
+            var filtered = queryBuilder.BuildDynamicQuery((IQueryable<ExamplePersonTransaction>)allTags, filters);
+
+
             return testData;
         }
 
