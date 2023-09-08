@@ -1,4 +1,4 @@
-﻿using ObjectMetaDataTagging.Models;
+﻿using ObjectMetaDataTagging.Models.TagModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

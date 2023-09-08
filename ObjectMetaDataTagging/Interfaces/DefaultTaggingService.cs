@@ -1,5 +1,5 @@
 ﻿using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
 using System.Security.AccessControl;
 
@@ -42,6 +42,7 @@ namespace ObjectMetaDataTagging.Interfaces
          *  Strategy pattern, where behaviour is encapsulated in 
          *  separate strategy objects rather than overridden methods.        
          */
+        #region CRUD Operations
         public virtual IEnumerable<BaseTag> GetAllTags(object o)
         {
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
@@ -70,19 +71,6 @@ namespace ObjectMetaDataTagging.Interfaces
                 }
             }
             return null;
-        }
-
-        public bool HasTag(object o, Guid tagId)
-        {
-            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (weakRef != null && data.TryGetValue(weakRef, out var tags))
-            {
-                lock (tags)
-                {
-                    return tags.ContainsKey(tagId);
-                }
-            }
-            return false;
         }
 
 
@@ -121,7 +109,7 @@ namespace ObjectMetaDataTagging.Interfaces
         public virtual void SetTag(object o, BaseTag tag)
         {
             if (tag == null || o == null) return;
-           
+
             var objectName = o.GetType().Name;
 
             var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
@@ -138,7 +126,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
                 tagFromEvent.AssociatedParentObjectName = objectName;
                 if (tagFromEvent != null)
-                {     
+                {
                     tagDictionary[tagFromEvent.Id] = tagFromEvent;
                     tagDictionary[tag.Id] = tag;
                 }
@@ -170,5 +158,22 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return false;
         }
+        #endregion
+
+        #region Querying & Filtering
+
+        public bool HasTag(object o, Guid tagId)
+        {
+            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
+            if (weakRef != null && data.TryGetValue(weakRef, out var tags))
+            {
+                lock (tags)
+                {
+                    return tags.ContainsKey(tagId);
+                }
+            }
+            return false;
+        } 
+        #endregion
     }
 }
