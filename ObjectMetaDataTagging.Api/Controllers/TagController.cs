@@ -103,10 +103,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var fundTransferTag2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
             taggingService.SetTag(trans1, fundTransferTag2);
 
-            testData.Add(taggingService.GetAllTags(trans1)
-                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+            //testData.Add(taggingService.GetAllTags(trans1)
+            //    .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            ///////////
+            /////////// Filter Test /////////////
 
             var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
             var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
@@ -121,10 +121,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             var filters = new List<FilterCriteria>
             {
-                new FilterCriteria{TagName = "Payment Expired", TagValue = ExampleTags.PaymentExpired}
+                new FilterCriteria{Name = "Payment Expired", Value = ExampleTags.PaymentExpired}
             };
-            var allTags = taggingService.GetAllTags(trans2);
-            var filtered = queryBuilder.BuildDynamicQuery((IQueryable<ExamplePersonTransaction>)allTags, filters);
+            
+            var filtered = queryBuilder.BuildDynamicQuery(trans2.AssociatedTags, filters);
 
 
             return testData;

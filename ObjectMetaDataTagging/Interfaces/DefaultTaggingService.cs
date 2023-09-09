@@ -18,7 +18,7 @@ namespace ObjectMetaDataTagging.Interfaces
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
 
-        private readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
+        protected readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         /* By exposing these events, it allow consumers to attach event handlers to these events 

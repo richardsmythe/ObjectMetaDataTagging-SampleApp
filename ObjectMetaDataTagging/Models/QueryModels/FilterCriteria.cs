@@ -2,8 +2,8 @@
 {
     public class FilterCriteria
     {
-        public string TagName{ get; set; }
-        public object TagValue { get; set; }
+        public string Name{ get; set; }
+        public object Value { get; set; }
 
     }
 }
