@@ -7,7 +7,7 @@ namespace ObjectMetaDataTagging.Interfaces
     public interface IDynamicQueryBuilder
     {
         IQueryable<T> BuildDynamicQuery<T>(
-            List<T> sourceObject,
+             List<BaseTag> sourceObject,
             List<FilterCriteria> filters,
             LogicalOperator logicalOperator = LogicalOperator.AND);
     }

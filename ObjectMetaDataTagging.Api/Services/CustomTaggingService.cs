@@ -29,11 +29,11 @@ namespace ObjectMetaDataTagging.Api.Services
             if (key != null && data.TryGetValue(key, out var tags))
             {
                 var allTags = tags.Values.ToList();
-                Console.WriteLine("Tags:");
-                foreach (var tag in allTags)
-                {
-                    Console.WriteLine($"- Tag Id: {tag.Id}, Name: {tag.Name}, Value: {tag.Value}");
-                }
+                //Console.WriteLine("Tags:");
+                //foreach (var tag in allTags)
+                //{
+                //    Console.WriteLine($"- Tag Id: {tag.Id}, Name: {tag.Name}, Value: {tag.Value}");
+                //}
                 return allTags;
             }
             Console.WriteLine("No tags found for the object.");

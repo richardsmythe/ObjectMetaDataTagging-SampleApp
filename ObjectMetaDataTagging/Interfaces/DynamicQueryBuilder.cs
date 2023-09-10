@@ -20,14 +20,30 @@ namespace ObjectMetaDataTagging.Interfaces
         /// <returns>An IQueryable representing the filtered collection of objects.</returns>
 
         public IQueryable<T> BuildDynamicQuery<T>(
-            List<T> sourceObject,
+            List<BaseTag> sourceObject,
             List<FilterCriteria> filters,
             LogicalOperator logicalOperator = LogicalOperator.AND)
         {
-            if (filters == null || filters.Count == 0) return sourceObject.AsQueryable();
+            if (filters == null || filters.Count == 0)
+            {
+                Console.WriteLine("No filters provided.");
+                return (IQueryable<T>)sourceObject.AsQueryable();
+            }
+
+            Console.WriteLine("Filter Criteria:");
+            foreach (var filter in filters)
+            {
+                Console.WriteLine($"- Name: {filter.Name}, Value: {filter.Value}");
+            }
 
             var parameter = Expression.Parameter(typeof(BaseTag), "tag");
             Expression predicateBody = null;
+
+            // Print the values of "Name" and "Value" properties for objects in sourceObject
+            foreach (var tag in sourceObject)
+            {
+                Console.WriteLine($"tag name: { tag.Name} tag value: {tag.Value }");
+            }
 
             foreach (var filter in filters)
             {
@@ -37,9 +53,16 @@ namespace ObjectMetaDataTagging.Interfaces
                 var constantName = Expression.Constant(filter.Name);
                 var constantValue = Expression.Constant(filter.Value, typeof(object));
 
+                Console.WriteLine($"Filter Criteria: - Name: {filter.Name}, Value: {filter.Value}");
+
                 // Build filter expressions for Name and Value properties
                 var nameFilterExpression = Expression.Equal(nameProperty, constantName);
                 var valueFilterExpression = Expression.Equal(valueProperty, constantValue);
+
+                Console.WriteLine($"Accessed Name property: {nameProperty.Member.Name}");
+                Console.WriteLine($"Accessed Value property: {valueProperty.Member.Name}");
+
+                Console.WriteLine($"Applying Filter: {filter.Name} == {filter.Value}");
 
                 // Combine filter expressions using logicalOperator
                 Expression filterExpression = logicalOperator == LogicalOperator.AND
@@ -58,9 +81,15 @@ namespace ObjectMetaDataTagging.Interfaces
                 }
             }
 
-            var lambda = Expression.Lambda<Func<T, bool>>(predicateBody, parameter);
+            // Creates a lambda expression in that represents a delegate of type Func<T, bool>.
+            // This lambda expression encapsulates the filtering logic generated based on the filter criteria.
+            var lambda = Expression.Lambda<Func<BaseTag, bool>>(predicateBody, parameter);
 
-            return sourceObject.AsQueryable().Where(lambda); 
+            var result = sourceObject.AsQueryable().Where(lambda);
+
+            Console.WriteLine($"Filtered result: {result.Count()} items");
+
+            return (IQueryable<T>)result;
         }
     }
 }
