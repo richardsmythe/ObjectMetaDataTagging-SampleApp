@@ -42,7 +42,8 @@ namespace ObjectMetaDataTagging.Interfaces
             // Print the values of "Name" and "Value" properties for objects in sourceObject
             foreach (var tag in sourceObject)
             {
-                Console.WriteLine($"tag name: { tag.Name} tag value: {tag.Value }");
+                Console.WriteLine($"tag name: {tag.Name} tag value: {tag.Value}");
+
             }
 
             foreach (var filter in filters)
@@ -55,14 +56,13 @@ namespace ObjectMetaDataTagging.Interfaces
 
                 Console.WriteLine($"Filter Criteria: - Name: {filter.Name}, Value: {filter.Value}");
 
+
+
                 // Build filter expressions for Name and Value properties
                 var nameFilterExpression = Expression.Equal(nameProperty, constantName);
                 var valueFilterExpression = Expression.Equal(valueProperty, constantValue);
 
-                Console.WriteLine($"Accessed Name property: {nameProperty.Member.Name}");
-                Console.WriteLine($"Accessed Value property: {valueProperty.Member.Name}");
-
-                Console.WriteLine($"Applying Filter: {filter.Name} == {filter.Value}");
+                Console.WriteLine($"Applying Filter: tag.Name == {filter.Name} && tag.Value == {filter.Value}");
 
                 // Combine filter expressions using logicalOperator
                 Expression filterExpression = logicalOperator == LogicalOperator.AND

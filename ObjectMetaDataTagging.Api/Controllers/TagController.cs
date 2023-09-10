@@ -133,10 +133,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             };
 
             var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters);
-            foreach (var f in filtered)
-            {
-                Console.WriteLine(f); 
-            }
 
             return testData;
         }
