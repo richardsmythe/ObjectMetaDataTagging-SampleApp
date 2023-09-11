@@ -116,23 +116,20 @@ namespace ObjectMetaDataTagging.Api.Controllers
             taggingService.SetTag(trans2, filterTagTest2);
             taggingService.SetTag(trans2, filterTagTest3);
 
-
-
-
             testData.Add(taggingService.GetAllTags(trans2)
                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            trans2.AssociatedTags.Add(filterTagTest1);
-            trans2.AssociatedTags.Add(filterTagTest2);
-            trans2.AssociatedTags.Add(filterTagTest3);
+            //trans2.AssociatedTags.Add(filterTagTest1);
+            //trans2.AssociatedTags.Add(filterTagTest2);
+            //trans2.AssociatedTags.Add(filterTagTest3);
 
 
             var filters = new List<FilterCriteria>
             {
-                new FilterCriteria{Name = "Payment Expired", Value = ExampleTags.PaymentExpired}
+                new FilterCriteria{Name = "Payment Expired", Type = "ExampleTags"}
             };
 
-            var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters);
+            var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters, LogicalOperator.AND);
 
             return testData;
         }

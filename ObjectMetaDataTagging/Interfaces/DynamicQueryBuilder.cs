@@ -20,9 +20,9 @@ namespace ObjectMetaDataTagging.Interfaces
         /// <returns>An IQueryable representing the filtered collection of objects.</returns>
 
         public IQueryable<T> BuildDynamicQuery<T>(
-            List<BaseTag> sourceObject,
-            List<FilterCriteria> filters,
-            LogicalOperator logicalOperator = LogicalOperator.AND)
+     List<BaseTag> sourceObject,
+     List<FilterCriteria> filters,
+     LogicalOperator logicalOperator = LogicalOperator.AND)
         {
             if (filters == null || filters.Count == 0)
             {
@@ -30,44 +30,31 @@ namespace ObjectMetaDataTagging.Interfaces
                 return (IQueryable<T>)sourceObject.AsQueryable();
             }
 
-            Console.WriteLine("Filter Criteria:");
-            foreach (var filter in filters)
-            {
-                Console.WriteLine($"- Name: {filter.Name}, Value: {filter.Value}");
-            }
-
-            var parameter = Expression.Parameter(typeof(BaseTag), "tag");
+            var parameter = Expression.Parameter(typeof(BaseTag), "Tag");
             Expression predicateBody = null;
 
-            // Print the values of "Name" and "Value" properties for objects in sourceObject
             foreach (var tag in sourceObject)
             {
-                Console.WriteLine($"tag name: {tag.Name} tag value: {tag.Value}");
-
+                Console.WriteLine($"tag.Value Type: {tag.Value.GetType().FullName}");
             }
 
             foreach (var filter in filters)
             {
-                // Create expressions to filter based on Name and Value properties
+                // Note - currently works fine with Name and Type using both OR and AND, however the property Value didn't work in the AND operator.
                 var nameProperty = Expression.Property(parameter, "Name");
-                var valueProperty = Expression.Property(parameter, "Value");
+                var valueProperty = Expression.Property(parameter, "Type");
                 var constantName = Expression.Constant(filter.Name);
-                var constantValue = Expression.Constant(filter.Value, typeof(object));
+                var constantValue = Expression.Constant(filter.Type);
 
-                Console.WriteLine($"Filter Criteria: - Name: {filter.Name}, Value: {filter.Value}");
-
-
-
-                // Build filter expressions for Name and Value properties
                 var nameFilterExpression = Expression.Equal(nameProperty, constantName);
                 var valueFilterExpression = Expression.Equal(valueProperty, constantValue);
 
-                Console.WriteLine($"Applying Filter: tag.Name == {filter.Name} && tag.Value == {filter.Value}");
-
-                // Combine filter expressions using logicalOperator
-                Expression filterExpression = logicalOperator == LogicalOperator.AND
-                    ? Expression.AndAlso(nameFilterExpression, valueFilterExpression)
+                var filterExpression = logicalOperator == LogicalOperator.AND
+                    ? Expression.And(nameFilterExpression, valueFilterExpression)
                     : Expression.OrElse(nameFilterExpression, valueFilterExpression);
+
+
+                Console.WriteLine($"filter.Value Type: {filter.Type.GetType().FullName}");
 
                 if (predicateBody == null)
                 {
@@ -81,12 +68,10 @@ namespace ObjectMetaDataTagging.Interfaces
                 }
             }
 
-            // Creates a lambda expression in that represents a delegate of type Func<T, bool>.
-            // This lambda expression encapsulates the filtering logic generated based on the filter criteria.
             var lambda = Expression.Lambda<Func<BaseTag, bool>>(predicateBody, parameter);
-
-            var result = sourceObject.AsQueryable().Where(lambda);
-
+            Console.WriteLine("Generated Expression:");
+            Console.WriteLine(lambda.ToString());
+            var result = sourceObject.AsQueryable().Where(lambda);    
             Console.WriteLine($"Filtered result: {result.Count()} items");
 
             return (IQueryable<T>)result;

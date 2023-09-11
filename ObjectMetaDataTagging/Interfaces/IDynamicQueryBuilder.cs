@@ -9,6 +9,6 @@ namespace ObjectMetaDataTagging.Interfaces
         IQueryable<T> BuildDynamicQuery<T>(
              List<BaseTag> sourceObject,
             List<FilterCriteria> filters,
-            LogicalOperator logicalOperator = LogicalOperator.AND);
+            LogicalOperator logicalOperator = LogicalOperator.OR);
     }
 }
