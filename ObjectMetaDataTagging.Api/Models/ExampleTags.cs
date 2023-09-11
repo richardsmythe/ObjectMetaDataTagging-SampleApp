@@ -5,6 +5,7 @@ namespace ObjectMetaDataTagging.Models
     {
         PaymentExpired,
         Suspicious,
-        FundsTransfer,       
+        FundsTransfer,
+        AccountActivity
     }
 }

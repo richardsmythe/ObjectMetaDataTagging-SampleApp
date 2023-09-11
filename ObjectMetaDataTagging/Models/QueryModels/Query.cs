@@ -8,9 +8,9 @@ namespace ObjectMetaDataTagging.Models.QueryModels
 {
     public class Query
     {
-        public List<FilterCriteria> Filters { get; set; }
-        public List<SortCriteria> Sorters { get; set; }
-        public LogicalOperator Operator { get; set; }
+        //public List<FilterCriteria> Filters { get; set; }
+        //public List<SortCriteria> Sorters { get; set; }
+        //public LogicalOperator Operator { get; set; }
 
     }
 }

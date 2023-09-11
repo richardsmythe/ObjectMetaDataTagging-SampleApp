@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public IQueryable<T> BuildDynamicQuery<T>(
      List<BaseTag> sourceObject,
-     List<FilterCriteria> filters,
+     List<DefaultFilterCriteria> filters,
      LogicalOperator logicalOperator = LogicalOperator.AND)
         {
             if (filters == null || filters.Count == 0)
@@ -40,7 +40,8 @@ namespace ObjectMetaDataTagging.Interfaces
 
             foreach (var filter in filters)
             {
-                // Note - currently works fine with Name and Type using both OR and AND, however the property Value didn't work in the AND operator.
+                // Note - currently works fine with Name and Type using both OR and AND, however the property Value didn't work in the AND operator possibly because of the type mismatch.
+                // When compared with an enum value, you might encounter type-related issues because Expression.Equal expects the compared values to have the same runtime type for the comparison to succeed
                 var nameProperty = Expression.Property(parameter, "Name");
                 var valueProperty = Expression.Property(parameter, "Type");
                 var constantName = Expression.Constant(filter.Name);
@@ -69,10 +70,10 @@ namespace ObjectMetaDataTagging.Interfaces
             }
 
             var lambda = Expression.Lambda<Func<BaseTag, bool>>(predicateBody, parameter);
-            Console.WriteLine("Generated Expression:");
+            Console.WriteLine("generated expression:");
             Console.WriteLine(lambda.ToString());
             var result = sourceObject.AsQueryable().Where(lambda);    
-            Console.WriteLine($"Filtered result: {result.Count()} items");
+            Console.WriteLine($"filtered: {result.Count()} items");
 
             return (IQueryable<T>)result;
         }

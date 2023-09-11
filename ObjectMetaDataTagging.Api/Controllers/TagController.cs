@@ -106,27 +106,24 @@ namespace ObjectMetaDataTagging.Api.Controllers
             //testData.Add(taggingService.GetAllTags(trans1)
             //    .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            /////////// Filter Test /////////////
+            /////////// Dynamic Filter Test /////////////
 
             var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
             var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
             var filterTagTest2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
             var filterTagTest3 = tagFactory.CreateBaseTag("Transfer Funds", ExampleTags.FundsTransfer, null);
+            var filterTagTest4 = tagFactory.CreateBaseTag("Account Activity", ExampleTags.AccountActivity, null);
             taggingService.SetTag(trans2, filterTagTest1);
             taggingService.SetTag(trans2, filterTagTest2);
             taggingService.SetTag(trans2, filterTagTest3);
+            taggingService.SetTag(trans2, filterTagTest4);
 
             testData.Add(taggingService.GetAllTags(trans2)
                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            //trans2.AssociatedTags.Add(filterTagTest1);
-            //trans2.AssociatedTags.Add(filterTagTest2);
-            //trans2.AssociatedTags.Add(filterTagTest3);
-
-
-            var filters = new List<FilterCriteria>
+            var filters = new List<DefaultFilterCriteria>
             {
-                new FilterCriteria{Name = "Payment Expired", Type = "ExampleTags"}
+                new CustomFilter("Payment Expired", "ExampleTags")
             };
 
             var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters, LogicalOperator.AND);
