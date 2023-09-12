@@ -2,6 +2,8 @@
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Models.QueryModels;
+using System.Diagnostics;
 
 namespace ObjectMetaDataTagging.Configuration
 {
@@ -15,7 +17,9 @@ namespace ObjectMetaDataTagging.Configuration
         {
             // Register default services
             services.AddScoped<IDefaultTaggingService, DefaultTaggingService>();
-            services.AddScoped<IDynamicQueryBuilder, DynamicQueryBuilder>();
+            services.AddScoped<IDynamicQueryBuilder<DefaultFilterCriteria>, DynamicQueryBuilder<DefaultFilterCriteria>>();
+
+
             services.AddSingleton<ITagFactory, TagFactory>();
 
             // Register the EventManager

@@ -14,14 +14,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
-        private readonly IDynamicQueryBuilder _dynamicQueryBuilder;
+        private readonly IDynamicQueryBuilder<DefaultFilterCriteria> _dynamicQueryBuilder;
         private readonly IDefaultTaggingService _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         public TagController(
-            IDynamicQueryBuilder dynamicQueryBuilder,
+            IDynamicQueryBuilder<DefaultFilterCriteria> dynamicQueryBuilder,
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
@@ -91,7 +91,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
-            IDynamicQueryBuilder queryBuilder)
+            IDynamicQueryBuilder<DefaultFilterCriteria> queryBuilder)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
@@ -127,6 +127,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             };
 
             var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters, LogicalOperator.AND);
+
 
             return testData;
         }

@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 namespace ObjectMetaDataTagging.Interfaces
 {
 
-    public class DynamicQueryBuilder : IDynamicQueryBuilder
+    public class DynamicQueryBuilder<TFilter> : IDynamicQueryBuilder<TFilter>
+        where TFilter : DefaultFilterCriteria
     {
         /// <summary>
         /// Constructs a dynamic query to filter a collection of objects based on specified filter criteria.
@@ -20,9 +21,9 @@ namespace ObjectMetaDataTagging.Interfaces
         /// <returns>An IQueryable representing the filtered collection of objects.</returns>
 
         public IQueryable<T> BuildDynamicQuery<T>(
-     List<BaseTag> sourceObject,
-     List<DefaultFilterCriteria> filters,
-     LogicalOperator logicalOperator = LogicalOperator.AND)
+            List<BaseTag> sourceObject,
+            List<TFilter> filters,
+            LogicalOperator logicalOperator = LogicalOperator.OR)
         {
             if (filters == null || filters.Count == 0)
             {
