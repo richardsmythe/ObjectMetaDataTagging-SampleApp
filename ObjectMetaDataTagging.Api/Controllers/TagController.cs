@@ -126,7 +126,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
                 trans2.AssociatedTags,
-                tag => tag.Name == customFilter.Name, 
+                tag => tag.Name == customFilter.Name, // these define the filter condition
                 tag => tag.Type == customFilter.Type, 
                 LogicalOperator.AND
             );

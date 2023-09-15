@@ -9,6 +9,16 @@ namespace ObjectMetaDataTagging.Interfaces
 {
     public class DynamicQueryBuilder<TProperty1, TProperty2> : IDynamicQueryBuilder<TProperty1, TProperty2>
     {
+        /// <summary>
+        ///  Dynamically filters BaseTag objects based on the given fields, e.g. Name and Type. 
+        ///  This is done via a custom filter that should extend BaseTag.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sourceObject">A collection of type BaseTag that is used to filter against.</param>
+        /// <param name="property1Filter">Delegate based filter for first property.</param>
+        /// <param name="property2Filter">Delegate based filter for second property.</param>
+        /// <param name="logicalOperator">Used to combine the filter expressions</param>
+        /// <returns>An object of filtered results.</returns>
         public IQueryable<T> BuildDynamicQuery<T>(
          List<BaseTag> sourceObject,
          Func<BaseTag, bool> property1Filter = null,
@@ -49,7 +59,6 @@ namespace ObjectMetaDataTagging.Interfaces
 
             if (predicateBody == null)
             {
-                // No valid filter predicates provided, return all sourceObject items.
                 Console.WriteLine("BuildDynamicQuery: No valid filter predicates, returning all items.");
                 return sourceObject.AsQueryable().Cast<T>();
             }
