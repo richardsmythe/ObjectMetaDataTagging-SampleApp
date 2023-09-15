@@ -1,15 +1,17 @@
-﻿using ObjectMetaDataTagging.Models.QueryModels;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Models.TagModels;
-using System.Linq.Expressions;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
-    public interface IDynamicQueryBuilder<TFilter>
-        where TFilter : DefaultFilterCriteria
+    public interface IDynamicQueryBuilder<TProperty1, TProperty2>
     {
         IQueryable<T> BuildDynamicQuery<T>(
             List<BaseTag> sourceObject,
-            List<TFilter> filters,
+            Func<BaseTag, bool> property1Filter = null,
+            Func<BaseTag, bool> property2Filter = null,
             LogicalOperator logicalOperator = LogicalOperator.OR);
     }
 }

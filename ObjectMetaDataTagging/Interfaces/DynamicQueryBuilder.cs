@@ -4,79 +4,63 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
-
-    public class DynamicQueryBuilder<TFilter> : IDynamicQueryBuilder<TFilter>
-        where TFilter : DefaultFilterCriteria
+    public class DynamicQueryBuilder<TProperty1, TProperty2> : IDynamicQueryBuilder<TProperty1, TProperty2>
     {
-        /// <summary>
-        /// Constructs a dynamic query to filter a collection of objects based on specified filter criteria.
-        /// </summary>
-        /// <param name="source">The source collection to filter.</param>
-        /// <param name="filterCriteria">A list of filter criteria specifying property names and values to filter by.</param>
-        /// <returns>An IQueryable representing the filtered collection of objects.</returns>
-
         public IQueryable<T> BuildDynamicQuery<T>(
-            List<BaseTag> sourceObject,
-            List<TFilter> filters,
-            LogicalOperator logicalOperator = LogicalOperator.OR)
+         List<BaseTag> sourceObject,
+         Func<BaseTag, bool> property1Filter = null,
+         Func<BaseTag, bool> property2Filter = null,
+         LogicalOperator logicalOperator = LogicalOperator.OR)
         {
-            if (filters == null || filters.Count == 0)
+            if (property1Filter == null && property2Filter == null)
             {
-                Console.WriteLine("No filters provided.");
-                return (IQueryable<T>)sourceObject.AsQueryable();
+                Console.WriteLine("BuildDynamicQuery: No filter conditions found.");
+                return sourceObject.AsQueryable().Cast<T>();
             }
 
-            var parameter = Expression.Parameter(typeof(BaseTag), "Tag");
+            var parameter = Expression.Parameter(typeof(BaseTag), "tag");
+            Console.WriteLine($"BuildDynamicQuery: Parameter name: {parameter.Name}");
             Expression predicateBody = null;
 
-            foreach (var tag in sourceObject)
+            if (property1Filter != null)
             {
-                Console.WriteLine($"tag.Value Type: {tag.Value.GetType().FullName}");
+                Console.WriteLine("BuildDynamicQuery: Adding property1Filter");
+                predicateBody = predicateBody == null
+                    ? Expression.Invoke(Expression.Constant(property1Filter), parameter)
+                    : logicalOperator == LogicalOperator.AND
+                        ? Expression.AndAlso(predicateBody, Expression.Invoke(Expression.Constant(property1Filter), parameter))
+                        : Expression.OrElse(predicateBody, Expression.Invoke(Expression.Constant(property1Filter), parameter));
+                Console.WriteLine("BuildDynamicQuery: property1Filter: " + property1Filter.ToString());
             }
 
-            foreach (var filter in filters)
+            if (property2Filter != null)
             {
-                // Note - currently works fine with Name and Type using both OR and AND, however the property Value didn't work in the AND operator possibly because of the type mismatch.
-                // When compared with an enum value, you might encounter type-related issues because Expression.Equal expects the compared values to have the same runtime type for the comparison to succeed
-                var nameProperty = Expression.Property(parameter, "Name");
-                var valueProperty = Expression.Property(parameter, "Type");
-                var constantName = Expression.Constant(filter.Name);
-                var constantValue = Expression.Constant(filter.Type);
+                Console.WriteLine("BuildDynamicQuery: Adding property2Filter");
+                predicateBody = predicateBody == null
+                    ? Expression.Invoke(Expression.Constant(property2Filter), parameter)
+                    : logicalOperator == LogicalOperator.AND
+                        ? Expression.AndAlso(predicateBody, Expression.Invoke(Expression.Constant(property2Filter), parameter))
+                        : Expression.OrElse(predicateBody, Expression.Invoke(Expression.Constant(property2Filter), parameter));
+                Console.WriteLine("BuildDynamicQuery: property2Filter: " + property2Filter.ToString());
+            }
 
-                var nameFilterExpression = Expression.Equal(nameProperty, constantName);
-                var valueFilterExpression = Expression.Equal(valueProperty, constantValue);
-
-                var filterExpression = logicalOperator == LogicalOperator.AND
-                    ? Expression.And(nameFilterExpression, valueFilterExpression)
-                    : Expression.OrElse(nameFilterExpression, valueFilterExpression);
-
-
-                Console.WriteLine($"filter.Value Type: {filter.Type.GetType().FullName}");
-
-                if (predicateBody == null)
-                {
-                    predicateBody = filterExpression;
-                }
-                else
-                {
-                    predicateBody = logicalOperator == LogicalOperator.AND
-                        ? Expression.AndAlso(predicateBody, filterExpression)
-                        : Expression.OrElse(predicateBody, filterExpression);
-                }
+            if (predicateBody == null)
+            {
+                // No valid filter predicates provided, return all sourceObject items.
+                Console.WriteLine("BuildDynamicQuery: No valid filter predicates, returning all items.");
+                return sourceObject.AsQueryable().Cast<T>();
             }
 
             var lambda = Expression.Lambda<Func<BaseTag, bool>>(predicateBody, parameter);
-            Console.WriteLine("generated expression:");
-            Console.WriteLine(lambda.ToString());
-            var result = sourceObject.AsQueryable().Where(lambda);    
-            Console.WriteLine($"filtered: {result.Count()} items");
+            Console.WriteLine("BuildDynamicQuery: Filter expression: " + lambda.ToString());
 
-            return (IQueryable<T>)result;
+            var result = sourceObject.AsQueryable().Where(lambda);
+            Console.WriteLine("BuildDynamicQuery: Filtered items count: " + result.Count());
+
+            return result.Cast<T>();
         }
     }
 }

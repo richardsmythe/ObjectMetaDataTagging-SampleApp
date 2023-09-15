@@ -7,6 +7,7 @@ using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Api.Events;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Models.QueryModels;
+using System.Linq.Expressions;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -14,14 +15,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
-        private readonly IDynamicQueryBuilder<DefaultFilterCriteria> _dynamicQueryBuilder;
+        private readonly IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> _dynamicQueryBuilder;
         private readonly IDefaultTaggingService _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         public TagController(
-            IDynamicQueryBuilder<DefaultFilterCriteria> dynamicQueryBuilder,
+            IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> dynamicQueryBuilder,
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
@@ -91,7 +92,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             IDefaultTaggingService taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
-            IDynamicQueryBuilder<DefaultFilterCriteria> queryBuilder)
+            IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
@@ -121,13 +122,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
             testData.Add(taggingService.GetAllTags(trans2)
                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
-            var filters = new List<DefaultFilterCriteria>
-            {
-                new CustomFilter("Payment Expired", "ExampleTags")
-            };
+            var customFilter = new CustomFilter("Payment Expired", "ExampleTags");
 
-            var filtered = queryBuilder.BuildDynamicQuery<BaseTag>(trans2.AssociatedTags, filters, LogicalOperator.AND);
-
+            var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
+                trans2.AssociatedTags,
+                tag => tag.Name == customFilter.Name, 
+                tag => tag.Type == customFilter.Type, 
+                LogicalOperator.AND
+            );
 
             return testData;
         }

@@ -8,8 +8,8 @@ using System.Diagnostics;
 namespace ObjectMetaDataTagging.Configuration
 {
     /* 
-       Default services for external application to register with,
-       eg.g. builder.Services.AddObjectMetaDataTagging();
+       Default services for the external application to register with,
+       e.g., builder.Services.AddObjectMetaDataTagging();
     */
     public static class ServiceCollection
     {
@@ -17,15 +17,16 @@ namespace ObjectMetaDataTagging.Configuration
         {
             // Register default services
             services.AddScoped<IDefaultTaggingService, DefaultTaggingService>();
-            services.AddScoped<IDynamicQueryBuilder<DefaultFilterCriteria>, DynamicQueryBuilder<DefaultFilterCriteria>>();
 
+            // Register IDynamicQueryBuilder with its two type parameters
+            services.AddScoped(typeof(IDynamicQueryBuilder<,>), typeof(DynamicQueryBuilder<,>));
 
             services.AddSingleton<ITagFactory, TagFactory>();
 
             // Register the EventManager
             services.AddScoped<TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs>>();
-            
-            return services;        
+
+            return services;
         }
     }
 }
