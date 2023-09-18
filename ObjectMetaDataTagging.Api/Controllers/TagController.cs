@@ -104,32 +104,30 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var fundTransferTag2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
             taggingService.SetTag(trans1, fundTransferTag2);
 
-            //testData.Add(taggingService.GetAllTags(trans1)
-            //    .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+            testData.Add(taggingService.GetAllTags(trans1)
+                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
             /////////// Dynamic Filter Test /////////////
 
-            var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
-            var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            var filterTagTest2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            var filterTagTest3 = tagFactory.CreateBaseTag("Transfer Funds", ExampleTags.FundsTransfer, null);
-            var filterTagTest4 = tagFactory.CreateBaseTag("Account Activity", ExampleTags.AccountActivity, null);
-            taggingService.SetTag(trans2, filterTagTest1);
-            taggingService.SetTag(trans2, filterTagTest2);
-            taggingService.SetTag(trans2, filterTagTest3);
-            taggingService.SetTag(trans2, filterTagTest4);
+            //var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
+            //var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
+            //var filterTagTest2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
+            //var filterTagTest3 = tagFactory.CreateBaseTag("Transfer Funds", ExampleTags.FundsTransfer, null);
+            //var filterTagTest4 = tagFactory.CreateBaseTag("Account Activity", ExampleTags.AccountActivity, null);
+            //taggingService.SetTag(trans2, filterTagTest1);
+            //taggingService.SetTag(trans2, filterTagTest2);
+            //taggingService.SetTag(trans2, filterTagTest3);
+            //taggingService.SetTag(trans2, filterTagTest4);  
 
-            testData.Add(taggingService.GetAllTags(trans2)
-               .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-
-            var customFilter = new CustomFilter("Payment Expired", "ExampleTags");
+            var customFilter = new CustomFilter("Suspicious Transfer", "ExampleTags");
 
             var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
-                trans2.AssociatedTags,
-                tag => tag.Name == customFilter.Name, // these define the filter condition
-                tag => tag.Type == customFilter.Type, 
+                trans1.AssociatedTags,
+                tag => tag.Name == customFilter.Name, // these define the filter condition for delegate based filtering
+                tag => tag.Type == customFilter.Type,
                 LogicalOperator.AND
             );
+
 
             return testData;
         }

@@ -27,47 +27,47 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             if (property1Filter == null && property2Filter == null)
             {
-                Console.WriteLine("BuildDynamicQuery: No filter conditions found.");
+                Console.WriteLine("No filter conditions found.");
                 return sourceObject.AsQueryable().Cast<T>();
             }
 
             var parameter = Expression.Parameter(typeof(BaseTag), "tag");
-            Console.WriteLine($"BuildDynamicQuery: Parameter name: {parameter.Name}");
+            Console.WriteLine($"Parameter name: {parameter.Name}");
             Expression predicateBody = null;
 
             if (property1Filter != null)
             {
-                Console.WriteLine("BuildDynamicQuery: Adding property1Filter");
                 predicateBody = predicateBody == null
                     ? Expression.Invoke(Expression.Constant(property1Filter), parameter)
                     : logicalOperator == LogicalOperator.AND
                         ? Expression.AndAlso(predicateBody, Expression.Invoke(Expression.Constant(property1Filter), parameter))
                         : Expression.OrElse(predicateBody, Expression.Invoke(Expression.Constant(property1Filter), parameter));
-                Console.WriteLine("BuildDynamicQuery: property1Filter: " + property1Filter.ToString());
+                Console.WriteLine("property1Filter: " + property1Filter.ToString());
             }
 
             if (property2Filter != null)
             {
-                Console.WriteLine("BuildDynamicQuery: Adding property2Filter");
                 predicateBody = predicateBody == null
                     ? Expression.Invoke(Expression.Constant(property2Filter), parameter)
                     : logicalOperator == LogicalOperator.AND
                         ? Expression.AndAlso(predicateBody, Expression.Invoke(Expression.Constant(property2Filter), parameter))
                         : Expression.OrElse(predicateBody, Expression.Invoke(Expression.Constant(property2Filter), parameter));
-                Console.WriteLine("BuildDynamicQuery: property2Filter: " + property2Filter.ToString());
+                Console.WriteLine("property2Filter: " + property2Filter.ToString());
             }
+
+            Console.WriteLine($"predicatebody: {predicateBody}");
 
             if (predicateBody == null)
             {
-                Console.WriteLine("BuildDynamicQuery: No valid filter predicates, returning all items.");
+                Console.WriteLine("No valid filter predicates, returning all items.");
                 return sourceObject.AsQueryable().Cast<T>();
             }
 
             var lambda = Expression.Lambda<Func<BaseTag, bool>>(predicateBody, parameter);
-            Console.WriteLine("BuildDynamicQuery: Filter expression: " + lambda.ToString());
+            Console.WriteLine("Filter expression: " + lambda.ToString());
 
             var result = sourceObject.AsQueryable().Where(lambda);
-            Console.WriteLine("BuildDynamicQuery: Filtered items count: " + result.Count());
+            Console.WriteLine("Filtered items count: " + result.Count());
 
             return result.Cast<T>();
         }
