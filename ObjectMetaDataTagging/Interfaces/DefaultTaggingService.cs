@@ -88,11 +88,12 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public virtual bool RemoveTag(object o, Guid tagId)
-        {
+        public virtual bool RemoveTag(object? o, Guid tagId)
+        {             
             var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
             if (key != null && data.TryGetValue(key, out var tags))
             {
+                
                 lock (tags)
                 {
                     if (tags.Remove(tagId))
@@ -175,6 +176,31 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return false;
         }
+
+        public virtual object? GetObjectByTag(Guid tagId)
+        {
+            foreach (var kvp in data)
+            {
+                var key = kvp.Key;
+                var tags = kvp.Value;
+
+                lock (tags)
+                {
+                    if (tags.ContainsKey(tagId))
+                    {
+                        var associatedObject = key.Target; 
+
+                        if (associatedObject != null)
+                        {
+                            return associatedObject;
+                        }
+                    }
+                }
+            }
+
+            return null; 
+        }
+
 
 
         #endregion

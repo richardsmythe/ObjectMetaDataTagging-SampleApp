@@ -13,15 +13,15 @@ namespace ObjectMetaDataTagging.Api.Services
         {
         }
 
-        public override void SetTag(object o, BaseTag tag)
-        {
-            if (o is ExamplePersonTransaction transaction)
-            {
-                transaction.AssociatedTags.Add(tag);
-            }
-            //Console.WriteLine($"Tag Id: {tag.Id}   TagName:  {tag.Name}  TagValue:  {tag.Value}");
-            base.SetTag(o, tag);
-        }
+        //public override void SetTag(object o, BaseTag tag)
+        //{
+        //    if (o is ExamplePersonTransaction transaction)
+        //    {
+        //        transaction.AssociatedTags.Add(tag);
+        //    }
+        //    //Console.WriteLine($"Tag Id: {tag.Id}   TagName:  {tag.Name}  TagValue:  {tag.Value}");
+        //    base.SetTag(o, tag);
+        //}
 
         public override List<BaseTag> GetAllTags(object o)
         {

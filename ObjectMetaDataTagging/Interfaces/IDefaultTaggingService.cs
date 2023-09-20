@@ -9,9 +9,9 @@ namespace ObjectMetaDataTagging.Interfaces
         IEnumerable<BaseTag> GetAllTags(object o);
         BaseTag? GetTag(object o, Guid tagId);
         void RemoveAllTags(object o);
-        bool RemoveTag(object o, Guid tagId);        
+        bool RemoveTag(object? o, Guid tagId);        
         bool HasTag(object o, Guid tagId);
-
+        object? GetObjectByTag(Guid tagId);
 
     }
 }

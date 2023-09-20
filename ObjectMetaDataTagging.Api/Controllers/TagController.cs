@@ -35,6 +35,18 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _dynamicQueryBuilder = dynamicQueryBuilder;
         }
 
+
+        [HttpDelete]
+        public IActionResult Delete(Guid tagId)
+        {
+            var obj = _taggingService.GetObjectByTag(tagId);
+            if (_taggingService.RemoveTag(obj, tagId))
+            {
+                return Ok();
+            }
+            return NotFound();
+        }
+
         [HttpGet]
         public IActionResult GetObjectsAndTags()
         {
@@ -66,6 +78,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     {
                         return new TagModel
                         {
+                            tagId = tag.Id,
                             TagName = tag.Name,
                             Description = tag.Description,
                             AssociatedObject = objectName,
@@ -96,7 +109,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 2531 };
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 5555 };
 
             var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
             taggingService.SetTag(trans1, fundTransferTag);
@@ -105,28 +118,22 @@ namespace ObjectMetaDataTagging.Api.Controllers
             taggingService.SetTag(trans1, fundTransferTag2);
 
             testData.Add(taggingService.GetAllTags(trans1)
-                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-
+                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());            
+  
+            
             /////////// Dynamic Filter Test /////////////
 
-            //var trans2 = new ExamplePersonTransaction { Sender = "Someone", Receiver = "Someone Else", Amount = 34 };
-            //var filterTagTest1 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            //var filterTagTest2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            //var filterTagTest3 = tagFactory.CreateBaseTag("Transfer Funds", ExampleTags.FundsTransfer, null);
-            //var filterTagTest4 = tagFactory.CreateBaseTag("Account Activity", ExampleTags.AccountActivity, null);
-            //taggingService.SetTag(trans2, filterTagTest1);
-            //taggingService.SetTag(trans2, filterTagTest2);
-            //taggingService.SetTag(trans2, filterTagTest3);
-            //taggingService.SetTag(trans2, filterTagTest4);  
+            //var customFilter = new CustomFilter("Suspicious Transfer", "ExampleTags");
 
-            var customFilter = new CustomFilter("Suspicious Transfer", "ExampleTags");
+            //var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
+            //    trans1.AssociatedTags,
+            //    tag => tag.Name == customFilter.Name, // these define the filter condition for delegate based filtering
+            //    tag => tag.Type == customFilter.Type,
+            //    LogicalOperator.AND
+            //);
 
-            var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
-                trans1.AssociatedTags,
-                tag => tag.Name == customFilter.Name, // these define the filter condition for delegate based filtering
-                tag => tag.Type == customFilter.Type,
-                LogicalOperator.AND
-            );
+            //////////////////////////////////////////////
+
 
 
             return testData;
