@@ -21,11 +21,16 @@ export class FrameService {
   public frameInitialised(): void {
     this.initialisedFramesCounter++;
     const frames = this.frames.getValue();
+    console.log("FRAMES:",frames.length);
     if (this.initialisedFramesCounter === frames.length) {
       console.log(this.initialisedFramesCounter, 'frames initialised');
       this.updateLinePositions();
       this.allFramesInitialised.next(true);
     }
+  }
+
+  refreshFrames(): void{
+
   }
 
   getLines(): Observable<LineModel[]> {
@@ -91,7 +96,7 @@ export class FrameService {
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-
+    this.frameInitialised()
     return frame;
   }
 
@@ -237,12 +242,26 @@ export class FrameService {
     // console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
     return associatedFrames;
   }
+
   destroyFrame(frameId: number): void {
+    const frameToDelete = this.getFrameById(frameId);
+    const tagId = frameToDelete?.tagData[0].tagId;
+    console.log(tagId);
     const currentFrames = this.frames.value.slice();
     const index = currentFrames.findIndex(frame => frame.id === frameId);
     if (index !== -1) {
       currentFrames.splice(index, 1);
-      this.frames.next(currentFrames);
+      this.frames.next(currentFrames);  
+
+      const url = `https://localhost:7170/api/Tag/?tagId=${tagId}`; 
+      this.http.delete(url).subscribe(
+        () => {
+          console.log("deleted successfully")
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
     }
   }
 
