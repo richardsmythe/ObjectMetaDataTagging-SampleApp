@@ -42,9 +42,34 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var obj = _taggingService.GetObjectByTag(tagId);
             if (obj != null && _taggingService.RemoveTag(obj, tagId))
             {
-                Console.WriteLine("Tag deleted");
-                var tags = _taggingService.GetAllTags(obj);
-                return Ok(tags);
+                var updatedTags = _taggingService.GetAllTags(obj);
+
+                var objectModels = new List<ObjectModel>();
+                var tagModels = new List<TagModel>();
+
+                foreach (var updatedTag in updatedTags)
+                {
+                    var tagModel = new TagModel
+                    {
+                        tagId = updatedTag.Id,
+                        TagName = updatedTag.Name,
+                        Description = updatedTag.Description,
+                        AssociatedObject = updatedTag.AssociatedParentObjectName.ToString(),
+                        AssociatedObjectId = updatedTag.AssociatedParentObjectId,
+                    };
+
+                    tagModels.Add(tagModel);
+                }
+
+                var frameModel = new Frame
+                {
+                    Id = Guid.NewGuid(),
+                    Origin = Assembly.GetEntryAssembly().GetName().Name,
+                    ObjectData = objectModels,
+                    TagData = tagModels
+                };
+
+                return Ok(frameModel); 
             }
 
             return NotFound();

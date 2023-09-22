@@ -29,7 +29,9 @@ export class FrameService {
     }
   }
 
-  refreshFrames(): void{
+  refreshFrames(tags: Frame, parentObjectId: number): void{
+    console.log("NEW FRAMES:", tags);
+    console.log("ParentObjID", parentObjectId);
     // attach tags to the existing object
 
     // const frames = this.frames.getValue();
@@ -262,20 +264,25 @@ export class FrameService {
   destroyFrame(frameId: number): void {
     const frameToDelete = this.getFrameById(frameId);
     const parentObjectId = frameToDelete?.tagData[0].associatedObjectId;
+    
     const tagId = frameToDelete?.tagData[0].tagId;
-    console.log("Frame being deleted:",tagId);
-    console.log("Frame being deleted parentObject:", parentObjectId);
+    console.log("Tag Id being deleted:",tagId); 
+    console.log("Tag being deleted parentObject:", parentObjectId);
     const currentFrames = this.frames.value.slice();
-    const index = currentFrames.findIndex(frame => frame.id === frameId);
+    const index = currentFrames.findIndex(frame => frame.id === frameId);debugger;
     if (index !== -1) {
       currentFrames.splice(index, 1);
       this.frames.next(currentFrames);
   
       const url = `https://localhost:7170/api/Tag/?tagId=${tagId}`;
       this.http.delete(url).subscribe({
-        next: () => {
-          this.refreshFrames();
-          console.log("Deleted request successful");
+        next: (response) => {
+          console.log("HERE",response);
+          // const tags = response as Frame;
+          // if (!parentObjectId) return;
+          // this.refreshFrames(tags, parentObjectId);
+          // console.log("Deleted request successful");
+          
         },
         error: (error) => {
           console.error(error);
