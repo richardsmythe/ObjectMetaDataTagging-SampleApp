@@ -15,8 +15,8 @@ namespace ObjectMetaDataTagging.Configuration
     {
         public static IServiceCollection AddObjectMetaDataTagging(this IServiceCollection services)
         {
-            // Register default services
-            services.AddScoped<IDefaultTaggingService, DefaultTaggingService>();
+            // Register defaultTaggingService as singleton so the same instance of the service is across the whole http request
+            services.AddSingleton<IDefaultTaggingService, DefaultTaggingService>();
 
             // Register IDynamicQueryBuilder with its two type parameters
             services.AddScoped(typeof(IDynamicQueryBuilder<,>), typeof(DynamicQueryBuilder<,>));
@@ -24,7 +24,7 @@ namespace ObjectMetaDataTagging.Configuration
             services.AddSingleton<ITagFactory, TagFactory>();
 
             // Register the EventManager
-            services.AddScoped<TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs>>();
+            services.AddSingleton<TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs>>();
 
             return services;
         }

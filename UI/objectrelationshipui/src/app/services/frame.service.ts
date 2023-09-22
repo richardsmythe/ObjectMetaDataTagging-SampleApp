@@ -21,7 +21,7 @@ export class FrameService {
   public frameInitialised(): void {
     this.initialisedFramesCounter++;
     const frames = this.frames.getValue();
-    console.log("FRAMES:",frames.length);
+
     if (this.initialisedFramesCounter === frames.length) {
       console.log(this.initialisedFramesCounter, 'frames initialised');
       this.updateLinePositions();
@@ -30,7 +30,27 @@ export class FrameService {
   }
 
   refreshFrames(): void{
+    // attach tags to the existing object
 
+    // const frames = this.frames.getValue();
+    // console.log(frames);
+    // const url = `https://localhost:7170/api/Tag/GetTagsForObject?model=${frames}`;
+    // this.http.delete(url).subscribe({
+    //   next: () => {
+    //     this.refreshFrames();
+    //     console.log("Deleted request successful");
+    //   },
+    //   error: (error) => {
+    //     console.error(error);
+    //   },
+    // });
+
+
+    // this.getFrameData().subscribe(updatedFrames => {
+    //   this.frames.next(updatedFrames);
+    //   console.log("New frames:",updatedFrames);
+
+    //})
   }
 
   getLines(): Observable<LineModel[]> {
@@ -198,8 +218,6 @@ export class FrameService {
     this.frames.next(updatedFrames);
   }
 
-
-
   getFrameSize(frameId: number | undefined): { width: number, height: number } | undefined {
     if (frameId === undefined) {
       return undefined;
@@ -234,8 +252,6 @@ export class FrameService {
     return undefined;
   }
 
-
-
   getAssociatedTagFrameIds(objectId: number): number[] {
     const tagFrames = this.frames.getValue().filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
     const associatedFrames = tagFrames.map(frame => frame.id);
@@ -251,17 +267,18 @@ export class FrameService {
     const index = currentFrames.findIndex(frame => frame.id === frameId);
     if (index !== -1) {
       currentFrames.splice(index, 1);
-      this.frames.next(currentFrames);  
-
-      const url = `https://localhost:7170/api/Tag/?tagId=${tagId}`; 
-      this.http.delete(url).subscribe(
-        () => {
-          console.log("deleted successfully")
+      this.frames.next(currentFrames);
+  
+      const url = `https://localhost:7170/api/Tag/?tagId=${tagId}`;
+      this.http.delete(url).subscribe({
+        next: () => {
+          this.refreshFrames();
+          console.log("Deleted request successful");
         },
-        (error) => {
+        error: (error) => {
           console.error(error);
-        }
-      );
+        },
+      });
     }
   }
 

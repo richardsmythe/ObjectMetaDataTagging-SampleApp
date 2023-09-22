@@ -17,11 +17,14 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
+        
+        // using object instead of weakreference, make sure to GC
+        protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
 
-        protected readonly ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<WeakReference, Dictionary<Guid, BaseTag>>();
+
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
-        /* By exposing these events, it allow consumers to attach event handlers to these events 
+        /* By exposing these events, it allow consumers to attach event handlers 
          * to perform additional actions when tags are added, removed, or updated. 
          * This can be useful if someone wants to extend the behavior of the library. */
 
@@ -50,8 +53,8 @@ namespace ObjectMetaDataTagging.Interfaces
         #region Default Tag Operations
         public virtual IEnumerable<BaseTag> GetAllTags(object o)
         {
-            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && data.TryGetValue(key, out var tags))
+ 
+            if (o != null && data.TryGetValue(o, out var tags))
             {
                 var allTags = tags.Values.ToList();
                 Console.WriteLine("Tags:");
@@ -67,8 +70,8 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public virtual BaseTag? GetTag(object o, Guid tagId)
         {
-            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && data.TryGetValue(key, out var tagDictionary))
+
+            if (data.TryGetValue(o, out var tagDictionary))
             {
                 if (tagDictionary.TryGetValue(tagId, out var tag))
                 {
@@ -81,19 +84,19 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public virtual void RemoveAllTags(object o)
         {
-            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null)
+
+            if (o != null)
             {
-                data.Remove(key, out _);
+                data.Remove(o, out _);
             }
         }
 
         public virtual bool RemoveTag(object? o, Guid tagId)
-        {             
-            var key = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (key != null && data.TryGetValue(key, out var tags))
+        {
+
+            if (o != null && data.TryGetValue(o, out var tags))
             {
-                
+
                 lock (tags)
                 {
                     if (tags.Remove(tagId))
@@ -101,7 +104,7 @@ namespace ObjectMetaDataTagging.Interfaces
                         // if there are no tags left for this object, remove entry
                         if (tags.Count == 0)
                         {
-                            data.TryRemove(key, out _);
+                            data.TryRemove(o, out _);
                         }
 
                         _eventManager.RaiseTagRemoved(new TagRemovedEventArgs(o, tagId));
@@ -116,15 +119,8 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             if (tag == null || o == null) return;
 
-            var objectName = o.GetType().Name;
-
-            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (weakRef == null)
-            {
-                weakRef = new WeakReference(o);
-            }
-
-            var tagDictionary = data.GetOrAdd(weakRef, new Dictionary<Guid, BaseTag>());
+            var objectName = o.GetType().Name;            
+            var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
             lock (tagDictionary)
             {
@@ -132,22 +128,23 @@ namespace ObjectMetaDataTagging.Interfaces
 
                 tagFromEvent.AssociatedParentObjectName = objectName;
                 if (tagFromEvent != null)
-                {
+                {                    
                     tagDictionary[tagFromEvent.Id] = tagFromEvent;
                     tagDictionary[tag.Id] = tag;
-                }
+                }            
             }
         }
+
 
         public bool UpdateTag(object o, Guid tagId, BaseTag modifiedTag)
         {
             if (modifiedTag == null) return false;
-            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (weakRef == null) return false;
+
+            if (o == null) return false;
 
             modifiedTag.DateLastUpdated = DateTime.UtcNow;
 
-            if (data.TryGetValue(weakRef, out var tags))
+            if (data.TryGetValue(o, out var tags))
             {
                 lock (tags)
                 {
@@ -166,8 +163,8 @@ namespace ObjectMetaDataTagging.Interfaces
         }
         public bool HasTag(object o, Guid tagId)
         {
-            var weakRef = data.Keys.FirstOrDefault(k => k.IsAlive && k.Target == o);
-            if (weakRef != null && data.TryGetValue(weakRef, out var tags))
+
+            if (o != null && data.TryGetValue(o, out var tags))
             {
                 lock (tags)
                 {
@@ -181,24 +178,18 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             foreach (var kvp in data)
             {
-                var key = kvp.Key;
                 var tags = kvp.Value;
 
                 lock (tags)
                 {
-                    if (tags.ContainsKey(tagId))
+                    if (tags.TryGetValue(tagId, out var tag))
                     {
-                        var associatedObject = key.Target; 
-
-                        if (associatedObject != null)
-                        {
-                            return associatedObject;
-                        }
+                        return kvp.Key; // kvp.Key is now the associated object
                     }
                 }
             }
 
-            return null; 
+            return null;
         }
 
 

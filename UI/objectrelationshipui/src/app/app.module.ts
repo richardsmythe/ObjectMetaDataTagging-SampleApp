@@ -11,6 +11,7 @@ import { LineComponent } from './line/line.component';
   declarations: [
     AppComponent,
     FrameComponent,
+    
     LineComponent
   ],
   imports: [

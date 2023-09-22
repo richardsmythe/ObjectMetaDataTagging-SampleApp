@@ -40,13 +40,17 @@ namespace ObjectMetaDataTagging.Api.Controllers
         public IActionResult Delete(Guid tagId)
         {
             var obj = _taggingService.GetObjectByTag(tagId);
-            if (_taggingService.RemoveTag(obj, tagId))
+            if (obj != null && _taggingService.RemoveTag(obj, tagId))
             {
-                return Ok();
+                Console.WriteLine("Tag deleted");
+                var tags = _taggingService.GetAllTags(obj);
+                return Ok(tags);
             }
+
             return NotFound();
         }
 
+        // Initial data for app
         [HttpGet]
         public IActionResult GetObjectsAndTags()
         {
@@ -109,7 +113,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 5555 };
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 15432 };
 
             var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
             taggingService.SetTag(trans1, fundTransferTag);
@@ -118,9 +122,9 @@ namespace ObjectMetaDataTagging.Api.Controllers
             taggingService.SetTag(trans1, fundTransferTag2);
 
             testData.Add(taggingService.GetAllTags(trans1)
-                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());            
-  
-            
+                .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+
+
             /////////// Dynamic Filter Test /////////////
 
             //var customFilter = new CustomFilter("Suspicious Transfer", "ExampleTags");
@@ -133,8 +137,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             //);
 
             //////////////////////////////////////////////
-
-
 
             return testData;
         }

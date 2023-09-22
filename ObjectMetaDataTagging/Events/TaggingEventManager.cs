@@ -38,6 +38,7 @@ namespace ObjectMetaDataTagging.Events
         {
            var result = _addedHandler.Handle(e);
             TagAdded?.Invoke(this, e);
+
             return result;
         }
         public void RaiseTagRemoved(TRemoved e)
