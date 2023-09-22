@@ -261,8 +261,10 @@ export class FrameService {
 
   destroyFrame(frameId: number): void {
     const frameToDelete = this.getFrameById(frameId);
+    const parentObjectId = frameToDelete?.tagData[0].associatedObjectId;
     const tagId = frameToDelete?.tagData[0].tagId;
-    console.log(tagId);
+    console.log("Frame being deleted:",tagId);
+    console.log("Frame being deleted parentObject:", parentObjectId);
     const currentFrames = this.frames.value.slice();
     const index = currentFrames.findIndex(frame => frame.id === frameId);
     if (index !== -1) {
