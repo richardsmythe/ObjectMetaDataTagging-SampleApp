@@ -269,7 +269,7 @@ export class FrameService {
     console.log("Tag Id being deleted:",tagId); 
     console.log("Tag being deleted parentObject:", parentObjectId);
     const currentFrames = this.frames.value.slice();
-    const index = currentFrames.findIndex(frame => frame.id === frameId);debugger;
+    const index = currentFrames.findIndex(frame => frame.id === frameId);
     if (index !== -1) {
       currentFrames.splice(index, 1);
       this.frames.next(currentFrames);

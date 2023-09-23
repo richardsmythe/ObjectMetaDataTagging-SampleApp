@@ -46,7 +46,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 var objectModels = new List<ObjectModel>();
                 var tagModels = new List<TagModel>();
-
+                var objectName = "";
+                Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); ;
                 foreach (var updatedTag in updatedTags)
                 {
                     var tagModel = new TagModel
@@ -54,12 +55,23 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         tagId = updatedTag.Id,
                         TagName = updatedTag.Name,
                         Description = updatedTag.Description,
-                        AssociatedObject = updatedTag.AssociatedParentObjectName.ToString(),
+                        AssociatedObject = updatedTag.AssociatedParentObjectName?.ToString(),
                         AssociatedObjectId = updatedTag.AssociatedParentObjectId,
                     };
-
                     tagModels.Add(tagModel);
+                    
+                    if(updatedTag.AssociatedParentObjectName != null)
+                    {
+                        objectName = updatedTag.AssociatedParentObjectName?.ToString();
+                        objectId = updatedTag.AssociatedParentObjectId;
+                    }
                 }
+
+                objectModels.Add(new ObjectModel
+                {
+                    Id = objectId,
+                    ObjectName = objectName
+                });
 
                 var frameModel = new Frame
                 {
