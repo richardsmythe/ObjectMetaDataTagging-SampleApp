@@ -11,7 +11,7 @@
             <b>Name:</b> {{ obj.objectName }}
           </li>
           <li *ngFor="let obj of frame?.objectData">
-            <b>Id:</b> {{ obj?.id }}
+            <b>ObjectId:</b> {{ obj?.id }}
           </li>
         </ng-container>
         <ng-container *ngIf="frame?.frameType === 'Tag'">
@@ -19,6 +19,8 @@
             <li *ngIf="isFirst"><b>Parent:</b> {{ tag?.associatedObject }}</li>
             <li><b>Tag Name:</b> {{ tag?.tagName }}</li>
             <li *ngIf="tag?.description"><b>Description:</b> {{tag?.description}}</li>
+            <li><b>TagId:</b>{{tag?.tagId}}</li>
+            <li><b>ParentObjectId:</b>{{tag?.associatedObjectId}}</li>
           </ng-container>
         </ng-container>
       </ul>

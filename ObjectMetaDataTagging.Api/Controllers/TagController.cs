@@ -150,7 +150,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 15432 };
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 123 };
 
             var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
             taggingService.SetTag(trans1, fundTransferTag);

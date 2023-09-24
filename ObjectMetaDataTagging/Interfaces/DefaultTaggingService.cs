@@ -2,6 +2,7 @@
 using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
 using System.Security.AccessControl;
+using System.Transactions;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
@@ -17,7 +18,7 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
         }
-        
+
         // using object instead of weakreference, make sure to GC
         protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
 
@@ -53,7 +54,7 @@ namespace ObjectMetaDataTagging.Interfaces
         #region Default Tag Operations
         public virtual IEnumerable<BaseTag> GetAllTags(object o)
         {
- 
+
             if (o != null && data.TryGetValue(o, out var tags))
             {
                 var allTags = tags.Values.ToList();
@@ -119,7 +120,8 @@ namespace ObjectMetaDataTagging.Interfaces
         {
             if (tag == null || o == null) return;
 
-            var objectName = o.GetType().Name;            
+            var objectName = o.GetType().Name;
+            var objectId = GetObjectId(o);
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
             lock (tagDictionary)
@@ -127,11 +129,12 @@ namespace ObjectMetaDataTagging.Interfaces
                 var tagFromEvent = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
 
                 tagFromEvent.AssociatedParentObjectName = objectName;
+                tagFromEvent.AssociatedParentObjectId = objectId;
                 if (tagFromEvent != null)
-                {                    
+                {
                     tagDictionary[tagFromEvent.Id] = tagFromEvent;
                     tagDictionary[tag.Id] = tag;
-                }            
+                }
             }
         }
 
@@ -175,7 +178,7 @@ namespace ObjectMetaDataTagging.Interfaces
         }
 
         public virtual object? GetObjectByTag(Guid tagId)
-        {
+        { // is this returning the correct object?????
             foreach (var kvp in data)
             {
                 var tags = kvp.Value;
@@ -192,6 +195,22 @@ namespace ObjectMetaDataTagging.Interfaces
             return null;
         }
 
+        private Guid GetObjectId(object o)
+        {
+            if (o != null)
+            {
+                var idProperty = o.GetType().GetProperty("Id");
+                if (idProperty != null)
+                {
+                    var idValue = idProperty.GetValue(o);
+                    if (idValue is Guid guidValue)
+                    {
+                        return guidValue;
+                    }
+                }
+            }
+            return Guid.Empty;
+        }
 
 
         #endregion
