@@ -1,4 +1,4 @@
-import { OnInit, ViewChildren, QueryList, Component, ElementRef, Inject, Input, ViewChild, ChangeDetectorRef, SimpleChanges } from '@angular/core';
+import { OnInit, ViewChildren, QueryList, Component, ElementRef, Inject, Input, ViewChild, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Frame } from '../models/FrameModel';
 import { FrameService } from '../services/frame.service';
@@ -12,13 +12,13 @@ export type ResizeDirectionType = 'x' | 'y' | 'xy';
 @Component({
   selector: 'app-frame',
   templateUrl: './frame.component.html',
-  styleUrls: ['./frame.component.css'],
-
+  styleUrls: ['./frame.component.css'], 
+  changeDetection: ChangeDetectionStrategy.Default
 })
+
 export class FrameComponent implements OnInit {
 
   @ViewChildren(LineComponent) lineComponents!: QueryList<LineComponent>;
-
   @Input() frame: Frame | undefined;
   @ViewChild('wrapper') wrapperRef!: ElementRef;
   @ViewChild('topBar') topBarRef!: ElementRef;
@@ -35,7 +35,6 @@ export class FrameComponent implements OnInit {
   constructor(@Inject(DOCUMENT) private document: Document,
     private frameService: FrameService,
     private cdRef: ChangeDetectorRef) {
-
     this.lastPosition = undefined;
     this.lastSize = undefined;
   }
@@ -43,7 +42,7 @@ export class FrameComponent implements OnInit {
 
   ngOnInit(): void {
     this.cdRef.detectChanges();
-
+  
     // Subscription to update the component's state whenever frames data changes
     this.subs.add(
       this.frameService.frames.subscribe(frames => {
@@ -54,7 +53,7 @@ export class FrameComponent implements OnInit {
         }
       })
     );
-
+  
     if (this.frame) {
       // if object frame, get associated tags
       const objectIds = this.frame.objectData?.map(obj => obj.id);
@@ -64,23 +63,31 @@ export class FrameComponent implements OnInit {
         }
       }
     }
-
+  
     // Inform the service that this frame has been initialised
     this.frameService.frameInitialised();
-
+  
     // Setup a subscription to fetch the lines once all frames are initialised
-    this.frameService.allFramesInitialised.pipe(
-      take(1),
-      switchMap(initialised => {
-        if (initialised) {
-          return this.frameService.getLines();
-        } else {
-          return of([]);  // Don't fetch lines if frames are not initialised.
-        }
+    this.subs.add(
+      this.frameService.allFramesInitialised.pipe(
+        take(1),
+        switchMap(initialised => {
+          if (initialised) {
+            return this.frameService.getLines();
+          } else {
+            return of([]);  // Don't fetch lines if frames are not initialised.
+          }
+        })
+      ).subscribe(lines => {
+        this.lines = lines;      
       })
-    ).subscribe(lines => {
-      this.lines = lines;
-    });
+    );
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['frame']) {
+      console.log('Frame changed:', changes['frame'].currentValue);
+    }
   }
 
 
@@ -195,7 +202,7 @@ export class FrameComponent implements OnInit {
     if (frameId !== undefined) {
       console.log(frameId);
       this.frameService.destroyFrame(frameId);
-
+      this.cdRef.detectChanges(); 
     }
   }
 }

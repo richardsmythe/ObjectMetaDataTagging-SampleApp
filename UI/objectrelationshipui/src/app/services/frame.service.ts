@@ -5,6 +5,7 @@ import { Frame } from '../models/FrameModel';
 import { ObjectModel } from '../models/ObjectModel';
 import { TagModel } from '../models/TagModel';
 import { LineModel } from '../models/LineModel';
+import { response } from 'express';
 
 @Injectable({
   providedIn: 'root'
@@ -29,64 +30,10 @@ export class FrameService {
     }
   }
 
-  refreshFrames(tags: Frame, parentObjectId: number): void{
-    console.log("NEW FRAMES:", tags);
-    console.log("ParentObjID", parentObjectId);
-    // attach tags to the existing object
-
-    // const frames = this.frames.getValue();
-    // console.log(frames);
-    // const url = `https://localhost:7170/api/Tag/GetTagsForObject?model=${frames}`;
-    // this.http.delete(url).subscribe({
-    //   next: () => {
-    //     this.refreshFrames();
-    //     console.log("Deleted request successful");
-    //   },
-    //   error: (error) => {
-    //     console.error(error);
-    //   },
-    // });
-
-
-    // this.getFrameData().subscribe(updatedFrames => {
-    //   this.frames.next(updatedFrames);
-    //   console.log("New frames:",updatedFrames);
-
-    //})
-  }
-
-  getLines(): Observable<LineModel[]> {
-    return this.lines.asObservable();
-  }
-  getFrames(): Frame[] {
-    return this.frames.getValue();
-  }
   getFrameData(): Observable<Frame[]> {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
-        const frames: Frame[] = [];
-
-        response.forEach(frameData => {
-          // Check if there are objects
-          if (frameData.objectData) {
-            frameData.objectData.forEach((object: ObjectModel) => {
-              // Create an object frame
-              const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
-              frames.push(objectFrame);
-
-              // Iterate over the tags associated with the current object
-              frameData.tagData.forEach((tag: any) => {
-                // Check if the tag is associated with the current object
-                if (tag.associatedObjectId === object.id) {
-                  // Create a tag frame for each individual tag
-                  const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
-                  frames.push(tagFrame);
-                }
-              });
-            });
-          }
-        });
-
+        const frames = this.processFrameData(response);
         this.frames.next(frames);
         return of(frames);
       }),
@@ -96,6 +43,63 @@ export class FrameService {
       })
     );
   }
+
+  private processFrameData(response: any[]): Frame[] {
+    const frames: Frame[] = [];
+    this.frameIdCounter = 1;
+
+    response.forEach(frameData => {
+      // Check if there are objects
+      if (frameData.objectData) {
+        frameData.objectData.forEach((object: ObjectModel) => {
+          // Create an object frame
+          const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
+          frames.push(objectFrame);
+
+          // Iterate over the tags associated with the current object
+          frameData.tagData.forEach((tag: any) => {
+            // Check if the tag is associated with the current object
+            if (tag.associatedObjectId === object.id) {
+              // Create a tag frame for each individual tag
+              const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
+              frames.push(tagFrame);
+            }
+          });
+        });
+      }
+    });
+    this.frames.next(frames);
+    console.log("RESULT:", frames);
+    return frames;
+  }
+
+  destroyFrame(frameId: number): void {
+    const tagId = this.getFrameById(frameId)?.tagData[0]?.tagId;
+    console.log("Deleting tag:",frameId);
+    if (!tagId) {
+      return;
+    }
+    // Identify the lines associated with the frame to be deleted
+    
+    this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
+      next: (response) => {
+        const updatedFrames = this.processFrameData(response);
+        
+        const associatedLines = this.lines.value.filter(line => line.childId[0] === frameId);
+        // Remove the associated lines from the lines array
+        const newLines = this.lines.value.filter(line => !associatedLines.includes(line));
+
+        // Update the frames and lines
+        this.frames.next(updatedFrames);
+        this.lines.next(newLines);
+        this.updateLinePositions();
+      },
+      error: (error) => {
+        console.error('HTTP Delete Error:', error);
+      },
+    });
+  }
+
 
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
@@ -108,7 +112,6 @@ export class FrameService {
       tagData
     };
 
-    // Populate relatedFrameIds for object frames
     if (frameType === 'Object') {
       frame.objectData?.forEach(obj => {
         obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
@@ -118,8 +121,16 @@ export class FrameService {
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-    this.frameInitialised()
+    // this.frameInitialised()
+    this.updateLinePositions();
     return frame;
+  }
+
+  getLines(): Observable<LineModel[]> {
+    return this.lines.asObservable();
+  }
+  getFrames(): Frame[] {
+    return this.frames.getValue();
   }
 
   calculateFramePosition(): { x: number, y: number } {
@@ -182,10 +193,10 @@ export class FrameService {
     if (Array.isArray(data)) {
       for (const item of data) {
         if (isTagType) {
-           const tag = item as TagModel;          
-           width = Math.max(width, tag?.description?.length > 20 ? 320 : 320);;
-           height = 200;
-        } else {        
+          const tag = item as TagModel;
+          width = Math.max(width, tag?.description?.length > 20 ? 320 : 320);;
+          height = 200;
+        } else {
           const object = item as ObjectModel;
           const objectIdLength = object?.id?.toString().length || 0;
           width = Math.max(width, objectIdLength > 30 ? 350 : 200);
@@ -195,7 +206,7 @@ export class FrameService {
     }
     return { w: width, h: height };
   }
-  
+
   getFrameById(frameId: number): Frame | undefined {
     const frames = this.frames.value;
     const frame = frames.find(fr => fr.id === frameId);
@@ -244,7 +255,6 @@ export class FrameService {
     return undefined;
   }
 
-
   getFramePosition(frameId: number): { x: number; y: number } | undefined {
     const frame = this.getFrameById(frameId);
     if (frame && frame.position) {
@@ -257,42 +267,11 @@ export class FrameService {
   getAssociatedTagFrameIds(objectId: number): number[] {
     const tagFrames = this.frames.getValue().filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
     const associatedFrames = tagFrames.map(frame => frame.id);
-    // console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
+    //console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
     return associatedFrames;
   }
 
-  destroyFrame(frameId: number): void {
-    const frameToDelete = this.getFrameById(frameId);
-    const parentObjectId = frameToDelete?.tagData[0].associatedObjectId;
-    
-    const tagId = frameToDelete?.tagData[0].tagId;
-    console.log("Tag Id being deleted:",tagId); 
-    console.log("Tag being deleted parentObject:", parentObjectId);
-    const currentFrames = this.frames.value.slice();
-    const index = currentFrames.findIndex(frame => frame.id === frameId);
-    if (index !== -1) {
-      currentFrames.splice(index, 1);
-      this.frames.next(currentFrames);
-  
-      const url = `https://localhost:7170/api/Tag/?tagId=${tagId}`;
-      this.http.delete(url).subscribe({
-        next: (response) => {
-          console.log("HERE",response);
-          // const tags = response as Frame;
-          // if (!parentObjectId) return;
-          // this.refreshFrames(tags, parentObjectId);
-          // console.log("Deleted request successful");
-          
-        },
-        error: (error) => {
-          console.error(error);
-        },
-      });
-    }
-  }
-
-
-  updateLinePositions(): void {
+  updateLinePositions(): void { 
     const frames = this.frames.getValue();
     const lines: LineModel[] = [];
 
@@ -300,17 +279,17 @@ export class FrameService {
       if (frame.frameType === 'Object') {
         const startingPosition = frame.position;
         const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
-
+        //console.log("CHILDIDS",childIds);
         childIds.forEach(childId => {
+          // Check if the associated tag frame still exists
           const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
-          if (associatedTagFrame && associatedTagFrame.tagData[0].associatedObjectId === frame.objectData?.[0]?.id) {
+          if (associatedTagFrame) {
             const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
             lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });
           }
         });
       }
     }
-
     this.lines.next(lines);
   }
 }

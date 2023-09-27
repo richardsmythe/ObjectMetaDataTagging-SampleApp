@@ -9,14 +9,12 @@ import { Frame } from './models/FrameModel';
 })
 export class AppComponent {
   frames: Frame[] = [];
-  frameCount: number = 0;
 
   constructor(private frameService: FrameService) {}
 
   ngOnInit(): void {
     this.frameService.getFrameData().subscribe((data: Frame[]) => {
       this.frames = data;
-      this.frameCount = this.frames.length;
     });
   }
 }
