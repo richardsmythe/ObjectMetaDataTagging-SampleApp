@@ -79,12 +79,10 @@ export class FrameService {
     if (!tagId) {
       return;
     }
-    // Identify the lines associated with the frame to be deleted
     
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const updatedFrames = this.processFrameData(response);
-        
+        const updatedFrames = this.processFrameData(response); 
         const associatedLines = this.lines.value.filter(line => line.childId[0] === frameId);
         // Remove the associated lines from the lines array
         const newLines = this.lines.value.filter(line => !associatedLines.includes(line));
@@ -102,6 +100,7 @@ export class FrameService {
 
 
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
+
     const frame: Frame = {
       id: this.frameIdCounter++,
       size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData, frameType === 'Tag'),
@@ -121,8 +120,7 @@ export class FrameService {
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-    // this.frameInitialised()
-    this.updateLinePositions();
+    console.log('Created Frame id:', frame.id, frame);
     return frame;
   }
 
@@ -264,22 +262,25 @@ export class FrameService {
     return undefined;
   }
 
-  getAssociatedTagFrameIds(objectId: number): number[] {
-    const tagFrames = this.frames.getValue().filter(frame => frame.frameType === 'Tag' && frame.tagData?.some(tag => tag.associatedObjectId === objectId));
-    const associatedFrames = tagFrames.map(frame => frame.id);
-    //console.log("Associated Tag Frame IDs for Object ID", objectId, ":", associatedFrames);
+  getAssociatedTagFrameIds(objectId: number): number[] { 
+    const allFrames = this.frames.getValue(); 
+    const associatedFrames = allFrames
+      .filter(frame => frame.tagData?.some(tag => tag.associatedObjectId === objectId))
+      .filter(frame => frame.frameType === 'Tag')
+      .map(frame => frame.id);
+
     return associatedFrames;
   }
 
   updateLinePositions(): void { 
-    const frames = this.frames.getValue();
+    const frames = this.frames.getValue(); 
     const lines: LineModel[] = [];
 
     for (const frame of frames) {
       if (frame.frameType === 'Object') {
-        const startingPosition = frame.position;
+        const startingPosition = frame.position;  
         const childIds = frame.objectData ? this.getAssociatedTagFrameIds(frame.objectData[0].id) : [];
-        //console.log("CHILDIDS",childIds);
+
         childIds.forEach(childId => {
           // Check if the associated tag frame still exists
           const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
@@ -292,4 +293,5 @@ export class FrameService {
     }
     this.lines.next(lines);
   }
+  
 }

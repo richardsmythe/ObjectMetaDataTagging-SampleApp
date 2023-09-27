@@ -13,7 +13,7 @@ export type ResizeDirectionType = 'x' | 'y' | 'xy';
   selector: 'app-frame',
   templateUrl: './frame.component.html',
   styleUrls: ['./frame.component.css'], 
-  changeDetection: ChangeDetectionStrategy.Default
+
 })
 
 export class FrameComponent implements OnInit {
@@ -202,7 +202,6 @@ export class FrameComponent implements OnInit {
     if (frameId !== undefined) {
       console.log(frameId);
       this.frameService.destroyFrame(frameId);
-      this.cdRef.detectChanges(); 
     }
   }
 }
