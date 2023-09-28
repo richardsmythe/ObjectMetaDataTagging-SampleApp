@@ -8,6 +8,7 @@ using ObjectMetaDataTagging.Api.Events;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Models.QueryModels;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -81,7 +82,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     TagData = tagModels
                 };
 
-                return Ok(frameModel); 
+                return Ok(new List<Frame> { frameModel });
             }
 
             return NotFound();
@@ -96,14 +97,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var objectModels = new List<ObjectModel>();
             var tagModels = new List<TagModel>();
             var objectName = "";
+            Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00");
             foreach (var obj in testData)
             {
                 // gets type --> obj.First().Key.GetType().Name.ToString(); 
                 if (obj.First().Value is BaseTag baseTag)
                 {
                     objectName = baseTag.AssociatedParentObjectName.ToString();
+                    objectId = baseTag.AssociatedParentObjectId;
                 }
-                var objectId = Guid.NewGuid();
+         
                 var tags = obj.Select(kv => kv.Value.ToString());//?.Split(',')[1].TrimEnd(']')).ToList();
 
                 objectModels.Add(new ObjectModel
@@ -136,7 +139,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 Origin = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectData = objectModels,
                 TagData = tagModels
-
             };
 
             return Ok(new List<Frame> { frameModel });

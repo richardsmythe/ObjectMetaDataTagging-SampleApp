@@ -128,8 +128,8 @@ export class FrameService {
   getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
   }
-  getFrames(): Frame[] {
-    return this.frames.getValue();
+  getFrames(): Observable<Frame[]> {
+    return this.frames.asObservable();
   }
 
   calculateFramePosition(): { x: number, y: number } {

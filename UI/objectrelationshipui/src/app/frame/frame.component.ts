@@ -31,7 +31,7 @@ export class FrameComponent implements OnInit {
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
   minSize = { w: 150, h: 150 };
-  frames: Frame[] = [];
+  @Input() frames: Frame[] = [];
 
   constructor(@Inject(DOCUMENT) private document: Document,
     private frameService: FrameService,
@@ -76,8 +76,8 @@ export class FrameComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['frame']) {
-      console.log('Frame data changed:', changes['frame'].currentValue);
+    if (changes['frames']) {
+      console.log('Frame data changed:', changes['frames'].currentValue);
     }
   }
 
@@ -87,107 +87,91 @@ export class FrameComponent implements OnInit {
   }
 
 
-  drag(event: MouseEvent, frameId: number | undefined): void {
+  drag(event: MouseEvent, frame: any, frameId: number | undefined): void {
     event.preventDefault();
     const mouseX = event.clientX;
     const mouseY = event.clientY;
-
-    const { x: positionX, y: positionY } = this.position;
-    let dx: number;
-    let dy: number;
-
+    const { x: positionX, y: positionY } = frame.position;
+  
     const duringDrag = (e: MouseEvent) => {
-      dx = e.clientX - mouseX;
-      dy = e.clientY - mouseY;
-      this.position = { x: positionX + dx, y: positionY + dy };
-      this.lastPosition = { ...this.position };
-
-
-      this.frameService.updateFramePosition(this.position, frameId);
+      const dx = e.clientX - mouseX;
+      const dy = e.clientY - mouseY;
+      frame.position = { x: positionX + dx, y: positionY + dy };
+  
+      // Assuming this.frameService.updateFramePosition accepts the frame itself
+      this.frameService.updateFramePosition(frame.position, frameId);  
+  
       this.frameService.updateLinePositions();
     };
-
+  
     const finishDrag = () => {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
     };
-
+  
     this.document.addEventListener('mousemove', duringDrag);
     this.document.addEventListener('mouseup', finishDrag);
   }
-  resize(event: MouseEvent,
-    anchors: ResizeAnchorType[],
-    direction: ResizeDirectionType,
-    frameId: number | undefined): void {
-    event.preventDefault();
 
+  resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType, frame: Frame): void {
+    event.preventDefault();
+  
     const mouseX = event.clientX;
     const mouseY = event.clientY;
-    const lastX = this.position.x;
-    const lastY = this.position.y;
-    const dimensionWidth = this.size.w;
-    const dimensionHeight = this.size.h;
-
+    const originalX = frame.position.x;
+    const originalY = frame.position.y;
+    const originalWidth = frame.size.w;
+    const originalHeight = frame.size.h;
+  
     const duringResize = (e: MouseEvent) => {
-      let dw = dimensionWidth;
-      let dh = dimensionHeight;
-
-      if (direction === 'x' || direction === 'xy') {
-        if (anchors.includes('left')) {
-          const offsetX = e.clientX - mouseX;
-          dw -= offsetX;
-          if (dw >= this.minSize.w) {
-            this.position.x = lastX + offsetX;
-          } else {
-            dw = this.minSize.w;
-            this.position.x = lastX + dimensionWidth - this.minSize.w;
-          }
-        } else if (anchors.includes('right')) {
-          dw += (e.clientX - mouseX);
-        }
+      const deltaX = e.clientX - mouseX;
+      const deltaY = e.clientY - mouseY;
+      let newWidth = originalWidth;
+      let newHeight = originalHeight;
+      let newX = originalX;
+      let newY = originalY;
+  
+      if (anchors.includes('left')) {
+        newWidth -= deltaX;
+        newX += deltaX;
       }
-
-      if (direction === 'y' || direction === 'xy') {
-        if (anchors.includes('top')) {
-          const offsetY = e.clientY - mouseY;
-          dh -= offsetY;
-          if (dh >= this.minSize.h) {
-            this.position.y = lastY + offsetY;
-          } else {
-            dh = this.minSize.h;
-            this.position.y = lastY + dimensionHeight - this.minSize.h;
-          }
-        } else if (anchors.includes('bottom')) {
-          dh += (e.clientY - mouseY);
-        }
+  
+      if (anchors.includes('top')) {
+        newHeight -= deltaY;
+        newY += deltaY;
       }
-
-      if (anchors.includes('left') || anchors.includes('top') || anchors.includes('bottom') || anchors.includes('right')) {
-        dw = Math.max(dw, this.minSize.w);
-        dh = Math.max(dh, this.minSize.h);
+  
+      if (anchors.includes('right')) {
+        newWidth += deltaX;
       }
-
-      this.size.w = dw;
-      this.size.h = dh;
-      this.lastSize = { ...this.size };
-
-      const newSize = { w: dw, h: dh };
-      this.frameService.updateFramePosition(this.position, frameId);
-      this.frameService.updateFrameSize(newSize, frameId);
-      this.frameService.updateLinePositions();
+  
+      if (anchors.includes('bottom')) {
+        newHeight += deltaY;
+      }
+  
+      // Ensure that the frame size doesn't go below the minimum size
+      newWidth = Math.max(newWidth, this.minSize.w);
+      newHeight = Math.max(newHeight, this.minSize.h);
+  
+    
+      if (frame.id !== undefined) {
+        this.frameService.updateFrameSize({ w: newWidth, h: newHeight }, frame.id);
+        this.frameService.updateFramePosition({ x: newX, y: newY }, frame.id);
+        this.frameService.updateLinePositions();
+      }
+  
 
     };
-
+  
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
-
     };
-
+  
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
-
   }
+  
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
@@ -195,6 +179,7 @@ export class FrameComponent implements OnInit {
       // Remove the deleted frame from the local list
       this.frames = this.frames.filter((frame) => frame.id !== frameId);
       console.log("number of frames after deleting:", this.frames.length)
+      this.cdRef.markForCheck();
     }
   }
 }
