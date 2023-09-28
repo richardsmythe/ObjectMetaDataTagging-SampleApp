@@ -97,10 +97,8 @@ export class FrameComponent implements OnInit {
       const dx = e.clientX - mouseX;
       const dy = e.clientY - mouseY;
       frame.position = { x: positionX + dx, y: positionY + dy };
-  
-      // Assuming this.frameService.updateFramePosition accepts the frame itself
-      this.frameService.updateFramePosition(frame.position, frameId);  
-  
+
+      this.frameService.updateFramePosition(frame.position, frameId);   
       this.frameService.updateLinePositions();
     };
   
@@ -148,19 +146,15 @@ export class FrameComponent implements OnInit {
       if (anchors.includes('bottom')) {
         newHeight += deltaY;
       }
-  
-      // Ensure that the frame size doesn't go below the minimum size
+
       newWidth = Math.max(newWidth, this.minSize.w);
-      newHeight = Math.max(newHeight, this.minSize.h);
-  
+      newHeight = Math.max(newHeight, this.minSize.h);  
     
       if (frame.id !== undefined) {
         this.frameService.updateFrameSize({ w: newWidth, h: newHeight }, frame.id);
         this.frameService.updateFramePosition({ x: newX, y: newY }, frame.id);
         this.frameService.updateLinePositions();
-      }
-  
-
+      } 
     };
   
     const finishResize = () => {
@@ -176,10 +170,9 @@ export class FrameComponent implements OnInit {
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
       this.frameService.destroyFrame(frameId);
-      // Remove the deleted frame from the local list
       this.frames = this.frames.filter((frame) => frame.id !== frameId);
       console.log("number of frames after deleting:", this.frames.length)
-      this.cdRef.markForCheck();
+
     }
   }
 }
