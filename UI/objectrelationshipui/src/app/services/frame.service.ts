@@ -34,7 +34,7 @@ export class FrameService {
   getFrameData(): Observable<Frame[]> {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
-        const frames = this.processFrameData(response,false, null);
+        const frames = this.processFrameData(response);
         this.frames.next(frames);
         return of(frames);
       }),
@@ -45,7 +45,7 @@ export class FrameService {
     );
   }
 
-  private processFrameData(response: any[], keepPositions: boolean, frameId: number | null): Frame[] {
+  private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
     this.frameIdCounter = 1;
     
@@ -84,7 +84,7 @@ export class FrameService {
     
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const updatedFrames = this.processFrameData(response, true, frameId); 
+        const updatedFrames = this.processFrameData(response); 
         //const associatedLines = this.lines.value.filter(line => line.childId[0] === frameId);
         // Remove the associated lines from the lines array
         //const newLines = this.lines.value.filter(line => !associatedLines.includes(line));
@@ -121,7 +121,7 @@ export class FrameService {
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
     this.frames.next(currentFrames);
-    console.log('Created Frame id:', frame.id, frame);
+
     return frame;
   }
 

@@ -31,6 +31,7 @@ export class FrameComponent implements OnInit {
   lastPosition: { x: number, y: number } | undefined;
   lastSize: { w: number, h: number } | undefined;
   minSize = { w: 150, h: 150 };
+  frames: Frame[] = [];
 
   constructor(@Inject(DOCUMENT) private document: Document,
     private frameService: FrameService,
@@ -40,14 +41,14 @@ export class FrameComponent implements OnInit {
   }
 
 
-  ngOnInit(): void {  
+  ngOnInit(): void {
 
-    // Subscription to update the component's state whenever frames data changes
+    // subscription to update the component's state whenever frames data changes
     this.subs.add(
-      this.frameService.frames.subscribe(frames => {
-        const latestFrame = frames.find(f => f.id === this.frame?.id);
-        if (latestFrame) {
-          console.log(latestFrame);
+      this.frameService.frames.subscribe((frames) => {
+        this.frames = frames;
+        const latestFrame = frames.find((f) => f.id === this.frame?.id);
+        if (latestFrame) { 
           this.size = { w: latestFrame.size.w, h: latestFrame.size.h };
           this.position = { x: latestFrame.position.x, y: latestFrame.position.y };
           this.frame = latestFrame;
@@ -190,9 +191,10 @@ export class FrameComponent implements OnInit {
 
   deleteFrame(frameId: number | undefined): void {
     if (frameId !== undefined) {
-      console.log(frameId);
       this.frameService.destroyFrame(frameId);
-      
+      // Remove the deleted frame from the local list
+      this.frames = this.frames.filter((frame) => frame.id !== frameId);
+      console.log("number of frames after deleting:", this.frames.length)
     }
   }
 }
