@@ -30,10 +30,11 @@ export class FrameService {
     }
   }
 
+  // this is the starting data
   getFrameData(): Observable<Frame[]> {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
-        const frames = this.processFrameData(response);
+        const frames = this.processFrameData(response,false, null);
         this.frames.next(frames);
         return of(frames);
       }),
@@ -44,24 +45,25 @@ export class FrameService {
     );
   }
 
-  private processFrameData(response: any[]): Frame[] {
+  private processFrameData(response: any[], keepPositions: boolean, frameId: number | null): Frame[] {
     const frames: Frame[] = [];
     this.frameIdCounter = 1;
-
+    
     response.forEach(frameData => {
       // Check if there are objects
       if (frameData.objectData) {
         frameData.objectData.forEach((object: ObjectModel) => {
           // Create an object frame
+
           const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
-          frames.push(objectFrame);
+          frames.push(objectFrame); 
 
           // Iterate over the tags associated with the current object
           frameData.tagData.forEach((tag: any) => {
             // Check if the tag is associated with the current object
             if (tag.associatedObjectId === object.id) {
               // Create a tag frame for each individual tag
-              const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
+              const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);             
               frames.push(tagFrame);
             }
           });
@@ -82,14 +84,13 @@ export class FrameService {
     
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const updatedFrames = this.processFrameData(response); 
-        const associatedLines = this.lines.value.filter(line => line.childId[0] === frameId);
+        const updatedFrames = this.processFrameData(response, true, frameId); 
+        //const associatedLines = this.lines.value.filter(line => line.childId[0] === frameId);
         // Remove the associated lines from the lines array
-        const newLines = this.lines.value.filter(line => !associatedLines.includes(line));
-
+        //const newLines = this.lines.value.filter(line => !associatedLines.includes(line));
         // Update the frames and lines
         this.frames.next(updatedFrames);
-        this.lines.next(newLines);
+        //this.lines.next(newLines);
         this.updateLinePositions();
       },
       error: (error) => {
