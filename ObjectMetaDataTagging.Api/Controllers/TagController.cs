@@ -40,7 +40,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         [HttpDelete]
         public IActionResult Delete(Guid tagId)
         {
-            var obj = _taggingService.GetObjectByTag(tagId);
+            var obj = _taggingService.GetObjectByTag(tagId); //   <------- why is this only saying there's 1 assoc. tag??
             if (obj != null && _taggingService.RemoveTag(obj, tagId))
             {
                 var updatedTags = _taggingService.GetAllTags(obj);
@@ -152,7 +152,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
 
-            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 123 };
+            var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 54123 };
 
             var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
             taggingService.SetTag(trans1, fundTransferTag);

@@ -178,7 +178,7 @@ namespace ObjectMetaDataTagging.Interfaces
         }
 
         public virtual object? GetObjectByTag(Guid tagId)
-        { // is this returning the correct object?????
+        {
             foreach (var kvp in data)
             {
                 var tags = kvp.Value;

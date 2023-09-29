@@ -277,7 +277,7 @@ export class FrameService {
       .filter(frame => frame.tagData?.some(tag => tag.associatedObjectId === objectId))
       .filter(frame => frame.frameType === 'Tag')
       .map(frame => frame.id);
-
+    console.log("assoc. frames", associatedFrames)
     return associatedFrames;
   }
 
