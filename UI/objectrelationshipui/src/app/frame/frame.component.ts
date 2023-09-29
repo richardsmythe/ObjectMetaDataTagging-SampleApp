@@ -168,6 +168,7 @@ export class FrameComponent implements OnInit {
   
 
   deleteFrame(frameId: number | undefined): void {
+
     if (frameId !== undefined) {
       this.frameService.destroyFrame(frameId);
       this.frames = this.frames.filter((frame) => frame.id !== frameId);

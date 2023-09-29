@@ -99,18 +99,7 @@ export class FrameService {
 
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const parentObject = currentFrame ? this.getParentFramesByTagId(currentFrame) : undefined;
-        const existingPos = parentObject && parentObject.length === 1
-          ? this.getFramePosition(parentObject[0].id)
-          : undefined;
-        const updatedFrames = this.processFrameData(response);
-        updatedFrames.forEach((obj) => {
-          if (obj.frameType == "Object" && existingPos) {
-            obj.position = existingPos;
-          }
-          else if (obj.frameType == "Tag")
-            obj.position = this.getFramePosition(frameId)!
-        })
+        const updatedFrames = this.processFrameData(response);       
         this.frames.next(updatedFrames);
         this.updateLinePositions();
       },
