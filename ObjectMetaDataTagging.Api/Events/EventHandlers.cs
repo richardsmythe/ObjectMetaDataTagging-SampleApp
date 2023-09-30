@@ -40,8 +40,7 @@ namespace ObjectMetaDataTagging.Api.Events
                         var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
                         transaction.AssociatedTags.Add(newTag);
                         return newTag;
-                    }
-                   
+                    }                   
                 }
             }
             return null;

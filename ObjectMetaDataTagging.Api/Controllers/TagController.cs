@@ -40,7 +40,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         [HttpDelete]
         public IActionResult Delete(Guid tagId)
         {
-            var obj = _taggingService.GetObjectByTag(tagId); //   <------- why is this only saying there's 1 assoc. tag??
+            var obj = _taggingService.GetObjectByTag(tagId); 
             if (obj != null && _taggingService.RemoveTag(obj, tagId))
             {
                 var updatedTags = _taggingService.GetAllTags(obj);
