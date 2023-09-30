@@ -129,7 +129,6 @@ export class FrameService {
 
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
-    console.log("Created:",frame);
     this.frames.next(currentFrames);
 
     return frame;
@@ -138,6 +137,7 @@ export class FrameService {
   getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
   }
+
   getFrames(): Observable<Frame[]> {
     return this.frames.asObservable();
   }

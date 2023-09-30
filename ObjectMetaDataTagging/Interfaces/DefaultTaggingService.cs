@@ -119,35 +119,27 @@ namespace ObjectMetaDataTagging.Interfaces
         public virtual void SetTag(object o, BaseTag tag)
         {
             if (tag == null || o == null) return;
-           
+
             var objectName = o.GetType().Name;
             var objectId = GetObjectId(o);
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
-            if (!tagDictionary.TryGetValue(tag.Id, out _))
-            {
-                lock (tagDictionary)
-                {
-                    tag.AssociatedParentObjectId = objectId;
-                    tag.AssociatedParentObjectName = objectName;
-                    tagDictionary[tag.Id] = tag;
-                }
-            }
-
             lock (tagDictionary)
             {
-               var tagFromEvent = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
+                tag.AssociatedParentObjectId = objectId;
+                tag.AssociatedParentObjectName = objectName;
+                tagDictionary[tag.Id] = tag;
 
+                var tagFromEvent = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
+
+                tagFromEvent.AssociatedParentObjectName = objectName;
+                tagFromEvent.AssociatedParentObjectId = objectId;
+
+                if (tagFromEvent != null)
                 {
-                    tagFromEvent.AssociatedParentObjectName = objectName;
-                    tagFromEvent.AssociatedParentObjectId = objectId;
-
-                    if (tagFromEvent != null)
-                    {
-                        tagDictionary[tagFromEvent.Id] = tagFromEvent;
-                        tagDictionary[tag.Id] = tag;
-                    }
+                    tagDictionary[tagFromEvent.Id] = tagFromEvent;
+                    tagDictionary[tag.Id] = tag;
                 }
             }
         }
