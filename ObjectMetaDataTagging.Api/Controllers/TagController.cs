@@ -163,6 +163,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
             testData.Add(taggingService.GetAllTags(trans1)
                 .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
+            var trans2 = new ExamplePersonTransaction { Sender = "Ed", Receiver = "Tim", Amount = 123 };
+
+            var fundTransferTag3 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
+            taggingService.SetTag(trans2, fundTransferTag3);
+
+            var fundTransferTag4 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
+            taggingService.SetTag(trans2, fundTransferTag4);
+
+            testData.Add(taggingService.GetAllTags(trans2)
+              .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
             /////////// Dynamic Filter Test /////////////
 

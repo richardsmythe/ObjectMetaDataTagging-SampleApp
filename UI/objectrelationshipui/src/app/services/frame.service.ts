@@ -90,6 +90,10 @@ export class FrameService {
   }
 
   destroyFrame(frameId: number): void {
+    // keep all existing frames
+    // add to response after deletion
+    debugger;
+    const currentFrames = this.frames.value.slice().filter(f => f.id !== frameId);
     const currentFrame = this.getFrameById(frameId);
     const tagId = currentFrame?.tagData[0]?.tagId;
 
@@ -100,7 +104,8 @@ export class FrameService {
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
         const updatedFrames = this.processFrameData(response);       
-        this.frames.next(updatedFrames);
+        const mergedFrames = currentFrames.concat(updatedFrames);
+        this.frames.next(mergedFrames);
         this.updateLinePositions();
       },
       error: (error) => {
@@ -122,6 +127,7 @@ export class FrameService {
     };
 
     if (frameType === 'Object') {
+      
       frame.objectData?.forEach(obj => {
         obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
       });

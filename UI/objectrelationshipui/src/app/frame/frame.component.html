@@ -27,7 +27,7 @@
       </div>
       <div class="top-bar-wrapper" [attr.id]="frame.id" (mousedown)="drag($event,frame,frame.id)">
         <div class="top-bar-title">
-          {{ frame.frameType}} - {{frame.id}}
+          {{frame.id}}
         </div>
         <span class="delete-icon" (click)="deleteFrame(frame.id)">&times;</span>
       </div>
