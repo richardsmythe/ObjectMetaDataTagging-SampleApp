@@ -90,22 +90,50 @@ export class FrameService {
   }
 
   destroyFrame(frameId: number): void {
-    // keep all existing frames
-    // add to response after deletion
-    debugger;
-    const currentFrames = this.frames.value.slice().filter(f => f.id !== frameId);
+    // Keep all existing frames
+    // Add to response after deletion
+  
+    const currentFrames = this.frames.value.slice().filter((f) => f.id !== frameId);
     const currentFrame = this.getFrameById(frameId);
     const tagId = currentFrame?.tagData[0]?.tagId;
-
+  
     if (!tagId) {
       return;
     }
 
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const updatedFrames = this.processFrameData(response);       
-        const mergedFrames = currentFrames.concat(updatedFrames);
-        this.frames.next(mergedFrames);
+        const updatedFrames = response.concat(currentFrames).filter((frame, index, self) => {
+          if (frame.frameType === 'Object') {
+            // Check for duplicates based on objectData.id
+            return (
+              !self.some(
+                (otherFrame, otherIndex) =>
+                  otherIndex !== index &&
+                  otherFrame.frameType === 'Object' &&
+                  otherFrame.objectData &&
+                  otherFrame.objectData[0]?.id === frame.objectData[0]?.id
+              )
+            );
+          } else if (frame.frameType === 'Tag') {
+            // Check for duplicates based on tagData.tagId
+            return (
+              !self.some(
+                (otherFrame, otherIndex) =>
+                  otherIndex !== index &&
+                  otherFrame.frameType === 'Tag' &&
+                  otherFrame.tagData &&
+                  otherFrame.tagData[0]?.tagId === frame.tagData[0]?.tagId
+              )
+            );
+          }
+          // Include frames of other types
+          return true;
+        });
+        console.log("CONDITIONAL", updatedFrames)
+        const newFrames = this.processFrameData(updatedFrames);
+        console.log(newFrames);
+        this.frames.next(newFrames);
         this.updateLinePositions();
       },
       error: (error) => {
