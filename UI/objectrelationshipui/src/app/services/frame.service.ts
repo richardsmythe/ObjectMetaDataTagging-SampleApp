@@ -67,7 +67,7 @@ export class FrameService {
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
-
+  
     response.forEach(frameData => {
       if (frameData.objectData) {
         frameData.objectData.forEach((object: ObjectModel) => {
@@ -91,7 +91,6 @@ export class FrameService {
     const currentFrames = this.frames.value.slice().filter((f) => f.id !== frameId);
     const currentFrame = this.getFrameById(frameId);
     const tagId = currentFrame?.tagData[0]?.tagId;
-    //this.frameIdCounter = 1;
 
     if (!tagId) {
       return;
@@ -99,13 +98,7 @@ export class FrameService {
   
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-   
-        const updatedFrames = response.concat(currentFrames);
-        updatedFrames.forEach((item, index) => {
-          item.id = index + 1;
-        });
-        this.processFrameData(updatedFrames);
-        console.log(updatedFrames);
+        this.frames.next(currentFrames);
         this.updateLinePositions();
       },
       error: (error) => {
@@ -132,9 +125,9 @@ export class FrameService {
         obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
       });
     }
-
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
+    console.log("Created:",frame);
     this.frames.next(currentFrames);
 
     return frame;
