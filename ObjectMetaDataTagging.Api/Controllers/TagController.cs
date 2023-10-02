@@ -76,7 +76,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 var frameModel = new Frame
                 {
-                    Id = Guid.NewGuid(),
+                    Id = 0,
                     Origin = Assembly.GetEntryAssembly().GetName().Name,
                     ObjectData = objectModels,
                     TagData = tagModels
@@ -135,7 +135,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             var frameModel = new Frame
             {
-                Id = Guid.NewGuid(),
+                Id = 1,
                 Origin = Assembly.GetEntryAssembly().GetName().Name,
                 ObjectData = objectModels,
                 TagData = tagModels

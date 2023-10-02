@@ -67,7 +67,6 @@ export class FrameService {
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
-    this.frameIdCounter = 1;
 
     response.forEach(frameData => {
       if (frameData.objectData) {
@@ -84,56 +83,29 @@ export class FrameService {
         });
       }
     });
-    this.frames.next(frames);
     console.log("RESULT:", frames);
     return frames;
   }
 
   destroyFrame(frameId: number): void {
-    // Keep all existing frames
-    // Add to response after deletion
-  
     const currentFrames = this.frames.value.slice().filter((f) => f.id !== frameId);
     const currentFrame = this.getFrameById(frameId);
     const tagId = currentFrame?.tagData[0]?.tagId;
-  
+    //this.frameIdCounter = 1;
+
     if (!tagId) {
       return;
     }
-
+  
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
-        const updatedFrames = response.concat(currentFrames).filter((frame, index, self) => {
-          if (frame.frameType === 'Object') {
-            // Check for duplicates based on objectData.id
-            return (
-              !self.some(
-                (otherFrame, otherIndex) =>
-                  otherIndex !== index &&
-                  otherFrame.frameType === 'Object' &&
-                  otherFrame.objectData &&
-                  otherFrame.objectData[0]?.id === frame.objectData[0]?.id
-              )
-            );
-          } else if (frame.frameType === 'Tag') {
-            // Check for duplicates based on tagData.tagId
-            return (
-              !self.some(
-                (otherFrame, otherIndex) =>
-                  otherIndex !== index &&
-                  otherFrame.frameType === 'Tag' &&
-                  otherFrame.tagData &&
-                  otherFrame.tagData[0]?.tagId === frame.tagData[0]?.tagId
-              )
-            );
-          }
-          // Include frames of other types
-          return true;
+   
+        const updatedFrames = response.concat(currentFrames);
+        updatedFrames.forEach((item, index) => {
+          item.id = index + 1;
         });
-        console.log("CONDITIONAL", updatedFrames)
-        const newFrames = this.processFrameData(updatedFrames);
-        console.log(newFrames);
-        this.frames.next(newFrames);
+        this.processFrameData(updatedFrames);
+        console.log(updatedFrames);
         this.updateLinePositions();
       },
       error: (error) => {
@@ -312,7 +284,7 @@ export class FrameService {
       .filter(frame => frame.tagData?.some(tag => tag.associatedObjectId === objectId))
       .filter(frame => frame.frameType === 'Tag')
       .map(frame => frame.id);
-    console.log("assoc. frames", associatedFrames)
+    //console.log("assoc. frames", associatedFrames)
     return associatedFrames;
   }
 
