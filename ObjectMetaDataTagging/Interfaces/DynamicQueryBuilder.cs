@@ -33,7 +33,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var parameter = Expression.Parameter(typeof(BaseTag), "tag");
             Console.WriteLine($"Parameter name: {parameter.Name}");
-            Expression predicateBody = null;
+            Expression? predicateBody = null;
 
             if (property1Filter != null)
             {

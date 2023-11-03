@@ -67,7 +67,7 @@ export class FrameService {
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
-  
+
     response.forEach(frameData => {
       if (frameData.objectData) {
         frameData.objectData.forEach((object: ObjectModel) => {
@@ -95,7 +95,7 @@ export class FrameService {
     if (!tagId) {
       return;
     }
-  
+
     this.http.delete<any[]>(`https://localhost:7170/api/Tag/?tagId=${tagId}`).subscribe({
       next: (response) => {
         this.frames.next(currentFrames);
@@ -120,14 +120,14 @@ export class FrameService {
     };
 
     if (frameType === 'Object') {
-      
+
       frame.objectData?.forEach(obj => {
         obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
       });
     }
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
-    console.log("Created:",frame);
+
     this.frames.next(currentFrames);
 
     return frame;
@@ -150,8 +150,6 @@ export class FrameService {
     let posX = 10;
     let posY = 10;
     let overlapping = true;
-    let maxWidth = 0;
-    let maxHeight = 0;
 
     while (overlapping) {
       overlapping = false;
@@ -161,14 +159,10 @@ export class FrameService {
         const currentFrameWidth = currentFrameSize?.width || 0;
         const currentFrameHeight = currentFrameSize?.height || 0;
 
-        maxWidth = Math.max(maxWidth, currentFrameWidth);
-        maxHeight = Math.max(maxHeight, currentFrameHeight);
-
         if (
-          posX < frame.position.x + currentFrameWidth + margin &&
-          posX + maxWidth + margin > frame.position.x &&
-          posY < frame.position.y + currentFrameHeight + margin &&
-          posY + maxHeight + margin > frame.position.y
+          posX < frame.position.x + currentFrameWidth + margin && posX + margin > frame.position.x
+          &&
+          posY < frame.position.y + currentFrameHeight + margin && posY + margin > frame.position.y
         ) {
           overlapping = true;
           break;
@@ -176,17 +170,18 @@ export class FrameService {
       }
 
       if (overlapping) {
+
         // Move to the next row if there is not enough space in the current row
-        if (posX + maxWidth + margin > containerWidth) {
-          posX = 10;
-          posY += maxHeight + margin;
-          maxHeight = 0;
-        } else if (posY + maxHeight + margin > containerHeight) {
+        if (posX + margin > containerWidth) {
+          posX = margin;
+          posY += margin;
+
+        } else if (posY + margin > containerHeight) {
           // Stop generating positions if it exceeds the container height
           break;
         } else {
           // Shift the position horizontally
-          posX += maxWidth + margin;
+          posX += margin;
         }
       }
     }
