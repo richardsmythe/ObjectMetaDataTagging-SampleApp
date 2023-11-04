@@ -196,16 +196,12 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
                     var tagType = tagTypes[random.Next(tagTypes.Length)];
 
-                    var description = "";
-                    if(newObj.Amount < 1000)
-                    {
-                        description = "Description" + random.Next(1, 10);
-                    }
 
-                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, description);
+
+                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
                     taggingService.SetTag(newObj, newTag);
 
-                    testData.Add(new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>(tagName, newTag) });
+                    testData.Add(taggingService.GetAllTags(newObj).Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
 
