@@ -176,10 +176,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
         IAlertService alertService,
         IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
         {
+            
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
 
-            for (int i = 0; i < random.Next(1, 5); i++)
+            for (int i = 0; i < random.Next(1, 3); i++)
             {
                 var newObj = new ExamplePersonTransaction
                 {
@@ -188,19 +189,20 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     Amount = random.Next(1, 5999),
                 };
 
-                int numberOfTags = random.Next(1, 5);
+                int numberOfTags = random.Next(1, 2);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                    var tagType = tagTypes[random.Next(tagTypes.Length)];
+                    var tagName = "TagName" + random.Next(1,50);
+                    var tagType = tagTypes[random.Next(tagTypes.Length)].ToString();
 
 
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
                     taggingService.SetTag(newObj, newTag);
 
+                  
                     testData.Add(taggingService.GetAllTags(newObj).Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
