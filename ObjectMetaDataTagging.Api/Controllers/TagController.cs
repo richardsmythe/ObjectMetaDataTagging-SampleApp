@@ -168,8 +168,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
         //    return Ok(newTag);
         //}
 
-
-
         public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData(
         IDefaultTaggingService taggingService,
         ITagFactory tagFactory,
@@ -196,8 +194,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 {
                     var tagName = "TagName" + random.Next(1,50);
                     var tagType = tagTypes[random.Next(tagTypes.Length)].ToString();
-
-
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
                     taggingService.SetTag(newObj, newTag);

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ObjectMetaDataTagging.Models.QueryModels;
+﻿using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Interfaces

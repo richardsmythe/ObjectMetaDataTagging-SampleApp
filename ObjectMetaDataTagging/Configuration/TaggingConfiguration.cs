@@ -8,6 +8,6 @@ namespace ObjectMetaDataTagging.Configuration
 {
     public class TaggingConfiguration
     {
-        public int MaximumTagsPerObject {get; set;} = 10;
+        public int MaximumTagsPerObject {get; set;}
     }
 }

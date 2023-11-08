@@ -15,13 +15,16 @@ namespace ObjectMetaDataTagging.Interfaces
         public DefaultTaggingService(
             TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
         {
-            _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
+            _eventManager = eventManager;
+        }
+
+        public DefaultTaggingService()
+        {
+            
         }
 
         // using object instead of weakreference, make sure to GC
         protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
-
-
         private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
 
         /* By exposing these events, it allow consumers to attach event handlers 
@@ -46,14 +49,9 @@ namespace ObjectMetaDataTagging.Interfaces
             remove => _eventManager.TagUpdated -= value;
         }
 
-        /*  Methods are virtual so defualt behaviour can be override. 
-         *  Strategy pattern, where behaviour is encapsulated in 
-         *  separate strategy objects rather than overridden methods.        
-         */
         #region Default Tag Operations
         public virtual IEnumerable<BaseTag> GetAllTags(object o)
         {
-
             if (o != null && data.TryGetValue(o, out var tags))
             {
                 var allTags = tags.Values.ToList();
@@ -70,7 +68,6 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public virtual BaseTag? GetTag(object o, Guid tagId)
         {
-
             if (data.TryGetValue(o, out var tagDictionary))
             {
                 if (tagDictionary.TryGetValue(tagId, out var tag))
@@ -80,7 +77,6 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return null;
         }
-
 
         public virtual void RemoveAllTags(object o)
         {
@@ -124,6 +120,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
+            // could use semaphore.WaitAsync() here instead to provide thread safety and async
             lock (tagDictionary)
             {
                 tag.AssociatedParentObjectId = objectId;
@@ -143,11 +140,9 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-
         public bool UpdateTag(object o, Guid tagId, BaseTag modifiedTag)
         {
             if (modifiedTag == null) return false;
-
             if (o == null) return false;
 
             modifiedTag.DateLastUpdated = DateTime.UtcNow;
@@ -216,8 +211,6 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return Guid.Empty;
         }
-
-
         #endregion
 
 

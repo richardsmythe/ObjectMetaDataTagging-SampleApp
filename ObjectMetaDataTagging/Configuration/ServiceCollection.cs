@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
-using ObjectMetaDataTagging.Models;
-using ObjectMetaDataTagging.Models.QueryModels;
-using System.Diagnostics;
 
 namespace ObjectMetaDataTagging.Configuration
 {
