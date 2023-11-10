@@ -1,5 +1,4 @@
 using ObjectMetaDataTagging.Api.Events;
-using ObjectMetaDataTagging.Api.Models;
 using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Configuration;
 using ObjectMetaDataTagging.Events;
