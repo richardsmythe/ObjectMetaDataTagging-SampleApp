@@ -5,7 +5,8 @@ using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Api.Services
 {
-    public class CustomTaggingService : DefaultTaggingService
+    public class CustomTaggingService<T> : DefaultTaggingService<T>
+        where T : BaseTag
     {
         public CustomTaggingService(
             TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager) 
@@ -13,7 +14,7 @@ namespace ObjectMetaDataTagging.Api.Services
         {
         }
 
-        public override void SetTag(object o, BaseTag tag)
+        public override void SetTag(object o, T tag)
         {
             if (o is ExamplePersonTransaction transaction)
             {

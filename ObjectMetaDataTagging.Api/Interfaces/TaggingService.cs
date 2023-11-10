@@ -2,7 +2,7 @@
 
 namespace ObjectMetaDataTagging.Api.Interfaces
 {
-    public class TaggingService : DefaultTaggingService
-    {
-    }
+    //public class TaggingService : DefaultTaggingService
+    //{
+    //}
 }

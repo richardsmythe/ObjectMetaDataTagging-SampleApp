@@ -6,7 +6,8 @@ using System.Collections.Concurrent;
 namespace ObjectMetaDataTagging.Interfaces
 {
 
-    public class DefaultTaggingService : IDefaultTaggingService
+    public class DefaultTaggingService<T> : IDefaultTaggingService<T>
+        where T: BaseTag
     {
         /// <summary>
         /// Constructs a DefaultTaggingService with the specified TaggingEventManager for event handling.
@@ -50,7 +51,7 @@ namespace ObjectMetaDataTagging.Interfaces
         }
 
         #region Default Tag Operations
-        public virtual IEnumerable<BaseTag> GetAllTags(object o)
+        public virtual IEnumerable<T> GetAllTags(object o)
         {
             if (o != null && data.TryGetValue(o, out var tags))
             {
@@ -58,21 +59,24 @@ namespace ObjectMetaDataTagging.Interfaces
                 Console.WriteLine("Tags:");
                 foreach (var tag in allTags)
                 {
-                    Console.WriteLine($"- Tag Id: {tag.Id}, Name: {tag.Name}, Value: {tag.Value}");
+                    if (tag is T typedTag) // type check
+                    {
+                        Console.WriteLine($"- Tag Id: {typedTag.Id}, Name: {typedTag.Name}, Value: {typedTag.Value}");
+                    }
                 }
-                return allTags;
+                return (IEnumerable<T>)allTags;
             }
             Console.WriteLine("No tags found for the object.");
-            return Enumerable.Empty<BaseTag>();
+            return Enumerable.Empty<T>();
         }
 
-        public virtual BaseTag? GetTag(object o, Guid tagId)
+        public virtual T? GetTag(object o, Guid tagId)
         {
             if (data.TryGetValue(o, out var tagDictionary))
             {
                 if (tagDictionary.TryGetValue(tagId, out var tag))
                 {
-                    return tag;
+                    return (T)tag;
                 }
             }
             return null;
@@ -111,7 +115,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return false;
         }
 
-        public virtual void SetTag(object o, BaseTag tag)
+        public virtual void SetTag(object o, T tag)
         {
             if (tag == null || o == null) return;
 
@@ -140,7 +144,7 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public bool UpdateTag(object o, Guid tagId, BaseTag modifiedTag)
+        public bool UpdateTag(object o, Guid tagId, T modifiedTag)
         {
             if (modifiedTag == null) return false;
             if (o == null) return false;

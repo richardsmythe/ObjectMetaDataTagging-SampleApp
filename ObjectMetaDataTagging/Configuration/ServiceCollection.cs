@@ -13,7 +13,8 @@ namespace ObjectMetaDataTagging.Configuration
         public static IServiceCollection AddObjectMetaDataTagging(this IServiceCollection services)
         {
             // Register defaultTaggingService as singleton so the same instance of the service is across the whole http request
-            services.AddSingleton<IDefaultTaggingService, DefaultTaggingService>();
+            services.AddSingleton(typeof(IDefaultTaggingService<>), typeof(DefaultTaggingService<>));
+
 
             // Register IDynamicQueryBuilder with its two type parameters
             services.AddScoped(typeof(IDynamicQueryBuilder<,>), typeof(DynamicQueryBuilder<,>));
