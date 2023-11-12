@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private readonly IDefaultTaggingService<BaseTag> _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
-        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
+        private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
         public TagController(
@@ -29,7 +29,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
-            TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
+            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
         {
             _taggingService = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
             _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
@@ -42,10 +42,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
 
         [HttpDelete]
-        public IActionResult Delete(Guid tagId)
+        public async Task<IActionResult> DeleteAsync(Guid tagId)
         {
             var obj = _taggingService.GetObjectByTag(tagId);
-            if (obj != null && _taggingService.RemoveTag(obj, tagId))
+            if (obj != null && await _taggingService.RemoveTag(obj, tagId))
             {
                 var updatedTags = _taggingService.GetAllTags(obj);
 

@@ -2,8 +2,8 @@
 
 namespace ObjectMetaDataTagging.Interfaces
 {
-    public interface IEventHandler<T>
+    public interface IAsyncEventHandler<T>
     {
-        BaseTag Handle(T eventArgs);
+        Task<BaseTag> HandleAsync(T eventArgs);
     }
 }

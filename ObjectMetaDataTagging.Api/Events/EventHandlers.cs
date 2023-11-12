@@ -16,7 +16,7 @@ namespace ObjectMetaDataTagging.Api.Events
         }
     }
 
-    public class TagAddedHandler : IEventHandler<TagAddedEventArgs>
+    public class TagAddedHandler : IAsyncEventHandler<AsyncTagAddedEventArgs>
     {
         private readonly IAlertService _alertService;
         private readonly ITagFactory _tagFactory;
@@ -28,7 +28,7 @@ namespace ObjectMetaDataTagging.Api.Events
 
         }
 
-        public BaseTag Handle(TagAddedEventArgs args)
+        public Task<BaseTag> HandleAsync(AsyncTagAddedEventArgs args)
         {
             if (args.TaggedObject is ExamplePersonTransaction transaction)
             {
@@ -39,7 +39,7 @@ namespace ObjectMetaDataTagging.Api.Events
                     {
                         var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
                         transaction.AssociatedTags.Add(newTag);
-                        return newTag;
+                        return Task.FromResult(newTag);
                     }                   
                 }
             }
@@ -48,18 +48,18 @@ namespace ObjectMetaDataTagging.Api.Events
 
     }
 
-    public class TagRemovedHandler : IEventHandler<TagRemovedEventArgs>
+    public class TagRemovedHandler : IAsyncEventHandler<AsyncTagRemovedEventArgs>
     {
-        public BaseTag Handle(TagRemovedEventArgs args)
+        public Task<BaseTag> HandleAsync(AsyncTagRemovedEventArgs args)
         {
             // tbc
             return null;
         }
     }
 
-    public class TagUpdatedHandler : IEventHandler<TagUpdatedEventArgs>
+    public class TagUpdatedHandler : IAsyncEventHandler<AsyncTagUpdatedEventArgs>
     {
-        public BaseTag Handle(TagUpdatedEventArgs args)
+        public Task<BaseTag> HandleAsync(AsyncTagUpdatedEventArgs args)
         {
             // tbc
             return null;

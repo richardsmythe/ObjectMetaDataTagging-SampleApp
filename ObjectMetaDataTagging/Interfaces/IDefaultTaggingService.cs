@@ -5,12 +5,12 @@ namespace ObjectMetaDataTagging.Interfaces
     public interface IDefaultTaggingService<T>
         where T : BaseTag
     {
-        void SetTag(object o, T tag);
-        bool UpdateTag(object o, Guid tagId, T newTag);
+        Task SetTag(object o, T tag);
+        Task<bool> UpdateTag(object o, Guid tagId, T newTag);
         IEnumerable<T> GetAllTags(object o);
         T? GetTag(object o, Guid tagId);
         void RemoveAllTags(object o);
-        bool RemoveTag(object? o, Guid tagId);
+        Task<bool> RemoveTag(object? o, Guid tagId);
         bool HasTag(object o, Guid tagId);
         object? GetObjectByTag(Guid tagId);
     }

@@ -29,9 +29,9 @@ namespace ObjectMetaDataTagging.Api
 
             // Web API-specific services
             builder.Services.AddSingleton<IAlertService, AlertService>();
-            builder.Services.AddSingleton<IEventHandler<TagAddedEventArgs>, TagAddedHandler>();
-            builder.Services.AddSingleton<IEventHandler<TagRemovedEventArgs>, TagRemovedHandler>();
-            builder.Services.AddSingleton<IEventHandler<TagUpdatedEventArgs>, TagUpdatedHandler>();
+            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagAddedEventArgs>, TagAddedHandler>();
+            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagRemovedEventArgs>, TagRemovedHandler>();
+            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
 
             // Register CustomTaggingService as a scoped service
             builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();

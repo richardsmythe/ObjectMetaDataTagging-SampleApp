@@ -7,44 +7,44 @@ namespace ObjectMetaDataTagging.Interfaces
 {
 
     public class DefaultTaggingService<T> : IDefaultTaggingService<T>
-        where T: BaseTag
+        where T : BaseTag
     {
         /// <summary>
         /// Constructs a DefaultTaggingService with the specified TaggingEventManager for event handling.
         /// </summary>
         /// <param name="eventManager">The TaggingEventManager used for handling tagging-related events.</param>
         public DefaultTaggingService(
-            TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> eventManager)
+            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
         {
             _eventManager = eventManager;
         }
 
         public DefaultTaggingService()
         {
-            
+
         }
 
         // using object instead of weakreference, make sure to GC
         protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
-        private readonly TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs> _eventManager;
+        private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
 
         /* By exposing these events, it allow consumers to attach event handlers 
          * to perform additional actions when tags are added, removed, or updated. 
          * This can be useful if someone wants to extend the behavior of the library. */
 
-        public event EventHandler<TagAddedEventArgs> TagAdded
+        public event EventHandler<AsyncTagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
             remove => _eventManager.TagAdded -= value;
         }
 
-        public event EventHandler<TagRemovedEventArgs> TagRemoved
+        public event EventHandler<AsyncTagRemovedEventArgs> TagRemoved
         {
             add => _eventManager.TagRemoved += value;
             remove => _eventManager.TagRemoved -= value;
         }
 
-        public event EventHandler<TagUpdatedEventArgs> TagUpdated
+        public event EventHandler<AsyncTagUpdatedEventArgs> TagUpdated
         {
             add => _eventManager.TagUpdated += value;
             remove => _eventManager.TagUpdated -= value;
@@ -91,7 +91,7 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public virtual bool RemoveTag(object? o, Guid tagId)
+        public virtual async Task<bool> RemoveTag(object? o, Guid tagId)
         {
 
             if (o != null && data.TryGetValue(o, out var tags))
@@ -107,15 +107,15 @@ namespace ObjectMetaDataTagging.Interfaces
                             data.TryRemove(o, out _);
                         }
 
-                        _eventManager.RaiseTagRemoved(new TagRemovedEventArgs(o, tagId));
                         return true;
                     }
                 }
+                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, tagId));
             }
             return false;
         }
 
-        public virtual void SetTag(object o, T tag)
+        public virtual async Task SetTag(object o, T tag)
         {
             if (tag == null || o == null) return;
 
@@ -125,13 +125,13 @@ namespace ObjectMetaDataTagging.Interfaces
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
             // could use semaphore.WaitAsync() here instead to provide thread safety and async
+            var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag)) ?? tag;
+            
             lock (tagDictionary)
             {
                 tag.AssociatedParentObjectId = objectId;
                 tag.AssociatedParentObjectName = objectName;
                 tagDictionary[tag.Id] = tag;
-
-                var tagFromEvent = _eventManager.RaiseTagAdded(new TagAddedEventArgs(o, tag)) ?? tag;
 
                 tagFromEvent.AssociatedParentObjectName = objectName;
                 tagFromEvent.AssociatedParentObjectId = objectId;
@@ -144,7 +144,7 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public bool UpdateTag(object o, Guid tagId, T modifiedTag)
+        public virtual async Task<bool> UpdateTag(object o, Guid tagId, T modifiedTag)
         {
             if (modifiedTag == null) return false;
             if (o == null) return false;
@@ -157,14 +157,13 @@ namespace ObjectMetaDataTagging.Interfaces
                 {
                     if (tags.ContainsKey(tagId))
                     {
-                        var oldTag = tags[tagId];
 
                         tags[tagId] = modifiedTag;
-                        _eventManager.RaiseTagUpdated(new TagUpdatedEventArgs(o, oldTag, modifiedTag));
 
                         return true;
                     }
                 }
+                await _eventManager.RaiseTagUpdated(new AsyncTagUpdatedEventArgs(o, null, modifiedTag));
             }
             return false;
         }

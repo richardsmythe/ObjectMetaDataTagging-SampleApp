@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging.Configuration
             services.AddSingleton<ITagFactory, TagFactory>();
 
             // Register the EventManager
-            services.AddSingleton<TaggingEventManager<TagAddedEventArgs, TagRemovedEventArgs, TagUpdatedEventArgs>>();
+            services.AddSingleton<TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>>();
 
             return services;
         }
