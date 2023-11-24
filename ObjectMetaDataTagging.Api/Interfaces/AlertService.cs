@@ -15,7 +15,7 @@ public class AlertService : IAlertService
 
     public bool IsSuspiciousTransaction(ExamplePersonTransaction transaction)
     {
-        return transaction.Amount > 1000;
+        return transaction.Amount > 3000;
     }
 
     public void MarkAsSuspicious(ExamplePersonTransaction transaction, Guid tagId)

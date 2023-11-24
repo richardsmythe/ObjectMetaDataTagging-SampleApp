@@ -1,6 +1,7 @@
 ﻿using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
+using System.Threading;
 
 
 namespace ObjectMetaDataTagging.Interfaces
@@ -27,6 +28,7 @@ namespace ObjectMetaDataTagging.Interfaces
         // using object instead of weakreference, make sure to GC
         protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
+        private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         /* By exposing these events, it allow consumers to attach event handlers 
          * to perform additional actions when tags are added, removed, or updated. 
@@ -124,23 +126,30 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
-            // could use semaphore.WaitAsync() here instead to provide thread safety and async
-            var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag)) ?? tag;
-            
-            lock (tagDictionary)
+            var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag));
+
+            await semaphore.WaitAsync();
+
+            try
             {
-                tag.AssociatedParentObjectId = objectId;
-                tag.AssociatedParentObjectName = objectName;
-                tagDictionary[tag.Id] = tag;
-
-                tagFromEvent.AssociatedParentObjectName = objectName;
-                tagFromEvent.AssociatedParentObjectId = objectId;
-
                 if (tagFromEvent != null)
                 {
+                    tagFromEvent.AssociatedParentObjectName = objectName;
+                    tagFromEvent.AssociatedParentObjectId = objectId;
+
                     tagDictionary[tagFromEvent.Id] = tagFromEvent;
                     tagDictionary[tag.Id] = tag;
                 }
+                else
+                {
+                    tag.AssociatedParentObjectId = objectId;
+                    tag.AssociatedParentObjectName = objectName;
+                    tagDictionary[tag.Id] = tag;
+                }
+            }
+            finally
+            {
+                semaphore.Release();
             }
         }
 

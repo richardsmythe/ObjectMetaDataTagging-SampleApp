@@ -30,9 +30,9 @@ namespace ObjectMetaDataTagging.Api.Events
 
         public Task<BaseTag> HandleAsync(AsyncTagAddedEventArgs args)
         {
-            if (args.TaggedObject is ExamplePersonTransaction transaction)
+            if (args != null && args.TaggedObject is ExamplePersonTransaction transaction)
             {
-                if (_alertService.IsSuspiciousTransaction(transaction))
+                if (_alertService != null && transaction != null && _alertService.IsSuspiciousTransaction(transaction))
                 {
                     //Console.WriteLine($"Number of AssociatedTags: {transaction.AssociatedTags.Count}");
                     if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))

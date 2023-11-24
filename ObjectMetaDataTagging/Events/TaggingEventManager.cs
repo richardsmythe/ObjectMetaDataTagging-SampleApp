@@ -36,20 +36,30 @@ namespace ObjectMetaDataTagging.Events
 
         public async Task<BaseTag> RaiseTagAdded(TAdded e)
         {
-            var result = await _addedHandler.HandleAsync(e);
-
-            if (TagAdded != null)
+            try
             {
-                foreach (var handler in TagAdded.GetInvocationList())
+                var result = await _addedHandler.HandleAsync(e); // <---- giving object null reference error on non-suspicious objects
+
+                if (TagAdded != null)
                 {
-                    if (handler is IAsyncEventHandler<AsyncTagAddedEventArgs> asyncHandler)
+                    foreach (var handler in TagAdded.GetInvocationList())
                     {
-                        TagAdded?.Invoke(this, e);
+                        if (handler is IAsyncEventHandler<AsyncTagAddedEventArgs> asyncHandler)
+                        {
+                            await asyncHandler.HandleAsync(e);
+                        }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as appropriate for your application
+                Console.WriteLine($"Exception in RaiseTagAdded: {ex}");
+                // Optionally rethrow the exception if further handling is needed
+                throw;
+            }
         }
 
         public async Task RaiseTagRemoved(TRemoved e)
