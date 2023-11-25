@@ -57,8 +57,8 @@ namespace ObjectMetaDataTagging.Events
                 }
                 else
                 {
-                    // Handle the case where _addedHandler.HandleAsync returns null
-                    // You can return a default value or handle it as appropriate for your application
+                    // where _addedHandler.HandleAsync returns null
+                    // can return a default value or handle it as appropriate
                     Console.WriteLine("HandleAsync returned null in RaiseTagAdded");
                     return null;
                 }
