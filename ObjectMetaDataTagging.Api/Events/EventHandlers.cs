@@ -30,20 +30,31 @@ namespace ObjectMetaDataTagging.Api.Events
 
         public Task<BaseTag> HandleAsync(AsyncTagAddedEventArgs args)
         {
-            if (args != null && args.TaggedObject is ExamplePersonTransaction transaction)
+            try
             {
-                if (_alertService != null && transaction != null && _alertService.IsSuspiciousTransaction(transaction))
+                if (args != null && args.TaggedObject is ExamplePersonTransaction transaction)
                 {
-                    //Console.WriteLine($"Number of AssociatedTags: {transaction.AssociatedTags.Count}");
-                    if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))
+                    if (_alertService != null && transaction != null && _alertService.IsSuspiciousTransaction(transaction))
                     {
-                        var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
-                        transaction.AssociatedTags.Add(newTag);
-                        return Task.FromResult(newTag);
-                    }                   
+                        if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))
+                        {
+                            var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
+                            transaction.AssociatedTags.Add(newTag);
+                            return Task.FromResult(newTag);
+                        }
+                    }
                 }
+
+                // handles the case where no suspicious tag is added, and just continues
+                return Task.FromResult<BaseTag>(null);
             }
-            return null;
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Exception in HandleAsync: {ex}");
+                // Optionally rethrow the exception if further handling is needed
+                throw;
+            }
         }
 
     }

@@ -38,20 +38,30 @@ namespace ObjectMetaDataTagging.Events
         {
             try
             {
-                var result = await _addedHandler.HandleAsync(e); // <---- giving object null reference error on non-suspicious objects
+                var result = await _addedHandler.HandleAsync(e);
 
-                if (TagAdded != null)
+                if (result != null)
                 {
-                    foreach (var handler in TagAdded.GetInvocationList())
+                    if (TagAdded != null)
                     {
-                        if (handler is IAsyncEventHandler<AsyncTagAddedEventArgs> asyncHandler)
+                        foreach (var handler in TagAdded.GetInvocationList())
                         {
-                            await asyncHandler.HandleAsync(e);
+                            if (handler is IAsyncEventHandler<AsyncTagAddedEventArgs> asyncHandler)
+                            {
+                                await asyncHandler.HandleAsync(e);
+                            }
                         }
                     }
-                }
 
-                return result;
+                    return result;
+                }
+                else
+                {
+                    // Handle the case where _addedHandler.HandleAsync returns null
+                    // You can return a default value or handle it as appropriate for your application
+                    Console.WriteLine("HandleAsync returned null in RaiseTagAdded");
+                    return null;
+                }
             }
             catch (Exception ex)
             {
