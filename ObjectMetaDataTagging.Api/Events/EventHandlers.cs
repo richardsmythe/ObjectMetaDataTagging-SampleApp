@@ -51,8 +51,7 @@ namespace ObjectMetaDataTagging.Api.Events
             catch (Exception ex)
             {
 
-                Console.WriteLine($"Exception in HandleAsync: {ex}");
-                // Optionally rethrow the exception if further handling is needed
+                Console.WriteLine($"Exception in HandleAsync: {ex}");              
                 throw;
             }
         }

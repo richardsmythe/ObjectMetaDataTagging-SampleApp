@@ -5,6 +5,8 @@ namespace ObjectMetaDataTagging.Events
 {
     /// <summary>
     /// Manages events related to tagging actions, allowing event handlers to be attached to tagging events.
+    /// Encapsulate the logic for handling events related to adding tags to objects.
+    /// It allows other parts of the application to subscribe to these events and respond accordingly
     /// </summary>
     /// <typeparam name="TAdded">The type of event arguments for tag added events.</typeparam>
     /// <typeparam name="TRemoved">The type of event arguments for tag removed events.</typeparam>
@@ -64,10 +66,8 @@ namespace ObjectMetaDataTagging.Events
                 }
             }
             catch (Exception ex)
-            {
-                // Log the exception or handle it as appropriate for your application
-                Console.WriteLine($"Exception in RaiseTagAdded: {ex}");
-                // Optionally rethrow the exception if further handling is needed
+            {              
+                Console.WriteLine($"Exception in RaiseTagAdded: {ex}");         
                 throw;
             }
         }

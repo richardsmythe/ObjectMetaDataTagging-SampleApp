@@ -84,22 +84,29 @@ namespace ObjectMetaDataTagging.Interfaces
             return null;
         }
 
-        public virtual void RemoveAllTags(object o)
+        public virtual async void RemoveAllTags(object o)
         {
-
-            if (o != null)
+            await semaphore.WaitAsync();
+            try
             {
-                data.Remove(o, out _);
+                if (o != null)
+                {
+                    data.Remove(o, out _);
+                }
+            }
+            finally
+            {
+                semaphore.Release();
             }
         }
 
         public virtual async Task<bool> RemoveTag(object? o, Guid tagId)
         {
+            await semaphore.WaitAsync();
 
-            if (o != null && data.TryGetValue(o, out var tags))
+            try
             {
-
-                lock (tags)
+                if (o != null && data.TryGetValue(o, out var tags))
                 {
                     if (tags.Remove(tagId))
                     {
@@ -111,8 +118,12 @@ namespace ObjectMetaDataTagging.Interfaces
 
                         return true;
                     }
+                    await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, tagId));
                 }
-                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, tagId));
+            }
+            finally
+            {
+                semaphore.Release();
             }
             return false;
         }
@@ -128,6 +139,8 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag));
 
+            // ensure that multiple threads don't interfere with
+            // each other when modifying the dictionary concurrently
             await semaphore.WaitAsync();
 
             try
@@ -155,27 +168,37 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public virtual async Task<bool> UpdateTag(object o, Guid tagId, T modifiedTag)
         {
-            if (modifiedTag == null) return false;
-            if (o == null) return false;
+            if (modifiedTag == null || o == null)
+            {
+                return false;
+            }
 
             modifiedTag.DateLastUpdated = DateTime.UtcNow;
 
-            if (data.TryGetValue(o, out var tags))
+            // Ensure that multiple threads don't interfere with
+            // each other when modifying the dictionary concurrently
+            await semaphore.WaitAsync();
+
+            try
             {
-                lock (tags)
+                if (data.TryGetValue(o, out var tags))
                 {
                     if (tags.ContainsKey(tagId))
                     {
-
                         tags[tagId] = modifiedTag;
-
                         return true;
                     }
                 }
+
                 await _eventManager.RaiseTagUpdated(new AsyncTagUpdatedEventArgs(o, null, modifiedTag));
+                return false;
             }
-            return false;
+            finally
+            {
+                semaphore.Release();
+            }
         }
+
         public bool HasTag(object o, Guid tagId)
         {
 
