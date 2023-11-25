@@ -5,7 +5,7 @@ namespace ObjectMetaDataTagging.Events
 {
     /// <summary>
     /// Manages events related to tagging actions, allowing event handlers to be attached to tagging events.
-    /// Encapsulate the logic for handling events related to adding tags to objects.
+    /// Encapsulate the logic for handling events related to adding, removing, updating tags on objects.
     /// It allows other parts of the application to subscribe to these events and respond accordingly
     /// </summary>
     /// <typeparam name="TAdded">The type of event arguments for tag added events.</typeparam>
@@ -54,7 +54,6 @@ namespace ObjectMetaDataTagging.Events
                             }
                         }
                     }
-
                     return result;
                 }
                 else

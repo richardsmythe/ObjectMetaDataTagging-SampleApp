@@ -134,7 +134,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var objectName = o.GetType().Name;
             var objectId = GetObjectId(o);
-
+            
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
             var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag));
@@ -246,9 +246,10 @@ namespace ObjectMetaDataTagging.Interfaces
             }
             return Guid.Empty;
         }
-        #endregion
+
+            #endregion
 
 
 
-    }
+        }
 }
