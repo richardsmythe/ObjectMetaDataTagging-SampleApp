@@ -16,10 +16,7 @@ namespace ObjectMetaDataTagging.Helpers
             CheckVisibilityState(obj);
         }
 
-        private static void CheckVisibilityState(object obj)
-        {
-            throw new NotImplementedException();
-        }
+        // get fine-grained information about its internal state.
 
         private static void CheckErrorState(object obj)
         {
@@ -36,9 +33,18 @@ namespace ObjectMetaDataTagging.Helpers
             }
         }
 
-        private static void CheckExistenceState(object obj)
+        public static bool CheckVisibilityState(object obj) => obj.GetType().IsVisible;
+
+        private static bool CheckExistenceState(object obj)
         {
-            throw new NotImplementedException();
+            if (obj == null)
+            {
+                return false;
+            }
+            // this may no work as i intend it to
+            var weakRef = new WeakReference(obj);
+            GC.Collect(); 
+            return weakRef.IsAlive;
         }
     }
 }

@@ -84,7 +84,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return null;
         }
 
-        public virtual async void RemoveAllTags(object o)
+        public virtual async Task<bool> RemoveAllTags(object o)
         {
             await semaphore.WaitAsync();
             try
@@ -92,12 +92,15 @@ namespace ObjectMetaDataTagging.Interfaces
                 if (o != null)
                 {
                     data.Remove(o, out _);
+                    return true;
                 }
+                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o,null));
             }
             finally
             {
                 semaphore.Release();
             }
+            return false;
         }
 
         public virtual async Task<bool> RemoveTag(object? o, Guid tagId)
