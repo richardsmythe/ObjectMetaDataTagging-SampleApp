@@ -5,7 +5,7 @@ using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Api.Services
 {
-    public class CustomTaggingService<T> : DefaultTaggingService<T>
+    public class CustomTaggingService<T> : InMemoryTaggingService<T>
         where T : BaseTag
     {
         public CustomTaggingService(

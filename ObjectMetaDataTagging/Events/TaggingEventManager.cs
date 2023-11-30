@@ -36,6 +36,10 @@ namespace ObjectMetaDataTagging.Events
             _updatedHandler = updatedHandler;
         }
 
+        public TaggingEventManager()
+        {
+        }
+
         public async Task<BaseTag> RaiseTagAdded(TAdded e)
         {
             try
