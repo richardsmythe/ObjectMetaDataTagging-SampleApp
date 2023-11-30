@@ -1,4 +1,5 @@
 ﻿using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ObjectMetaDataTagging.Interfaces
+namespace ObjectMetaDataTagging.Services
 {
     public class DefaultTaggingService<T> : IDefaultTaggingService<T> where T : BaseTag
     {
@@ -21,9 +22,9 @@ namespace ObjectMetaDataTagging.Interfaces
 
         public Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag) => _taggingService.UpdateTagAsync(o, tagId, newTag);
 
-        IEnumerable<T> IDefaultTaggingService<T>.GetAllTags(object o) => _taggingService.GetAllTags(o);
+        Task<IEnumerable<T>> IDefaultTaggingService<T>.GetAllTags(object o) => _taggingService.GetAllTags(o);
 
-        T? IDefaultTaggingService<T>.GetTag(object o, Guid tagId) => _taggingService.GetTag(o, tagId);
+        Task<T>? IDefaultTaggingService<T>.GetTag(object o, Guid tagId) => _taggingService.GetTag(o, tagId);
 
         public Task<bool> RemoveAllTagsAsync(object o) => _taggingService.RemoveAllTagsAsync(o);
 

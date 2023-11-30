@@ -1,7 +1,7 @@
 ﻿using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.TagModels;
+using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Api.Services
 {

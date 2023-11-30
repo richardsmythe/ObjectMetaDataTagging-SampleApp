@@ -4,12 +4,9 @@ using System.Reflection;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
-using ObjectMetaDataTagging.Api.Events;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Models.QueryModels;
-using System.Linq.Expressions;
-using System.Runtime.Serialization;
-using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -37,9 +34,17 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _eventManager = eventManager;
             _dynamicQueryBuilder = dynamicQueryBuilder;
 
-            testData = GenerateTestData(_taggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
+            InitializeTestData();
         }
 
+        private async void InitializeTestData()
+        {
+            // Users can choose the tagging service they want to use
+            IDefaultTaggingService<BaseTag> taggingService = new InMemoryTaggingService<BaseTag>(); // or any other implementation, eg databaseTaggingService
+            var defaultTaggingService = new DefaultTaggingService<BaseTag>(taggingService);
+
+            testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
+        }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync(Guid tagId)
@@ -53,7 +58,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 var tagModels = new List<TagModel>();
                 var objectName = "";
                 Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); ;
-                foreach (var updatedTag in updatedTags)
+                foreach (var updatedTag in await updatedTags)
                 {
                     var tagModel = new TagModel
                     {
@@ -168,13 +173,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
         //    return Ok(newTag);
         //}
 
-        public static List<IEnumerable<KeyValuePair<string, object>>> GenerateTestData(
-        IDefaultTaggingService<BaseTag> taggingService,
-        ITagFactory tagFactory,
-        IAlertService alertService,
-        IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
-        {
-            
+        public static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
+     IDefaultTaggingService<BaseTag> taggingService,
+     ITagFactory tagFactory,
+     IAlertService alertService,
+     IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+        {    
+  
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
 
@@ -192,16 +197,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    var tagName = "TagName" + random.Next(1,50);
+                    var tagName = "TagName" + random.Next(1, 50);
                     var tagType = tagTypes[random.Next(tagTypes.Length)].ToString();
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
                     taggingService.SetTagAsync(newObj, newTag);
 
-                  
-                    testData.Add(taggingService.GetAllTags(newObj).Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
+                    var tags = await taggingService.GetAllTags(newObj);
+                    testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
-            }
+            } 
 
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////

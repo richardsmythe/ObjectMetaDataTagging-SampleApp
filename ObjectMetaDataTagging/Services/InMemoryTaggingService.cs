@@ -1,10 +1,11 @@
 ﻿using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
 using System.Threading;
 
 
-namespace ObjectMetaDataTagging.Interfaces
+namespace ObjectMetaDataTagging.Services
 {
 
     public class InMemoryTaggingService<T> : IDefaultTaggingService<T>
@@ -53,7 +54,7 @@ namespace ObjectMetaDataTagging.Interfaces
         }
 
         #region Default Tag Operations
-        public virtual IEnumerable<T> GetAllTags(object o)
+        public virtual Task<IEnumerable<T>> GetAllTags(object o)
         {
             if (o != null && data.TryGetValue(o, out var tags))
             {
@@ -66,19 +67,19 @@ namespace ObjectMetaDataTagging.Interfaces
                         Console.WriteLine($"- Tag Id: {typedTag.Id}, Name: {typedTag.Name}, Value: {typedTag.Value}");
                     }
                 }
-                return (IEnumerable<T>)allTags;
+                return Task.FromResult((IEnumerable<T>)allTags);
             }
             Console.WriteLine("No tags found for the object.");
-            return Enumerable.Empty<T>();
+            return (Task<IEnumerable<T>>)Enumerable.Empty<T>();
         }
 
-        public virtual T? GetTag(object o, Guid tagId)
+        public virtual Task<T>? GetTag(object o, Guid tagId)
         {
             if (data.TryGetValue(o, out var tagDictionary))
             {
                 if (tagDictionary.TryGetValue(tagId, out var tag))
                 {
-                    return (T)tag;
+                    return tag as Task<T>;
                 }
             }
             return null;
@@ -94,7 +95,7 @@ namespace ObjectMetaDataTagging.Interfaces
                     data.Remove(o, out _);
                     return true;
                 }
-                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o,null));
+                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, null));
             }
             finally
             {
@@ -137,7 +138,7 @@ namespace ObjectMetaDataTagging.Interfaces
 
             var objectName = o.GetType().Name;
             var objectId = GetObjectId(o);
-            
+
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
             var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag));
@@ -250,7 +251,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return Guid.Empty;
         }
 
-            #endregion
+        #endregion
 
-        }
+    }
 }

@@ -7,8 +7,8 @@ namespace ObjectMetaDataTagging.Interfaces
     {
         IQueryable<T> BuildDynamicQuery<T>(
             List<BaseTag> sourceObject,
-            Func<BaseTag, bool> property1Filter = null,
-            Func<BaseTag, bool> property2Filter = null,
+            Func<BaseTag, bool>? property1Filter = null,
+            Func<BaseTag, bool>? property2Filter = null,
             LogicalOperator logicalOperator = LogicalOperator.OR);
     }
 }

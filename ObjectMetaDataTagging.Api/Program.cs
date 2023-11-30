@@ -24,7 +24,7 @@ namespace ObjectMetaDataTagging.Api
 
             builder.Services.AddControllers();
 
-            // Register OMDT
+            // Register OMDT library
             builder.Services.AddObjectMetaDataTagging();
 
             // Web API-specific services
@@ -33,7 +33,7 @@ namespace ObjectMetaDataTagging.Api
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagRemovedEventArgs>, TagRemovedHandler>();
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
 
-            // Register CustomTaggingService as a scoped service
+            // Register CustomTaggingService
             builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
 
 

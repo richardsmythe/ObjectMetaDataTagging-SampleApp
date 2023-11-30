@@ -1,11 +1,12 @@
-﻿using ObjectMetaDataTagging.Models.QueryModels;
+﻿using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Models.TagModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace ObjectMetaDataTagging.Interfaces
+namespace ObjectMetaDataTagging.Services
 {
     public class DynamicQueryBuilder<TProperty1, TProperty2> : IDynamicQueryBuilder<TProperty1, TProperty2>
     {
