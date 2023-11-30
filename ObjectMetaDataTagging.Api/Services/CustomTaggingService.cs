@@ -14,14 +14,14 @@ namespace ObjectMetaDataTagging.Api.Services
         {
         }
 
-        public override async Task SetTag(object o, T tag)
+        public override async Task SetTagAsync(object o, T tag)
         {
             if (o is ExamplePersonTransaction transaction)
             {
                 transaction.AssociatedTags.Add(tag);
             }
             //Console.WriteLine($"Tag Id: {tag.Id}   TagName:  {tag.Name}  TagValue:  {tag.Value}");
-           await base.SetTag(o, tag);
+           await base.SetTagAsync(o, tag);
         }      
     }
 }

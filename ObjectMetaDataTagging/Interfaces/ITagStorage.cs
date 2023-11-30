@@ -9,8 +9,8 @@ namespace ObjectMetaDataTagging.Interfaces
 {
     public interface ITagStorage
     {
-        Task SetTag(Object o, BaseTag tag);
-        Task RemoveTag(Object o, BaseTag tag);
+        Task SetTagAsync(Object o, BaseTag tag);
+        Task RemoveTagAsync(Object o, BaseTag tag);
         Task<BaseTag> GetTag(Guid tagId);
         Task<IEnumerable<BaseTag>> GetAllTags(Guid objectId);
     }

@@ -45,7 +45,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         public async Task<IActionResult> DeleteAsync(Guid tagId)
         {
             var obj = _taggingService.GetObjectByTag(tagId);
-            if (obj != null && await _taggingService.RemoveTag(obj, tagId))
+            if (obj != null && await _taggingService.RemoveTagAsync(obj, tagId))
             {
                 var updatedTags = _taggingService.GetAllTags(obj);
 
@@ -196,7 +196,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var tagType = tagTypes[random.Next(tagTypes.Length)].ToString();
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
-                    taggingService.SetTag(newObj, newTag);
+                    taggingService.SetTagAsync(newObj, newTag);
 
                   
                     testData.Add(taggingService.GetAllTags(newObj).Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
@@ -209,10 +209,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
             //var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 54123 };
 
             //var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
-            //taggingService.SetTag(trans1, fundTransferTag);
+            //taggingService.SetTagAsync(trans1, fundTransferTag);
 
             //var fundTransferTag2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            //taggingService.SetTag(trans1, fundTransferTag2);
+            //taggingService.SetTagAsync(trans1, fundTransferTag2);
 
             //testData.Add(taggingService.GetAllTags(trans1)
             //    .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
@@ -220,10 +220,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
             //var trans2 = new ExamplePersonTransaction { Sender = "Ed", Receiver = "Tim", Amount = 123 };
 
             //var fundTransferTag3 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
-            //taggingService.SetTag(trans2, fundTransferTag3);
+            //taggingService.SetTagAsync(trans2, fundTransferTag3);
 
             //var fundTransferTag4 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
-            //taggingService.SetTag(trans2, fundTransferTag4);
+            //taggingService.SetTagAsync(trans2, fundTransferTag4);
 
             //testData.Add(taggingService.GetAllTags(trans2)
             //  .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());

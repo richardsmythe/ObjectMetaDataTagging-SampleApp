@@ -61,7 +61,7 @@ namespace ObjectMetaDataTagging.Interfaces
                 Console.WriteLine("Tags:");
                 foreach (var tag in allTags)
                 {
-                    if (tag is T typedTag) // type check
+                    if (tag is T typedTag)
                     {
                         Console.WriteLine($"- Tag Id: {typedTag.Id}, Name: {typedTag.Name}, Value: {typedTag.Value}");
                     }
@@ -84,7 +84,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return null;
         }
 
-        public virtual async Task<bool> RemoveAllTags(object o)
+        public virtual async Task<bool> RemoveAllTagsAsync(object o)
         {
             await semaphore.WaitAsync();
             try
@@ -103,7 +103,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return false;
         }
 
-        public virtual async Task<bool> RemoveTag(object? o, Guid tagId)
+        public virtual async Task<bool> RemoveTagAsync(object? o, Guid tagId)
         {
             await semaphore.WaitAsync();
 
@@ -131,7 +131,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return false;
         }
 
-        public virtual async Task SetTag(object o, T tag)
+        public virtual async Task SetTagAsync(object o, T tag)
         {
             if (tag == null || o == null) return;
 
@@ -169,7 +169,7 @@ namespace ObjectMetaDataTagging.Interfaces
             }
         }
 
-        public virtual async Task<bool> UpdateTag(object o, Guid tagId, T modifiedTag)
+        public virtual async Task<bool> UpdateTagAsync(object o, Guid tagId, T modifiedTag)
         {
             if (modifiedTag == null || o == null)
             {
@@ -215,7 +215,7 @@ namespace ObjectMetaDataTagging.Interfaces
             return false;
         }
 
-        public virtual object? GetObjectByTag(Guid tagId)
+        public virtual T? GetObjectByTag(Guid tagId)
         {
             foreach (var kvp in data)
             {
@@ -225,7 +225,7 @@ namespace ObjectMetaDataTagging.Interfaces
                 {
                     if (tags.TryGetValue(tagId, out var tag))
                     {
-                        return kvp.Key; // kvp.Key is now the associated object
+                        return (T?)kvp.Key; // kvp.Key is now the associated object
                     }
                 }
             }

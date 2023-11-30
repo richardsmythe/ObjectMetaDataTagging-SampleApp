@@ -35,7 +35,7 @@ public class AlertService : IAlertService
         //                ExampleTags.Suspicious,
         //                "This object has been tagged as suspicious");
 
-        //            _taggingService.SetTag(transaction, newTag);
+        //            _taggingService.SetTagAsync(transaction, newTag);
         //        }
         //    }
         //}
