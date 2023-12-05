@@ -40,7 +40,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private async void InitializeTestData()
         {
             // Users can choose the tagging service they want to use
-            IDefaultTaggingService<BaseTag> taggingService = new InMemoryTaggingService<BaseTag>(); // or any other implementation, eg databaseTaggingService
+            // or any other implementation, eg databaseTaggingService
+            IDefaultTaggingService<BaseTag> taggingService = new InMemoryTaggingService<BaseTag>(_eventManager); 
             var defaultTaggingService = new DefaultTaggingService<BaseTag>(taggingService);
 
             testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
@@ -53,7 +54,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             if (obj != null && await _taggingService.RemoveTagAsync(obj, tagId))
             {
                 var updatedTags = _taggingService.GetAllTags(obj);
-
                 var objectModels = new List<ObjectModel>();
                 var tagModels = new List<TagModel>();
                 var objectName = "";
@@ -174,12 +174,12 @@ namespace ObjectMetaDataTagging.Api.Controllers
         //}
 
         public static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-     IDefaultTaggingService<BaseTag> taggingService,
-     ITagFactory tagFactory,
-     IAlertService alertService,
-     IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
-        {    
-  
+         IDefaultTaggingService<BaseTag> taggingService,
+         ITagFactory tagFactory,
+         IAlertService alertService,
+         IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+        {
+
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
 
@@ -197,16 +197,15 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    var tagName = "TagName" + random.Next(1, 50);
-                    var tagType = tagTypes[random.Next(tagTypes.Length)].ToString();
+                    var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
-                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, tagType, "");
-                    taggingService.SetTagAsync(newObj, newTag);
+                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
+                    await taggingService.SetTagAsync(newObj, newTag);
 
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
-            } 
+            }
 
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////

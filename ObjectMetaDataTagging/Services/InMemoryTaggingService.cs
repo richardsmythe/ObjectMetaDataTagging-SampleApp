@@ -140,8 +140,9 @@ namespace ObjectMetaDataTagging.Services
             var objectId = GetObjectId(o);
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
-
-            var tagFromEvent = await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag));
+            var tagFromEvent = _eventManager != null
+                ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
+                : null;
 
             // ensure that multiple threads don't interfere with
             // each other when modifying the dictionary concurrently
@@ -216,7 +217,7 @@ namespace ObjectMetaDataTagging.Services
             return false;
         }
 
-        public virtual T? GetObjectByTag(Guid tagId)
+        public virtual Task<T?> GetObjectByTag(Guid tagId)
         {
             foreach (var kvp in data)
             {
@@ -226,11 +227,11 @@ namespace ObjectMetaDataTagging.Services
                 {
                     if (tags.TryGetValue(tagId, out var tag))
                     {
-                        return (T?)kvp.Key; // kvp.Key is now the associated object
+                        return kvp.Key as Task<T>; // kvp.Key is now the associated object
                     }
                 }
             }
-
+        
             return null;
         }
 

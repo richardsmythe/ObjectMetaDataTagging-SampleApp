@@ -13,7 +13,11 @@
             <li *ngFor="let obj of frame.objectData">
               <b>ObjectId:</b> {{ obj?.id }}
             </li>
+            <li *ngFor="let obj of frame.objectData">
+              <b>Tags:</b> {{getTagCount(obj?.id)}}
+            </li>
           </ng-container>
+
           <ng-container *ngIf="frame.frameType === 'Tag'">
             <ng-container *ngFor="let tag of frame.tagData; let isFirst = first">
               <li *ngIf="isFirst"><b>Parent:</b> {{ tag?.associatedObject }}</li>
@@ -22,6 +26,7 @@
               <li><b>TagId:</b>{{tag?.tagId}}</li>
               <li><b>ParentObjectId:</b>{{tag?.associatedObjectId}}</li>
             </ng-container>
+
           </ng-container>
         </ul>
       </div>
@@ -46,8 +51,7 @@
   </div>
 
   <div *ngFor="let line of lines">
-    <app-line [parentId]="line.parentId" [childId]="line.childId[0]" [width]="frame.size.w"
-    [height]="frame.size.h">
-  </app-line>
+    <app-line [parentId]="line.parentId" [childId]="line.childId[0]" [width]="frame.size.w" [height]="frame.size.h">
+    </app-line>
   </div>
 </div>

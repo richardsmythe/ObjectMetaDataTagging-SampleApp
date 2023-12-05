@@ -13,6 +13,6 @@ namespace ObjectMetaDataTagging.Interfaces
         Task<bool> RemoveAllTagsAsync(object o);
         Task<bool> RemoveTagAsync(object? o, Guid tagId);
         bool HasTag(object o, Guid tagId);
-        T? GetObjectByTag(Guid tagId);
+        Task<T?> GetObjectByTag(Guid tagId);
     }
 }

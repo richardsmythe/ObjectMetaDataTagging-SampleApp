@@ -1,28 +1,50 @@
-﻿using ObjectMetaDataTagging.Interfaces;
+﻿using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Services
 {
-    public class DatabaseTaggingService<T> : IDefaultTaggingService<T> where T : BaseTag
+    public class DatabaseTaggingService<T, TDbContext> : IDefaultTaggingService<T>
+        where T : BaseTag
+        where TDbContext : ITaggingDatabaseContext<T>
     {
-        public Task<IEnumerable<T>> GetAllTags(object o)
+        private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
+        private readonly TDbContext _databaseContext;
+
+        public DatabaseTaggingService(
+            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager,
+            TDbContext databaseContext)
         {
-            throw new NotImplementedException();
+            if (!(databaseContext is ITaggingDatabaseContext<T>))
+            {
+                throw new ArgumentException($"{nameof(databaseContext)} must implement ITaggingDatabaseContext<{typeof(T).Name}>");
+            }
+
+            _eventManager = eventManager ?? throw new ArgumentNullException(nameof(eventManager));
+            _databaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
 
-        public T? GetObjectByTag(Guid tagId)
+        public async Task<IEnumerable<T>> GetAllTags(object o)
         {
-            throw new NotImplementedException();
+            if (o == null)
+                throw new ArgumentNullException(nameof(o));
+
+            var objectId = GetObjectId(o);
+            return await _databaseContext.GetTagsForObject(objectId);
         }
 
-        public Task<T>? GetTag(object o, Guid tagId)
+        public async Task<T?> GetTag(object o, Guid tagId)
         {
-            throw new NotImplementedException();
+            if (o == null)
+                throw new ArgumentNullException(nameof(o));
+
+            var objectId = GetObjectId(o);
+            return await _databaseContext.GetTagById(objectId, tagId);
         }
 
         public bool HasTag(object o, Guid tagId)
@@ -30,24 +52,86 @@ namespace ObjectMetaDataTagging.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> RemoveAllTagsAsync(object o)
+        public async Task<bool> RemoveAllTagsAsync(object o)
         {
-            throw new NotImplementedException();
+            if (o == null)
+                throw new ArgumentNullException(nameof(o));
+
+            var objectId = GetObjectId(o);
+            await _databaseContext.DeleteAllTagsForObject(objectId);
+            return true;
         }
 
-        public Task<bool> RemoveTagAsync(object? o, Guid tagId)
+        public async Task<bool> RemoveTagAsync(object? o, Guid tagId)
         {
-            throw new NotImplementedException();
+            if (o == null)
+                throw new ArgumentNullException(nameof(o));
+
+            var objectId = GetObjectId(o);
+            return await _databaseContext.DeleteTagForObject(objectId, tagId);
         }
 
-        public Task SetTagAsync(object o, T tag)
+        public async Task SetTagAsync(object o, T tag)
         {
-            throw new NotImplementedException();
+            if (tag == null || o == null)
+                return;
+
+            var objectId = GetObjectId(o);
+
+            var tagFromEvent = _eventManager != null
+                ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
+                : null;
+
+            if (tagFromEvent != null)
+            {
+                tagFromEvent.AssociatedParentObjectId = objectId;
+                await _databaseContext.AddTagForObject(objectId, (T)tagFromEvent);
+            }
+
+            tag.AssociatedParentObjectId = objectId;
+            await _databaseContext.AddTagForObject(objectId, tag);
         }
 
-        public Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag)
+        public async Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag)
         {
-            throw new NotImplementedException();
+            var objectId = GetObjectId(o);
+            return await _databaseContext.UpdateTagForObject(objectId, tagId, newTag);
         }
+
+        private Guid GetObjectId(object o)
+        {
+            if (o != null)
+            {
+                var idProperty = o.GetType().GetProperty("Id");
+                if (idProperty != null)
+                {
+                    var idValue = idProperty.GetValue(o);
+                    if (idValue is Guid guidValue)
+                    {
+                        return guidValue;
+                    }
+                }
+            }
+            return Guid.Empty;
+        }
+
+        public async Task<T?> GetObjectByTag(Guid tagId)
+        {
+            var objectsWithTag = await _databaseContext.GetObjectsByTagId(tagId);
+            return objectsWithTag.FirstOrDefault();
+        }
+    }
+
+    public interface ITaggingDatabaseContext<T> where T : BaseTag
+    {
+        // the ITaggingDatabaseContext<T> interface is independent of Entity Framework.
+        // so developers can implement it according to their specific data access needs.
+        Task<IEnumerable<T>> GetObjectsByTagId(Guid tagId);
+        Task<IEnumerable<T>> GetTagsForObject(Guid objectId);
+        Task<T> GetTagById(Guid objectId, Guid tagId);
+        Task DeleteAllTagsForObject(Guid objectId);
+        Task<bool> DeleteTagForObject(Guid objectId, Guid tagId);
+        Task AddTagForObject(Guid objectId, T tag);
+        Task<bool> UpdateTagForObject(Guid objectId, Guid tagId, T modifiedTag);
     }
 }

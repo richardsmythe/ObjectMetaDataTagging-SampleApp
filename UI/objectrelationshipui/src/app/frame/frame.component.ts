@@ -48,7 +48,7 @@ export class FrameComponent implements OnInit {
       this.frameService.frames.subscribe((frames) => {
         this.frames = frames;
         const latestFrame = frames.find((f) => f.id === this.frame?.id);
-        if (latestFrame) { 
+        if (latestFrame) {
           this.size = { w: latestFrame.size.w, h: latestFrame.size.h };
           this.position = { x: latestFrame.position.x, y: latestFrame.position.y };
           this.frame = latestFrame;
@@ -92,35 +92,35 @@ export class FrameComponent implements OnInit {
     const mouseX = event.clientX;
     const mouseY = event.clientY;
     const { x: positionX, y: positionY } = frame.position;
-  
+
     const duringDrag = (e: MouseEvent) => {
       const dx = e.clientX - mouseX;
       const dy = e.clientY - mouseY;
       frame.position = { x: positionX + dx, y: positionY + dy };
 
-      this.frameService.updateFramePosition(frame.position, frameId);   
+      this.frameService.updateFramePosition(frame.position, frameId);
       this.frameService.updateLinePositions();
     };
-  
+
     const finishDrag = () => {
       this.document.removeEventListener('mousemove', duringDrag);
       this.document.removeEventListener('mouseup', finishDrag);
     };
-  
+
     this.document.addEventListener('mousemove', duringDrag);
     this.document.addEventListener('mouseup', finishDrag);
   }
 
   resize(event: MouseEvent, anchors: ResizeAnchorType[], direction: ResizeDirectionType, frame: Frame): void {
     event.preventDefault();
-  
+
     const mouseX = event.clientX;
     const mouseY = event.clientY;
     const originalX = frame.position.x;
     const originalY = frame.position.y;
     const originalWidth = frame.size.w;
     const originalHeight = frame.size.h;
-  
+
     const duringResize = (e: MouseEvent) => {
       const deltaX = e.clientX - mouseX;
       const deltaY = e.clientY - mouseY;
@@ -128,44 +128,44 @@ export class FrameComponent implements OnInit {
       let newHeight = originalHeight;
       let newX = originalX;
       let newY = originalY;
-  
+
       if (anchors.includes('left')) {
         newWidth -= deltaX;
         newX += deltaX;
       }
-  
+
       if (anchors.includes('top')) {
         newHeight -= deltaY;
         newY += deltaY;
       }
-  
+
       if (anchors.includes('right')) {
         newWidth += deltaX;
       }
-  
+
       if (anchors.includes('bottom')) {
         newHeight += deltaY;
       }
 
       newWidth = Math.max(newWidth, this.minSize.w);
-      newHeight = Math.max(newHeight, this.minSize.h);  
-    
+      newHeight = Math.max(newHeight, this.minSize.h);
+
       if (frame.id !== undefined) {
         this.frameService.updateFrameSize({ w: newWidth, h: newHeight }, frame.id);
         this.frameService.updateFramePosition({ x: newX, y: newY }, frame.id);
         this.frameService.updateLinePositions();
-      } 
+      }
     };
-  
+
     const finishResize = () => {
       this.document.removeEventListener('mousemove', duringResize);
       this.document.removeEventListener('mouseup', finishResize);
     };
-  
+
     this.document.addEventListener('mousemove', duringResize);
     this.document.addEventListener('mouseup', finishResize);
   }
-  
+
 
   deleteFrame(frameId: number | undefined): void {
 
@@ -175,5 +175,9 @@ export class FrameComponent implements OnInit {
       console.log("number of frames after deleting:", this.frames.length)
 
     }
+  }
+
+  getTagCount(frameId: number | undefined): number {    
+    return this.frameService.getAssociatedTagFrameIds(frameId ?? 0).length;
   }
 }

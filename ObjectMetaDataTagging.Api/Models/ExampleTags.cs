@@ -3,9 +3,13 @@ namespace ObjectMetaDataTagging.Models
 {
     public enum ExampleTags
     {
-        PaymentExpired,
         Suspicious,
+        FailedTransfer,
+        IncorrectSortCode,
+        IncorrectAccountNumber,
         FundsTransfer,
+        AddressNotMatching,
+        NameNotMatchingAccount,
         AccountActivity
     }
 }

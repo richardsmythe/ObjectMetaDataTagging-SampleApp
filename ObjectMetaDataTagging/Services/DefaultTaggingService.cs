@@ -1,11 +1,6 @@
 ﻿using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Services
 {
@@ -32,6 +27,6 @@ namespace ObjectMetaDataTagging.Services
 
         public bool HasTag(object o, Guid tagId) => _taggingService.HasTag(o, tagId);
 
-        public T? GetObjectByTag(Guid tagId) => _taggingService.GetObjectByTag(tagId);
+        public Task<T?> GetObjectByTag(Guid tagId) => _taggingService.GetObjectByTag(tagId);
     }
 }
