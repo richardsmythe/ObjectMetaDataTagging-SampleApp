@@ -81,7 +81,6 @@ export class FrameComponent implements OnInit {
     }
   }
 
-
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

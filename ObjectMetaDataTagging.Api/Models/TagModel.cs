@@ -1,4 +1,5 @@
 ﻿using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Api.Models
 {
@@ -9,6 +10,9 @@ namespace ObjectMetaDataTagging.Api.Models
         public Guid AssociatedObjectId { get; set; }
         public string TagName { get; set; }
         public string Description { get; set; }
+
+        public ICollection<BaseTag> ChildTags { get; set; }
+ 
 
     }
 }

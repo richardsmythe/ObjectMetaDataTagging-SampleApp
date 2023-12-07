@@ -78,7 +78,19 @@ export class FrameService {
             if (tag.associatedObjectId === object.id) {
               const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
               frames.push(tagFrame);
-            }
+            
+              if (tag.childTags != null) {
+                console.log(`Tag ${tag.tagName} has child tags:`);
+                console.log("Full tag object:", tag); // Log the entire tag object
+                tag.childTags.forEach((childTag: TagModel) => {
+                  console.log(childTag.tagName);
+                  
+                });
+              } else {
+                console.log(`Tag ${tag.tagName} does not have child tags.`);
+                console.log("Full tag object:", tag); // Log the entire tag object
+              }
+            }   
           });
         });
       }

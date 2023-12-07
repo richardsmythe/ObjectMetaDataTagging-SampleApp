@@ -29,7 +29,7 @@ namespace ObjectMetaDataTagging.Services
             _databaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
 
-        public async Task<IEnumerable<T>> GetAllTags(object o)
+        public virtual async Task<IEnumerable<T>> GetAllTags(object o)
         {
             if (o == null)
                 throw new ArgumentNullException(nameof(o));
@@ -38,7 +38,7 @@ namespace ObjectMetaDataTagging.Services
             return await _databaseContext.GetTagsForObject(objectId);
         }
 
-        public async Task<T?> GetTag(object o, Guid tagId)
+        public virtual async Task<T?> GetTag(object o, Guid tagId)
         {
             if (o == null)
                 throw new ArgumentNullException(nameof(o));
@@ -52,7 +52,7 @@ namespace ObjectMetaDataTagging.Services
             throw new NotImplementedException();
         }
 
-        public async Task<bool> RemoveAllTagsAsync(object o)
+        public virtual async Task<bool> RemoveAllTagsAsync(object o)
         {
             if (o == null)
                 throw new ArgumentNullException(nameof(o));
@@ -62,7 +62,7 @@ namespace ObjectMetaDataTagging.Services
             return true;
         }
 
-        public async Task<bool> RemoveTagAsync(object? o, Guid tagId)
+        public virtual async Task<bool> RemoveTagAsync(object? o, Guid tagId)
         {
             if (o == null)
                 throw new ArgumentNullException(nameof(o));
@@ -71,7 +71,7 @@ namespace ObjectMetaDataTagging.Services
             return await _databaseContext.DeleteTagForObject(objectId, tagId);
         }
 
-        public async Task SetTagAsync(object o, T tag)
+        public virtual async Task SetTagAsync(object o, T tag)
         {
             if (tag == null || o == null)
                 return;
@@ -92,7 +92,7 @@ namespace ObjectMetaDataTagging.Services
             await _databaseContext.AddTagForObject(objectId, tag);
         }
 
-        public async Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag)
+        public virtual async Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag)
         {
             var objectId = GetObjectId(o);
             return await _databaseContext.UpdateTagForObject(objectId, tagId, newTag);

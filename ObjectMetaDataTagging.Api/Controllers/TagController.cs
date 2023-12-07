@@ -127,15 +127,28 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var tag = tagPair.Value as BaseTag;
                     if (tag != null)
                     {
-                        return new TagModel
+                        var tagModel = new TagModel
                         {
                             tagId = tag.Id,
                             TagName = tag.Name,
                             Description = tag.Description,
                             AssociatedObject = objectName,
                             AssociatedObjectId = objectId,
+                            ChildTags = tag.ChildTags
                         };
+
+                        if (tagModel.ChildTags != null)
+                        {
+                            foreach (var childTag in tagModel.ChildTags)
+                            {
+                                tagModel.AssociatedObjectId = childTag.Id;
+                                tagModel.AssociatedObject = "CHILD TAG!";
+                            }
+                        }
+
+                        return tagModel;
                     }
+
                     return null;
                 }).Where(tagModel => tagModel != null)!);
             }
@@ -200,6 +213,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
+                    BaseTag newTag2 = tagFactory.CreateBaseTag("some tag", null, "");
+                    await taggingService.SetTagAsync(newObj, newTag2);
+                    
+                    newTag.AddChildTag(newTag2);
                     await taggingService.SetTagAsync(newObj, newTag);
 
                     var tags = await taggingService.GetAllTags(newObj);

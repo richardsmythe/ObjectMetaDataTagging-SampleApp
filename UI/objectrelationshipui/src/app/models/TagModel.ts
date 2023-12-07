@@ -4,4 +4,5 @@ export interface TagModel {
   associatedObject: string;
   tagName: string
   description: string;
+  childTags?: TagModel[];
   }
