@@ -78,21 +78,48 @@ export class FrameService {
               const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
               frames.push(tagFrame);
             }
-          });
-
-          frameData.tagData.forEach((tag: { tagName: any; description: any; childTags: any[]; }) => {
             if (tag.childTags) {
-              tag.childTags.forEach(childTag => {
+              tag.childTags.forEach((childTag: TagModel) => {
                 console.log("Tag has child tags:", tag.tagName);
                 console.log("Tag has child tags:", tag.description); 
+                console.log("childtag", childTag)
+                const childTagFrame = this.createNewFrame([], [childTag], 'Tag', frameData.origin);
+                frames.push(childTagFrame);
               });
             }
-          });
+          });         
         });
       }
     });
     console.log("RESULT:", frames);
     return frames;
+  }
+
+   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
+    const frame: Frame = {
+      counter: this.frameIdCounter++,
+      id: frameType === 'Tag' ? tagData[0].tagId : objectData[0].id, 
+      size: this.calculateFrameSize(frameType === 'Tag' ? [tagData[0]] : [objectData[0]], frameType === 'Tag'),
+      position: this.calculateFramePosition(),
+      frameType,
+      origin,
+      objectData,
+      tagData
+    };
+
+    if (frameType === 'Object') {
+
+      frame.objectData?.forEach(obj => {
+        obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
+      });
+    }
+
+    const currentFrames = this.frames.value.slice();
+    currentFrames.push(frame);
+
+    this.frames.next(currentFrames);
+
+    return frame;
   }
 
   destroyFrame(frameId: string): void {
@@ -115,31 +142,6 @@ export class FrameService {
     });
   }
 
-  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
-    const frame: Frame = {
-      counter: this.frameIdCounter++,
-      id: frameType === 'Tag' ? tagData[0].tagId : objectData[0].id, 
-      size: this.calculateFrameSize(frameType === 'Tag' ? [tagData[0]] : [objectData[0]], frameType === 'Tag'),
-      position: this.calculateFramePosition(),
-      frameType,
-      origin,
-      objectData,
-      tagData
-    };
-
-    if (frameType === 'Object') {
-
-      frame.objectData?.forEach(obj => {
-        obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
-      });
-    }
-    const currentFrames = this.frames.value.slice();
-    currentFrames.push(frame);
-
-    this.frames.next(currentFrames);
-
-    return frame;
-  }
 
   getLines(): Observable<LineModel[]> {
     return this.lines.asObservable();
