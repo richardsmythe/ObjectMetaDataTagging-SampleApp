@@ -7,8 +7,8 @@ import { FrameService } from '../services/frame.service'; // Ensure you have the
   styleUrls: ['./line.component.css'],
 })
 export class LineComponent implements OnChanges {
-  @Input() parentId: number | undefined;
-  @Input() childId: number | undefined;
+  @Input() parentId: string | undefined;
+  @Input() childId: string | undefined;
   @Input() width: number = 0;
   @Input() height: number = 0;
 

@@ -86,7 +86,7 @@ export class FrameComponent implements OnInit {
   }
 
 
-  drag(event: MouseEvent, frame: any, frameId: number | undefined): void {
+  drag(event: MouseEvent, frame: any, frameId: string | undefined): void {
     event.preventDefault();
     const mouseX = event.clientX;
     const mouseY = event.clientY;
@@ -166,7 +166,7 @@ export class FrameComponent implements OnInit {
   }
 
 
-  deleteFrame(frameId: number | undefined): void {
+  deleteFrame(frameId: string | undefined): void {
 
     if (frameId !== undefined) {
       this.frameService.destroyFrame(frameId);
@@ -176,7 +176,7 @@ export class FrameComponent implements OnInit {
     }
   }
 
-  getTagCount(frameId: number | undefined): number {    
-    return this.frameService.getAssociatedTagFrameIds(frameId ?? 0).length;
+  getTagCount(frameId: string | undefined): number {    
+    return this.frameService.getAssociatedTagFrameIds(frameId!).length;
   }
 }

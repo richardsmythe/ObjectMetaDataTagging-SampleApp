@@ -1,5 +1,5 @@
 export interface ObjectModel {
-    id: number;
+    id: string;
     objectName: string;  
-    relatedFrames?: number[];
+    relatedFrames?: string[];
   }

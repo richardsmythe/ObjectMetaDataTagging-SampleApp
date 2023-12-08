@@ -30,7 +30,6 @@ export class FrameService {
     }
   }
 
-
   getFrameData(): Observable<Frame[]> {
     return this.http.get<any[]>('https://localhost:7170/api/Tag').pipe(
       switchMap(response => {
@@ -67,10 +66,10 @@ export class FrameService {
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
-
+    
     response.forEach(frameData => {
       if (frameData.objectData) {
-        frameData.objectData.forEach((object: ObjectModel) => {
+        frameData.objectData.forEach((object: ObjectModel) => {         
           const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
           frames.push(objectFrame);
 
@@ -78,19 +77,16 @@ export class FrameService {
             if (tag.associatedObjectId === object.id) {
               const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
               frames.push(tagFrame);
-            
-              if (tag.childTags != null) {
-                console.log(`Tag ${tag.tagName} has child tags:`);
-                console.log("Full tag object:", tag); // Log the entire tag object
-                tag.childTags.forEach((childTag: TagModel) => {
-                  console.log(childTag.tagName);
-                  
-                });
-              } else {
-                console.log(`Tag ${tag.tagName} does not have child tags.`);
-                console.log("Full tag object:", tag); // Log the entire tag object
-              }
-            }   
+            }
+          });
+
+          frameData.tagData.forEach((tag: { tagName: any; description: any; childTags: any[]; }) => {
+            if (tag.childTags) {
+              tag.childTags.forEach(childTag => {
+                console.log("Tag has child tags:", tag.tagName);
+                console.log("Tag has child tags:", tag.description); 
+              });
+            }
           });
         });
       }
@@ -99,7 +95,7 @@ export class FrameService {
     return frames;
   }
 
-  destroyFrame(frameId: number): void {
+  destroyFrame(frameId: string): void {
     const currentFrames = this.frames.value.slice().filter((f) => f.id !== frameId);
     const currentFrame = this.getFrameById(frameId);
     const tagId = currentFrame?.tagData[0]?.tagId;
@@ -120,10 +116,10 @@ export class FrameService {
   }
 
   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
-
     const frame: Frame = {
-      id: this.frameIdCounter++,
-      size: this.calculateFrameSize(frameType === 'Tag' ? tagData : objectData, frameType === 'Tag'),
+      counter: this.frameIdCounter++,
+      id: frameType === 'Tag' ? tagData[0].tagId : objectData[0].id, 
+      size: this.calculateFrameSize(frameType === 'Tag' ? [tagData[0]] : [objectData[0]], frameType === 'Tag'),
       position: this.calculateFramePosition(),
       frameType,
       origin,
@@ -221,13 +217,13 @@ export class FrameService {
     return { w: width, h: height };
   }
 
-  getFrameById(frameId: number): Frame | undefined {
+  getFrameById(frameId: string): Frame | undefined {
     const frames = this.frames.value;
     const frame = frames.find(fr => fr.id === frameId);
     return frame !== undefined ? frame : undefined;
   }
 
-  updateFramePosition(position: { x: number; y: number }, frameId: number | undefined): void {
+  updateFramePosition(position: { x: number; y: number }, frameId: string | undefined): void {
     const frames = this.frames.getValue();
     const frameIndex = frames.findIndex((frame) => frame.id === frameId);
     if (frameIndex !== -1) {
@@ -237,7 +233,7 @@ export class FrameService {
     }
   }
 
-  updateFrameSize(newSize: { w: number; h: number }, frameId: number | undefined): void {
+  updateFrameSize(newSize: { w: number; h: number }, frameId: string | undefined): void {
     const frames = this.frames.getValue();
     const updatedFrames = frames.map(frame =>
       frame.id === frameId ? { ...frame, size: newSize } : frame
@@ -245,7 +241,7 @@ export class FrameService {
     this.frames.next(updatedFrames);
   }
 
-  getFrameSize(frameId: number | undefined): { width: number, height: number } | undefined {
+  getFrameSize(frameId: string | undefined): { width: number, height: number } | undefined {
     if (frameId === undefined) {
       return undefined;
     }
@@ -258,7 +254,7 @@ export class FrameService {
     return undefined;
   }
 
-  getCenterOfFrame(frameId: number): { x: number, y: number } | undefined {
+  getCenterOfFrame(frameId: string): { x: number, y: number } | undefined {
     const frame = this.getFrameById(frameId);
     if (frame) {
       return {
@@ -269,7 +265,7 @@ export class FrameService {
     return undefined;
   }
 
-  getFramePosition(frameId: number): { x: number; y: number } | undefined {
+  getFramePosition(frameId: string): { x: number; y: number } | undefined {
     const frame = this.getFrameById(frameId);
     if (frame && frame.position) {
       //console.log("CURRENT frameId:",frameId, "framePosition: ",frame.position);
@@ -278,7 +274,7 @@ export class FrameService {
     return undefined;
   }
 
-  getAssociatedTagFrameIds(objectId: number): number[] {
+  getAssociatedTagFrameIds(objectId: string): string[] {
     const allFrames = this.frames.getValue();
     const associatedFrames = allFrames
       .filter(frame => frame.tagData?.some(tag => tag.associatedObjectId === objectId))

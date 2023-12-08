@@ -1,6 +1,6 @@
 export interface LineModel {
-  parentId: number;
-  childId: number[];
+  parentId: string;
+  childId: string[];
   startingPosition: { x: number; y: number };
   endingPosition: { x: number; y: number };
 }
