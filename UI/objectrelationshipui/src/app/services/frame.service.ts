@@ -66,10 +66,10 @@ export class FrameService {
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
-    
+
     response.forEach(frameData => {
       if (frameData.objectData) {
-        frameData.objectData.forEach((object: ObjectModel) => {         
+        frameData.objectData.forEach((object: ObjectModel) => {
           const objectFrame = this.createNewFrame([object], [], 'Object', frameData.origin);
           frames.push(objectFrame);
 
@@ -79,15 +79,25 @@ export class FrameService {
               frames.push(tagFrame);
             }
             if (tag.childTags) {
-              tag.childTags.forEach((childTag: TagModel) => {
-                console.log("Tag has child tags:", tag.tagName);
-                console.log("Tag has child tags:", tag.description); 
-                console.log("childtag", childTag)
-                const childTagFrame = this.createNewFrame([], [childTag], 'Tag', frameData.origin);
+              tag.childTags.forEach((childTag: any) => {
+                // console.log("Tag has child tags:", tag.tagName);
+                // console.log("Tag has child tags:", tag.description);
+                // console.log("childtag", childTag)
+                //populate new model with this response data
+                const childTagModel: TagModel = {
+                  tagId: childTag.id,
+                  tagName: childTag.name,
+                  associatedObject: childTag.associatedParentObjectName,
+                  associatedObjectId: childTag.associatedParentObjectId,
+                  description: childTag.description,
+                };
+
+                console.log("Child Tag Model:", childTagModel);
+                const childTagFrame = this.createNewFrame([], [childTagModel], 'Tag', frameData.origin);
                 frames.push(childTagFrame);
               });
             }
-          });         
+          });
         });
       }
     });
@@ -95,10 +105,10 @@ export class FrameService {
     return frames;
   }
 
-   createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
+  createNewFrame(objectData: ObjectModel[], tagData: TagModel[], frameType: string, origin: string): Frame {
     const frame: Frame = {
       counter: this.frameIdCounter++,
-      id: frameType === 'Tag' ? tagData[0].tagId : objectData[0].id, 
+      id: frameType === 'Tag' ? tagData[0].tagId : objectData[0].id,
       size: this.calculateFrameSize(frameType === 'Tag' ? [tagData[0]] : [objectData[0]], frameType === 'Tag'),
       position: this.calculateFramePosition(),
       frameType,
@@ -107,12 +117,10 @@ export class FrameService {
       tagData
     };
 
-    if (frameType === 'Object') {
 
-      frame.objectData?.forEach(obj => {
-        obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
-      });
-    }
+    frame.objectData?.forEach(obj => {
+      obj.relatedFrames = this.getAssociatedTagFrameIds(obj.id);
+    });
 
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
