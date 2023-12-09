@@ -5,4 +5,5 @@ export interface TagModel {
   tagName: string
   description: string;
   childTags?: TagModel[];
+  relatedFrames?: string[];
   }

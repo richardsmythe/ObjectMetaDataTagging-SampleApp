@@ -177,6 +177,6 @@ export class FrameComponent implements OnInit {
   }
 
   getTagCount(frameId: string | undefined): number {    
-    return this.frameService.getAssociatedTagFrameIds(frameId!).length;
+    return this.frameService.getAssociatedTagIds(frameId!).length;
   }
 }

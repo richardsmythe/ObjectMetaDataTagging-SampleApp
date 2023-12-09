@@ -144,6 +144,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                                 //tagModel.AssociatedObjectId = childTag.Id;
                                 tagModel.Description = "HAS CHILD TAG!";
                                 childTag.Name = "The child tag";
+                                childTag.AssociatedParentObjectName = tagModel.TagName;
                                 childTag.AssociatedParentObjectId = tagModel.tagId;
                                 childTag.Description = "i'm a child tag";
                             }
