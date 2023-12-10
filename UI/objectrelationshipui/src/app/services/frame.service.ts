@@ -78,10 +78,9 @@ export class FrameService {
               const tagFrame = this.createNewFrame([], [tag], 'Tag', frameData.origin);
               frames.push(tagFrame);
             }
-            if (tag.childTags) {
+            if (tag.childTags !== 0) {
               tag.childTags.forEach((childTag: any) => {
-
-                // create childTagModel
+                // create childTagModel      
                 const childTagModel: TagModel = {
                   tagId: childTag.id,
                   tagName: childTag.name,
@@ -90,16 +89,23 @@ export class FrameService {
                   description: childTag.description,
                 };
 
+                if (!tag.relatedFrames) {
+                  tag.relatedFrames = [];
+                }                
+                tag.relatedFrames.push(childTag.id);
+
                 // console.log("Child Tag Model:", childTagModel);
                 const childTagFrame = this.createNewFrame([], [childTagModel], 'Tag', frameData.origin);
                 frames.push(childTagFrame);
+
+                console.log(tag);
               });
             }
           });
         });
       }
     });
-    console.log("RESULT:", frames);
+    //console.log("RESULT:", frames);
     return frames;
   }
 
@@ -118,16 +124,9 @@ export class FrameService {
     if(frameType==="Object"){  
       frame.objectData?.forEach(obj => {
         obj.relatedFrames = this.getAssociatedTagIds(obj.id);
-        console.log(obj.relatedFrames);
+        
       });
-    }
-    if (frameType === "Tag") {
-      frame.tagData?.forEach(tag => {   
-        tag.relatedFrames = this.getAssociatedTagIds(tag.tagId);
-        console.log("here:",tag.relatedFrames);
-      });
-    }
-
+    }  
 
     const currentFrames = this.frames.value.slice();
     currentFrames.push(frame);
@@ -294,28 +293,11 @@ export class FrameService {
   getAssociatedTagIds(objectId: string): string[] {
     const allFrames = this.frames.getValue();
     let associatedFrames: string[] = [];
-  
-    // Direct associations
+
     associatedFrames = allFrames
       .filter(frame => frame.tagData?.some(tag => tag.associatedObjectId === objectId))
       .filter(frame => frame.frameType === 'Tag')
-      .map(frame => frame.id);
-  
-    // If no direct associations, check associations through child tags
-    if (associatedFrames.length === 0) {
-      associatedFrames = allFrames
-        .filter(frame => frame.tagData?.some(tag => {
-          console.log("Checking parent tag:", tag.tagId);
-          return tag.childTags?.some(childTag => {
-            console.log("Checking child tag:", childTag.tagId);
-            return childTag.associatedObjectId === objectId;
-          });
-        }))
-        .filter(frame => frame.frameType === 'Tag')
-        .map(frame => frame.id);
-    }
-      //console.log("objectid:",objectId)
-      //console.log("child?",associatedFrames)
+      .map(frame => frame.id);   
   
     //console.log("assoc. frames", associatedFrames);
     return associatedFrames;
