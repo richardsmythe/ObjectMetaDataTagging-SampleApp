@@ -8,7 +8,7 @@ namespace ObjectMetaDataTagging.Models.TagModels
     /// </summary>
     public class BaseTag
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime DateCreated { get; private set; }
         public DateTime? DateLastUpdated { get; set; }
@@ -44,8 +44,7 @@ namespace ObjectMetaDataTagging.Models.TagModels
             if(childTag == null)
             {
                 throw new ArgumentNullException(nameof(childTag));
-            }
-   
+            }         
             ChildTags.Add(childTag);
         }
 

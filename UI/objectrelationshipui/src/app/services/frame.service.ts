@@ -44,25 +44,25 @@ export class FrameService {
     );
   }
 
-  getParentFramesByTagId(tagFrame: Frame): Frame[] {
-    const parentFrames: Frame[] = [];
+  // getParentFramesByTagId(tagFrame: Frame): Frame[] {
+  //   const parentFrames: Frame[] = [];
 
-    if (tagFrame && tagFrame.objectData && tagFrame.tagData) {
-      const associatedObjectIds = tagFrame.tagData.map((tag) => tag?.associatedObjectId).filter(Boolean);
+  //   if (tagFrame && tagFrame.objectData && tagFrame.tagData) {
+  //     const associatedObjectIds = tagFrame.tagData.map((tag) => tag?.associatedObjectId).filter(Boolean);
 
-      if (associatedObjectIds.length > 0) {
-        const frames = this.frames.getValue();
+  //     if (associatedObjectIds.length > 0) {
+  //       const frames = this.frames.getValue();
 
-        for (const associatedObjectId of associatedObjectIds) {
-          const associatedObjectFrames = frames.filter(
-            (f) => f.frameType === 'Object' && f.objectData?.some((obj) => obj.id === associatedObjectId)
-          );
-          parentFrames.push(...associatedObjectFrames);
-        }
-      }
-    }
-    return parentFrames;
-  }
+  //       for (const associatedObjectId of associatedObjectIds) {
+  //         const associatedObjectFrames = frames.filter(
+  //           (f) => f.frameType === 'Object' && f.objectData?.some((obj) => obj.id === associatedObjectId)
+  //         );
+  //         parentFrames.push(...associatedObjectFrames);
+  //       }
+  //     }
+  //   }
+  //   return parentFrames;
+  // }
 
   private processFrameData(response: any[]): Frame[] {
     const frames: Frame[] = [];
@@ -90,7 +90,7 @@ export class FrameService {
                   description: childTag.description,
                 };
 
-                console.log("Child Tag Model:", childTagModel);
+                // console.log("Child Tag Model:", childTagModel);
                 const childTagFrame = this.createNewFrame([], [childTagModel], 'Tag', frameData.origin);
                 frames.push(childTagFrame);
               });
@@ -115,17 +115,16 @@ export class FrameService {
       tagData
     };
 
-    if(frameType==="Object"){
-  
+    if(frameType==="Object"){  
       frame.objectData?.forEach(obj => {
         obj.relatedFrames = this.getAssociatedTagIds(obj.id);
         console.log(obj.relatedFrames);
       });
     }
-    if(frameType==="Tag"){
-      frame.tagData?.forEach(tag => {
+    if (frameType === "Tag") {
+      frame.tagData?.forEach(tag => {   
         tag.relatedFrames = this.getAssociatedTagIds(tag.tagId);
-        console.log(tag.relatedFrames);
+        console.log("here:",tag.relatedFrames);
       });
     }
 
@@ -304,14 +303,21 @@ export class FrameService {
   
     // If no direct associations, check associations through child tags
     if (associatedFrames.length === 0) {
-      
       associatedFrames = allFrames
-        .filter(frame => frame.tagData?.some(tag => tag.childTags?.some(childTag => childTag.associatedObjectId === objectId)))
+        .filter(frame => frame.tagData?.some(tag => {
+          console.log("Checking parent tag:", tag.tagId);
+          return tag.childTags?.some(childTag => {
+            console.log("Checking child tag:", childTag.tagId);
+            return childTag.associatedObjectId === objectId;
+          });
+        }))
         .filter(frame => frame.frameType === 'Tag')
         .map(frame => frame.id);
     }
+      //console.log("objectid:",objectId)
+      //console.log("child?",associatedFrames)
   
-     console.log("assoc. frames", associatedFrames);
+    //console.log("assoc. frames", associatedFrames);
     return associatedFrames;
   }
 

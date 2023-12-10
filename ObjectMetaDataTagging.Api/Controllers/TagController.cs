@@ -142,7 +142,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             foreach (var childTag in tagModel.ChildTags)
                             {
                                 //tagModel.AssociatedObjectId = childTag.Id;
-                                tagModel.Description = "HAS CHILD TAG!";
+                                tagModel.Description = "HAS CHILD TAG!"; 
+                                childTag.Id = Guid.NewGuid();
                                 childTag.Name = "The child tag";
                                 childTag.AssociatedParentObjectName = tagModel.TagName;
                                 childTag.AssociatedParentObjectId = tagModel.tagId;
