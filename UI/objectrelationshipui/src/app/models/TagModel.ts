@@ -6,4 +6,5 @@ export interface TagModel {
   description: string;
   childTags?: TagModel[];
   relatedFrames?: string[];
+  isChildTag?: boolean;
   }

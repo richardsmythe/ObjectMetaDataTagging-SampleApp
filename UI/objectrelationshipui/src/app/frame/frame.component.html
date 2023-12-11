@@ -1,7 +1,10 @@
 <div *ngFor="let frame of frames">
   <div class="frame-wrapper" [style.top.px]="frame.position.y" [style.left.px]="frame.position.x">
-    <div class="content-wrapper" [style.width.px]="frame.size.w" [style.height.px]="frame.size.h"
-      [ngClass]="{ 'object-frame': frame.frameType === 'Object', 'tag-frame': frame.frameType === 'Tag' }">
+    <div class="content-wrapper" [style.width.px]="frame.size.w" [style.height.px]="frame.size.h" [ngClass]="{
+        'object-frame': frame.frameType === 'Object',
+        'tag-frame': frame.frameType === 'Tag' && !frame.tagData[0].isChildTag,
+        'child-tag-frame': frame.frameType === 'Tag' && frame.tagData[0].isChildTag
+      }">
       <div class="frame-body">
         <ul>
           <li *ngIf="frame.frameType === 'Object'"><b>Origin:</b> {{ frame.origin }}</li>

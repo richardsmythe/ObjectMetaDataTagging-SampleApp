@@ -123,4 +123,7 @@
     bottom: -3px;
     cursor: nesw-resize;
   }
-  
+
+  .child-tag-frame {
+    background-color: rgb(224, 184, 247);
+  }

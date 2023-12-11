@@ -87,6 +87,7 @@ export class FrameService {
                   associatedObject: childTag.associatedParentObjectName,
                   associatedObjectId: childTag.associatedParentObjectId,
                   description: childTag.description,
+                  isChildTag: true,
                 };
 
                 if (!tag.relatedFrames) {
@@ -220,12 +221,12 @@ export class FrameService {
       for (const item of data) {
         if (isTagType) {
           const tag = item as TagModel;
-          width = Math.max(width, tag?.description?.length > 20 ? 320 : 320);;
+          width = Math.max(width, tag?.associatedObjectId?.length > 20 ? 380 : 300);;
           height = 200;
         } else {
           const object = item as ObjectModel;
           const objectIdLength = object?.id?.toString().length || 0;
-          width = Math.max(width, objectIdLength > 30 ? 350 : 200);
+          width = Math.max(width, objectIdLength > 30 ? 380 : 300);
           height = 200;
         }
       }
@@ -306,23 +307,31 @@ export class FrameService {
   updateLinePositions(): void {
     const frames = this.frames.getValue();
     const lines: LineModel[] = [];
-
-    for (const frame of frames) {
-      if (frame.frameType === 'Object') {
-        const startingPosition = frame.position;
-        const childIds = frame.objectData ? this.getAssociatedTagIds(frame.objectData[0].id) : [];
-
+  
+    const processFrames = (
+      frameType: string,
+      startingPositionFn: (frame: Frame) => { x: number, y: number },
+      childIdsFn: (frame: Frame) => string[] | undefined
+    ) => {
+      for (const frame of frames.filter(frame => frame.frameType === frameType)) {
+        const startingPosition = startingPositionFn(frame);
+        const childIds = childIdsFn(frame) || [];
+  
         childIds.forEach(childId => {
-          // Check if the associated tag frame still exists
-          const associatedTagFrame = frames.find(f => f.id === childId && f.frameType === 'Tag');
-          if (associatedTagFrame) {
-            const endingPosition = this.getFramePosition(associatedTagFrame.id) || { x: 0, y: 0 };
-            lines.push({ parentId: frame.id, childId: [associatedTagFrame.id], startingPosition, endingPosition });
+          const associatedFrame = frames.find(f => f.id === childId);
+          if (associatedFrame) {
+            const endingPosition = this.getFramePosition(associatedFrame.id) || { x: 0, y: 0 };
+            lines.push({ parentId: frame.id, childId: [associatedFrame.id], startingPosition, endingPosition });
           }
         });
       }
-    }
+    };
+  
+    processFrames('Object', frame => frame.position, frame => (frame.objectData ? this.getAssociatedTagIds(frame.objectData[0].id) : []));
+    processFrames('Tag', frame => frame.position, frame => (frame.tagData ? frame.tagData[0].relatedFrames : []));
+  
     this.lines.next(lines);
   }
+  
 
 }
