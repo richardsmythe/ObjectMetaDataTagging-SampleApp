@@ -23,12 +23,12 @@ namespace ObjectMetaDataTagging.Services
 
         public InMemoryTaggingService()
         {
-
+            _eventManager = null;
         }
 
         // using object instead of weakreference, make sure to GC
-        protected readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
-        private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
+        public readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
+        public readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         /* By exposing these events, it allow consumers to attach event handlers 

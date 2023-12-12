@@ -201,7 +201,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
 
-            for (int i = 0; i < random.Next(1, 3); i++)
+            for (int i = 0; i < random.Next(1, 2); i++)
             {
                 var newObj = new ExamplePersonTransaction
                 {
@@ -215,10 +215,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                    //var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
-                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
-                    BaseTag newTag2 = tagFactory.CreateBaseTag(tagName, null, "");
+                    BaseTag newTag = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "");
+                    BaseTag newTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "");
                     await taggingService.SetTagAsync(newObj, newTag2);
                     
                     newTag.AddChildTag(newTag2);
