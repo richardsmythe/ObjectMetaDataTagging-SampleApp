@@ -19,6 +19,7 @@
   position: absolute;
   font-size: 15px;
   color: rgb(0, 0, 0);
+
 }
 
 .delete-icon {
@@ -27,7 +28,8 @@
   right: 5px;
   cursor: pointer;
   font-size: 18px;
-  color: red;
+  color: rgb(243, 96, 96);
+  padding-right: 20px;
 }
 
 .top-bar-wrapper {
@@ -52,10 +54,17 @@
 
   .object-frame {
     background-color:  rgb(146, 180, 255);
+    border-radius: 15px;
   }
   
   .tag-frame {
-    background-color: rgb(255, 165, 183);;
+    background-color: rgb(255, 165, 183);
+    border-radius: 15px;
+  }
+    
+  .child-tag-frame {
+    background-color: rgb(224, 184, 247);
+    border-radius: 15px 50px;
   }
   
   .resizers {
@@ -122,8 +131,4 @@
     left: -3px;
     bottom: -3px;
     cursor: nesw-resize;
-  }
-
-  .child-tag-frame {
-    background-color: rgb(224, 184, 247);
   }

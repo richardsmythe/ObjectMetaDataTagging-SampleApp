@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ObjectMetaDataTagging.Exceptions;
 using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Events
@@ -11,8 +12,8 @@ namespace ObjectMetaDataTagging.Events
 
         public AsyncTagAddedEventArgs(object taggedObject, BaseTag tag)
         {
-            TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
-            Tag = tag ?? throw new ArgumentNullException(nameof(tag));
+            TaggedObject = taggedObject ?? throw new ObjectNotFoundException(nameof(taggedObject));
+            Tag = tag ?? throw new ObjectNotFoundException(nameof(tag));
         }
     }
 
@@ -23,8 +24,8 @@ namespace ObjectMetaDataTagging.Events
 
         public AsyncTagRemovedEventArgs(object taggedObject, object tag)
         {
-            TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
-            Tag = tag ?? throw new ArgumentNullException(nameof(tag));
+            TaggedObject = taggedObject ?? throw new ObjectNotFoundException(nameof(taggedObject));
+            Tag = tag ?? throw new ObjectNotFoundException(nameof(tag));
         }
     }
 
@@ -36,9 +37,9 @@ namespace ObjectMetaDataTagging.Events
 
         public AsyncTagUpdatedEventArgs(object taggedObject, BaseTag oldTag, BaseTag newTag)
         {
-            TaggedObject = taggedObject ?? throw new ArgumentNullException(nameof(taggedObject));
-            OldTag = oldTag ?? throw new ArgumentNullException(nameof(oldTag));
-            NewTag = newTag ?? throw new ArgumentNullException(nameof(newTag));
+            TaggedObject = taggedObject ?? throw new ObjectNotFoundException(nameof(taggedObject));
+            OldTag = oldTag ?? throw new ObjectNotFoundException(nameof(oldTag));
+            NewTag = newTag ?? throw new ObjectNotFoundException(nameof(newTag));
         }
     }
 }

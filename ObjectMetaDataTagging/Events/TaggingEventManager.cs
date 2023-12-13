@@ -1,5 +1,7 @@
-﻿using ObjectMetaDataTagging.Interfaces;
+﻿using ObjectMetaDataTagging.Exceptions;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
+using static ObjectMetaDataTagging.Exceptions.EventHandlingExceptions;
 
 namespace ObjectMetaDataTagging.Events
 {
@@ -63,46 +65,59 @@ namespace ObjectMetaDataTagging.Events
                 else
                 {
                     // where _addedHandler.HandleAsync returns null
-                    // can return a default value or handle it as appropriate
-                    Console.WriteLine("HandleAsync returned null in RaiseTagAdded");
+                    // can return a default value or handle it as it is. It's ok for it to return null as sometimes there wont 
+                    // be anything to return
                     return null;
                 }
             }
             catch (Exception ex)
-            {              
-                Console.WriteLine($"Exception in RaiseTagAdded: {ex}");         
-                throw;
+            {                
+                throw new TagAdditionException("Error occured while raising TagAdded event", ex);
             }
         }
 
         public async Task RaiseTagRemoved(TRemoved e)
         {
-            await _removedHandler.HandleAsync(e);
-
-            if (TagRemoved != null)
+            try
             {
-                foreach (var handler in TagRemoved.GetInvocationList())
+                await _removedHandler.HandleAsync(e);
+
+                if (TagRemoved != null)
                 {
-                    if (handler is IAsyncEventHandler<AsyncTagRemovedEventArgs> asyncHandler)
+                    foreach (var handler in TagRemoved.GetInvocationList())
                     {
-                        TagRemoved?.Invoke(this, e);
+                        if (handler is IAsyncEventHandler<AsyncTagRemovedEventArgs> asyncHandler)
+                        {
+                            TagRemoved?.Invoke(this, e);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new TagRemovalException("Error handling tag removal event.", ex);
             }
         }
         public async Task RaiseTagUpdated(TUpdated e)
         {
-            await _updatedHandler.HandleAsync(e);
-
-            if (TagUpdated != null)
+            try
             {
-                foreach (var handler in TagUpdated.GetInvocationList())
+                await _updatedHandler.HandleAsync(e);
+
+                if (TagUpdated != null)
                 {
-                    if (handler is IAsyncEventHandler<AsyncTagUpdatedEventArgs> asyncHandler)
+                    foreach (var handler in TagUpdated.GetInvocationList())
                     {
-                        TagUpdated?.Invoke(this, e);
+                        if (handler is IAsyncEventHandler<AsyncTagUpdatedEventArgs> asyncHandler)
+                        {
+                            TagUpdated?.Invoke(this, e);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {          
+                throw new TagUpdateException("Error handling tag update event.", ex);
             }
         }
 
