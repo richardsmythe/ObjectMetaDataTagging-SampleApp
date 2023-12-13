@@ -10,10 +10,10 @@ using Xunit;
 
 namespace ObjectMetaDataTagging.Test
 {
-    public class UnitTest1
+    public class InMemoryTaggingServiceTests
     {
         [Fact]
-        public async Task SetTagAsync_AddsTagToObject()
+        public async Task SetTagAsync_ShouldAddToDictionary()
         {
             // Arrange
             var mockAddedHandler = new Mock<IAsyncEventHandler<AsyncTagAddedEventArgs>>();            
@@ -24,7 +24,7 @@ namespace ObjectMetaDataTagging.Test
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
 
             var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 2000, Sender = "Richard", Receiver = "Jon" };
-            var tag = new BaseTag("TestTag", "TestValue");
+            var tag = new BaseTag("TestTag", 43, "A numeric tag");
 
             // Act
             await taggingService.SetTagAsync(obj, tag);
@@ -32,6 +32,7 @@ namespace ObjectMetaDataTagging.Test
             // Assert
             Assert.True(taggingService.data.TryGetValue(obj, out var tagDictionary));
             Assert.True(tagDictionary.ContainsKey(tag.Id));
+            Assert.True(tagDictionary.Count != 0);
 
             // Verify the tagDictionary has the correct values
             var tags = await taggingService.GetAllTags(obj);

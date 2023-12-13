@@ -1,4 +1,5 @@
 ﻿using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Exceptions;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
@@ -56,7 +57,12 @@ namespace ObjectMetaDataTagging.Services
         #region Default Tag Operations
         public virtual Task<IEnumerable<T>> GetAllTags(object o)
         {
-            if (o != null && data.TryGetValue(o, out var tags))
+            if (o == null)
+            {
+                throw new ObjectNotFoundException("No object supplied.");
+            }
+
+            if (data.TryGetValue(o, out var tags))
             {
                 var allTags = tags.Values.ToList();
                 Console.WriteLine("Tags:");
@@ -69,12 +75,17 @@ namespace ObjectMetaDataTagging.Services
                 }
                 return Task.FromResult((IEnumerable<T>)allTags);
             }
-            Console.WriteLine("No tags found for the object.");
-            return (Task<IEnumerable<T>>)Enumerable.Empty<T>();
+
+            throw new ObjectNotFoundException("Object not found in the data collection.", nameof(o));
         }
 
         public virtual Task<T>? GetTag(object o, Guid tagId)
         {
+            if (o == null)
+            {
+                throw new ObjectNotFoundException("No object supplied.");
+            }
+
             if (data.TryGetValue(o, out var tagDictionary))
             {
                 if (tagDictionary.TryGetValue(tagId, out var tag))
@@ -82,7 +93,8 @@ namespace ObjectMetaDataTagging.Services
                     return tag as Task<T>;
                 }
             }
-            return null;
+
+            throw new ObjectNotFoundException("Object or tag not found in the data collection.", nameof(o));
         }
 
         public virtual async Task<bool> RemoveAllTagsAsync(object o)
@@ -90,12 +102,17 @@ namespace ObjectMetaDataTagging.Services
             await semaphore.WaitAsync();
             try
             {
-                if (o != null)
+                if (o == null)
                 {
-                    data.Remove(o, out _);
+                    throw new ObjectNotFoundException("No object supplied.");
+                }
+
+                if (data.Remove(o, out _))
+                {
                     return true;
                 }
-                await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, null));
+
+                throw new ObjectNotFoundException("Object not found in the data collection.", nameof(o));
             }
             finally
             {
@@ -110,7 +127,12 @@ namespace ObjectMetaDataTagging.Services
 
             try
             {
-                if (o != null && data.TryGetValue(o, out var tags))
+                if (o == null)
+                {
+                    throw new ObjectNotFoundException("No object supplied.");
+                }
+
+                if (data.TryGetValue(o, out var tags))
                 {
                     if (tags.Remove(tagId))
                     {
@@ -122,7 +144,12 @@ namespace ObjectMetaDataTagging.Services
 
                         return true;
                     }
+
                     await _eventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(o, tagId));
+                }
+                else
+                {
+                    throw new ObjectNotFoundException("Object not found in the data collection.", nameof(o));
                 }
             }
             finally
@@ -134,7 +161,7 @@ namespace ObjectMetaDataTagging.Services
 
         public virtual async Task SetTagAsync(object o, T tag)
         {
-            if (tag == null || o == null) return;
+            if (tag == null || o == null) throw new ObjectNotFoundException("No object or tag supplied.");
 
             var objectName = o.GetType().Name;
             var objectId = GetObjectId(o);
@@ -175,7 +202,7 @@ namespace ObjectMetaDataTagging.Services
         {
             if (modifiedTag == null || o == null)
             {
-                return false;
+                throw new ObjectNotFoundException("No object or tag supplied.");
             }
 
             modifiedTag.DateLastUpdated = DateTime.UtcNow;
@@ -206,15 +233,24 @@ namespace ObjectMetaDataTagging.Services
 
         public bool HasTag(object o, Guid tagId)
         {
-
             if (o != null && data.TryGetValue(o, out var tags))
             {
                 lock (tags)
                 {
-                    return tags.ContainsKey(tagId);
+                    if (tags.ContainsKey(tagId))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        throw new ObjectNotFoundException($"Tag with Id {tagId} not found for the specified object.", nameof(tagId));
+                    }
                 }
             }
-            return false;
+            else
+            {
+                throw new ObjectNotFoundException("Object not found in the data dictionary.", nameof(o));
+            }
         }
 
         public virtual Task<T?> GetObjectByTag(Guid tagId)
@@ -227,29 +263,39 @@ namespace ObjectMetaDataTagging.Services
                 {
                     if (tags.TryGetValue(tagId, out var tag))
                     {
-                        return kvp.Key as Task<T>; // kvp.Key is now the associated object
+                        if (kvp.Key is Task<T> associatedObject)
+                        {
+                            return associatedObject;
+                        }
+                        else
+                        {
+                            throw new ObjectNotFoundException("Associated object is not of expected type Task<T>.", nameof(kvp.Key));
+                        }
                     }
                 }
             }
-        
-            return null;
+
+            throw new ObjectNotFoundException($"No object found with tagId: {tagId}", nameof(tagId));
         }
 
         private Guid GetObjectId(object o)
         {
-            if (o != null)
+            if (o == null)
             {
-                var idProperty = o.GetType().GetProperty("Id");
-                if (idProperty != null)
+                throw new ObjectNotFoundException("No object supplied.");
+            }
+
+            var idProperty = o.GetType().GetProperty("Id");
+            if (idProperty != null)
+            {
+                var idValue = idProperty.GetValue(o);
+                if (idValue is Guid guidValue)
                 {
-                    var idValue = idProperty.GetValue(o);
-                    if (idValue is Guid guidValue)
-                    {
-                        return guidValue;
-                    }
+                    return guidValue;
                 }
             }
-            return Guid.Empty;
+
+            throw new ObjectNotFoundException("Id property not found or not of type Guid.", nameof(o));
         }
 
         #endregion

@@ -33,12 +33,17 @@ namespace ObjectMetaDataTagging.Models.TagModels
             DateCreated = DateTime.UtcNow;
             ChildTags = new List<BaseTag>();
         }
+        /// <summary>
+        /// Allows you to specify the Value and Type of the object. E.g. BaseTag tagWithIntValue = new BaseTag("NumberTag", 42, "Numeric Tag");
+        /// </summary>
         private void SetValue(object value)
         {
             Value = value;
             Type = value?.GetType().Name;
         }
-
+        /// <summary>
+        /// Allows a collection of tags to be assigned to a parent tag.
+        /// </summary>
         public void AddChildTag(BaseTag childTag)
         {
             if(childTag == null)
