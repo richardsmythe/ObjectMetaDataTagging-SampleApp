@@ -31,6 +31,7 @@ namespace ObjectMetaDataTagging.Services
         public readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
         public readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        public Action<object, T>? OnSetTagAsyncCallback { get; set; }
 
         /* By exposing these events, it allow consumers to attach event handlers 
          * to perform additional actions when tags are added, removed, or updated. 
@@ -182,6 +183,10 @@ namespace ObjectMetaDataTagging.Services
             {
                 semaphore.Release();
             }
+
+            // Call the callback if set by something (like a test).
+            OnSetTagAsyncCallback?.Invoke(o, tag);
+
         }
 
         public virtual async Task<bool> UpdateTagAsync(object o, Guid tagId, T modifiedTag)
