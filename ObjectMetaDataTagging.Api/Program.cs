@@ -4,6 +4,7 @@ using ObjectMetaDataTagging.Configuration;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
+using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Api
 {
@@ -34,7 +35,8 @@ namespace ObjectMetaDataTagging.Api
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
 
             // Register CustomTaggingService
-            builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
+            builder.Services.AddScoped<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
+
 
 
             builder.Services.AddEndpointsApiExplorer();

@@ -112,13 +112,13 @@ namespace ObjectMetaDataTagging.Services
                     return true;
                 }
 
-                throw new ObjectNotFoundException("Object not found in the data collection.", nameof(o));
+                return false;
+      
             }
             finally
             {
                 semaphore.Release();
-            }
-            return false;
+            }    
         }
 
         public virtual async Task<bool> RemoveTagAsync(object? o, Guid tagId)
@@ -167,30 +167,16 @@ namespace ObjectMetaDataTagging.Services
             var objectId = GetObjectId(o);
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
-            var tagFromEvent = _eventManager != null
-                ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
-                : null;
 
             // ensure that multiple threads don't interfere with
             // each other when modifying the dictionary concurrently
             await semaphore.WaitAsync();
-
             try
             {
-                if (tagFromEvent != null)
-                {
-                    tagFromEvent.AssociatedParentObjectName = objectName;
-                    tagFromEvent.AssociatedParentObjectId = objectId;
+                tagDictionary[tag.Id] = tag;
+                tag.AssociatedParentObjectId = objectId;
+                tag.AssociatedParentObjectName = objectName;
 
-                    tagDictionary[tagFromEvent.Id] = tagFromEvent;
-                    tagDictionary[tag.Id] = tag;
-                }
-                else
-                {
-                    tag.AssociatedParentObjectId = objectId;
-                    tag.AssociatedParentObjectName = objectName;
-                    tagDictionary[tag.Id] = tag;
-                }
             }
             finally
             {

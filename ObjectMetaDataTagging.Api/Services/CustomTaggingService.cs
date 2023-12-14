@@ -1,7 +1,9 @@
 ﻿using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Api.Services
 {
@@ -9,19 +11,28 @@ namespace ObjectMetaDataTagging.Api.Services
         where T : BaseTag
     {
         public CustomTaggingService(
-            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager) 
-                : base(eventManager)
+            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
+            : base(eventManager)
         {
         }
 
         public override async Task SetTagAsync(object o, T tag)
         {
-            if (o is ExamplePersonTransaction transaction)
+            await base.SetTagAsync(o, tag);
+            Console.WriteLine("OVERRIDDEN");
+
+            var tagFromEvent = _eventManager != null
+                ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
+                : null;
+
+            if (tagFromEvent != null)
             {
-                transaction.AssociatedTags.Add(tag);
-            }
-            //Console.WriteLine($"Tag Id: {tag.Id}   TagName:  {tag.Name}  TagValue:  {tag.Value}");
-           await base.SetTagAsync(o, tag);
-        }      
+                tagFromEvent.DateLastUpdated = DateTime.UtcNow;
+                tagFromEvent.AssociatedParentObjectId = tag.AssociatedParentObjectId;
+                tagFromEvent.AssociatedParentObjectName = tag.AssociatedParentObjectName;
+
+                await base.SetTagAsync(o, (T)tagFromEvent);
+            }        
+        }
     }
 }

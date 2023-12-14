@@ -64,9 +64,8 @@ namespace ObjectMetaDataTagging.Events
                 }
                 else
                 {
-                    // where _addedHandler.HandleAsync returns null
-                    // can return a default value or handle it as it is. It's ok for it to return null as sometimes there wont 
-                    // be anything to return
+                    // where _addedHandler.HandleAsync returns null it can return a default value.
+                    // It's ok for it to return null as sometimes there wont be anything to return
                     return null;
                 }
             }

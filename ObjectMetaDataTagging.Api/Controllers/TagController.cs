@@ -7,6 +7,7 @@ using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Services;
+using ObjectMetaDataTagging.Api.Services;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -14,8 +15,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        private IDefaultTaggingService<BaseTag> _taggingService;
         private readonly IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> _dynamicQueryBuilder;
-        private readonly IDefaultTaggingService<BaseTag> _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
@@ -33,7 +34,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             _eventManager = eventManager;
             _dynamicQueryBuilder = dynamicQueryBuilder;
-
+       
             InitializeTestData();
         }
 
@@ -41,11 +42,18 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             // Users can choose the tagging service they want to use
             // or any other implementation, eg databaseTaggingService
-            IDefaultTaggingService<BaseTag> taggingService = new InMemoryTaggingService<BaseTag>(_eventManager); 
-            var defaultTaggingService = new DefaultTaggingService<BaseTag>(taggingService);
+
+            //_taggingService = new InMemoryTaggingService<BaseTag>(_eventManager);
+            //var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
+
+            //testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
+            _taggingService = new CustomTaggingService<BaseTag>(_eventManager); // Use the same instance of CustomTaggingService<BaseTag>
+            var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
 
             testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
-        }
+        
+
+    }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync(Guid tagId)
