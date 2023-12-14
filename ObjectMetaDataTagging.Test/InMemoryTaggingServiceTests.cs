@@ -13,8 +13,10 @@ namespace ObjectMetaDataTagging.Test
 {
     public class InMemoryTaggingServiceTests
     {
-        [Fact]
-        public async void SetTagAsync_ShouldAddToDictionary_AndTriggerEvent()
+        [Theory]
+        [InlineData(1500)]
+        [InlineData(2500)]
+        public async void SetTagAsync_ShouldAddToDictionary_AndRaiseEventIfConditionIsTrue(int amount)
         {
             // Arrange
             var mockAddedHandler = new Mock<IAsyncEventHandler<AsyncTagAddedEventArgs>>();
@@ -24,45 +26,41 @@ namespace ObjectMetaDataTagging.Test
 
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
 
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 2500, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = amount, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", 43, "A numeric tag");
 
             // Act
-            taggingService.SetTagAsync(obj, tag);
+            await taggingService.SetTagAsync(obj, tag);
 
             // Assert
             Assert.True(taggingService.data.TryGetValue(obj, out var tagDictionary));
             Assert.True(tagDictionary.ContainsKey(tag.Id));
             Assert.True(tagDictionary.Count != 0);
-
-            // Verify the tagDictionary has the correct values
             var tags = await taggingService.GetAllTags(obj);
             Assert.Single(tags);
             Assert.Equal(tag, tags.First());
 
-            // Verify that the event manager was invoked if not null and amount is over 2000
             mockAddedHandler.Verify(
                 handler => handler.HandleAsync(It.IsAny<AsyncTagAddedEventArgs>()),
                 Times.AtMostOnce);
 
+            // Check if the tag was raised or not depending on given condition
             if (obj.Amount > 2000)
             {
-                // If the condition is met, ensure that the event was raised
                 mockAddedHandler.Verify(
                     handler => handler.HandleAsync(It.Is<AsyncTagAddedEventArgs>(e => e.TaggedObject == obj && e.Tag == tag)),
                     Times.AtMostOnce);
             }
             else
             {
-                // If the condition is not met, ensure that the event was not raised
                 mockAddedHandler.Verify(
-                    handler => handler.HandleAsync(It.IsAny<AsyncTagAddedEventArgs>()),
-                    Times.Never);
+                   handler => handler.HandleAsync(It.Is<AsyncTagAddedEventArgs>(e => e.TaggedObject == obj && e.Tag == tag)),
+                   Times.Never);
+
             }
         }
     }
 
-        // Sample classes for testing
         public class PersonTranscation
     {
         public Guid Id { get; set; } = Guid.NewGuid();
