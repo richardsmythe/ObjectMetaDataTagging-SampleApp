@@ -13,7 +13,7 @@ namespace ObjectMetaDataTagging.Services
             _taggingService = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
         }
 
-        public virtual Task SetTagAsync(object o, T tag) => _taggingService.SetTagAsync(o, tag);
+        public Task SetTagAsync(object o, T tag) => _taggingService.SetTagAsync(o, tag);
 
         public Task<bool> UpdateTagAsync(object o, Guid tagId, T newTag) => _taggingService.UpdateTagAsync(o, tagId, newTag);
 

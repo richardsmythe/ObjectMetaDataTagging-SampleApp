@@ -22,6 +22,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
+        private static bool isTestDataInitialised = false; 
+
         public TagController(
             IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> dynamicQueryBuilder,
             IDefaultTaggingService<BaseTag> taggingService,
@@ -34,26 +36,22 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             _eventManager = eventManager;
             _dynamicQueryBuilder = dynamicQueryBuilder;
-       
-            InitializeTestData();
+
+            // Check if data is already initialized before calling InitializeTestData
+            if (!isTestDataInitialised)
+            {
+                InitialiseTestData();
+                isTestDataInitialised = true;
+            }
         }
 
-        private async void InitializeTestData()
+        private async Task InitialiseTestData()
         {
-            // Users can choose the tagging service they want to use
-            // or any other implementation, eg databaseTaggingService
-
-            //_taggingService = new InMemoryTaggingService<BaseTag>(_eventManager);
-            //var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
-
-            //testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
-            _taggingService = new CustomTaggingService<BaseTag>(_eventManager); // Use the same instance of CustomTaggingService<BaseTag>
+            _taggingService = new CustomTaggingService<BaseTag>(_eventManager);
             var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
 
             testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
-        
-
-    }
+        }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync(Guid tagId)
@@ -149,13 +147,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         {
                             foreach (var childTag in tagModel.ChildTags)
                             {
-                                //tagModel.AssociatedObjectId = childTag.Id;
-                                tagModel.Description = "HAS CHILD TAG!"; 
+                                tagModel.Description = "HAS CHILD TAG(S)";
                                 childTag.Id = Guid.NewGuid();
-                                childTag.Name = "The child tag";
                                 childTag.AssociatedParentObjectName = tagModel.TagName;
                                 childTag.AssociatedParentObjectId = tagModel.tagId;
-                                childTag.Description = "i'm a child tag";
+                                childTag.Name = "Child Tag";
                             }
                         }
 
@@ -177,27 +173,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             return Ok(new List<Frame> { frameModel });
         }
 
-        //[HttpPost]
-        //public IActionResult CreateTag()
-        //{
-        //    // Call GenerateTestData to get the existing test data
-        //    var existingTestData = GenerateTestData(_taggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
-
-        //    // Generate random data for the new tag
-        //    var random = new Random();
-        //    var tagName = "RandomTag" + random.Next(1, 9999);
-        //    var tagType = "RandomType" + random.Next(1, 9999);
-        //    var description = "RandomDescription" + random.Next(1, 9999);
-
-        //    // Create a new tag with random data
-        //    BaseTag newTag = _tagFactory.CreateBaseTag(tagName, tagType, description);
-
-        //    // Add the new tag to the existing test data
-        //    existingTestData.Add(new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>(tagName, newTag) });
-
-        //    // You can return the newly created tag or any relevant response based on your requirements
-        //    return Ok(newTag);
-        //}
 
         public static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
          IDefaultTaggingService<BaseTag> taggingService,
@@ -226,11 +201,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     //var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
                     BaseTag newTag = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "");
-                    BaseTag newTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "");
-                    await taggingService.SetTagAsync(newObj, newTag2);
-                    
-                    newTag.AddChildTag(newTag2);
+                    //BaseTag newTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), tagTypes[random.Next(tagTypes.Length)].ToString(), "");
+                    //BaseTag newTag3 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), tagTypes[random.Next(tagTypes.Length)].ToString(), "");
+
                     await taggingService.SetTagAsync(newObj, newTag);
+
+                    newTag.AddChildTag(tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 1"));
+                    newTag.AddChildTag(tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 2"));
 
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());

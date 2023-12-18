@@ -37,23 +37,23 @@ namespace ObjectMetaDataTagging.Services
          * to perform additional actions when tags are added, removed, or updated. 
          * This can be useful if someone wants to extend the behavior of the library. */
 
-        //public event EventHandler<AsyncTagAddedEventArgs> TagAdded
-        //{
-        //    add => _eventManager.TagAdded += value;
-        //    remove => _eventManager.TagAdded -= value;
-        //}
+        public event EventHandler<AsyncTagAddedEventArgs> TagAdded
+        {
+            add => _eventManager.TagAdded += value;
+            remove => _eventManager.TagAdded -= value;
+        }
 
-        //public event EventHandler<AsyncTagRemovedEventArgs> TagRemoved
-        //{
-        //    add => _eventManager.TagRemoved += value;
-        //    remove => _eventManager.TagRemoved -= value;
-        //}
+        public event EventHandler<AsyncTagRemovedEventArgs> TagRemoved
+        {
+            add => _eventManager.TagRemoved += value;
+            remove => _eventManager.TagRemoved -= value;
+        }
 
-        //public event EventHandler<AsyncTagUpdatedEventArgs> TagUpdated
-        //{
-        //    add => _eventManager.TagUpdated += value;
-        //    remove => _eventManager.TagUpdated -= value;
-        //}
+        public event EventHandler<AsyncTagUpdatedEventArgs> TagUpdated
+        {
+            add => _eventManager.TagUpdated += value;
+            remove => _eventManager.TagUpdated -= value;
+        }
 
         #region Default Tag Operations
         public virtual Task<IEnumerable<T>> GetAllTags(object o)
@@ -140,7 +140,7 @@ namespace ObjectMetaDataTagging.Services
                         // if there are no tags left for this object, remove entry
                         if (tags.Count == 0)
                         {
-                            data.TryRemove(o, out _);
+                           data.TryRemove(o, out _);
                         }
 
                         return true;

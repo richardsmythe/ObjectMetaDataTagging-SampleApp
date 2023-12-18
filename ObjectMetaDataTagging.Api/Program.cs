@@ -35,7 +35,7 @@ namespace ObjectMetaDataTagging.Api
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
 
             // Register CustomTaggingService
-            builder.Services.AddScoped<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
+            builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
 
 
 

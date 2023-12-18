@@ -32,7 +32,7 @@ namespace ObjectMetaDataTagging.Api.Services
                 tagFromEvent.AssociatedParentObjectName = tag.AssociatedParentObjectName;
 
                 await base.SetTagAsync(o, (T)tagFromEvent);
-            }        
+            }
         }
     }
 }

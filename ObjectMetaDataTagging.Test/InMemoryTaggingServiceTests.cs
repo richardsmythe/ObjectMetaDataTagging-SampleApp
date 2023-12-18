@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Moq;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
-using Xunit;
-using static ObjectMetaDataTagging.Test.InMemoryTaggingServiceTests;
 
 namespace ObjectMetaDataTagging.Test
 {
@@ -29,6 +24,7 @@ namespace ObjectMetaDataTagging.Test
             var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = amount, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", 43, "A numeric tag");
 
+
             // Act
             // Set the callback to simulate a situation where the tagAddedEvent is used to add a 'Suspicous' tag
             // if a transaction amount was over 2000. 
@@ -36,21 +32,25 @@ namespace ObjectMetaDataTagging.Test
             {
                 if (amount > 2000)
                 {
-                    taggingService.data.TryGetValue(o, out var tagDictionary);
-                    var suspiciousTag = new BaseTag("Suspicious", null, "This object has been tagged as suspicious.");
-                    tagDictionary?.TryAdd(suspiciousTag.Id, suspiciousTag);
-
-                    await taggingEventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, suspiciousTag));
-                }               
+                    await Task.Run(() =>
+                    {
+                        var suspiciousTag = new BaseTag("Suspicious", null, "This object has been tagged as suspicious.");
+                        taggingService.data.TryGetValue(o, out var tagDictionary);
+                        tagDictionary?.TryAdd(suspiciousTag.Id, suspiciousTag);
+                        taggingEventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, suspiciousTag)).Wait();
+                    });
+                }
             };
 
+
             await taggingService.SetTagAsync(obj, tag);
+            var tags = await taggingService.GetAllTags(obj);
+
 
             // Assert
             Assert.True(taggingService.data.TryGetValue(obj, out var tagDictionary));
             Assert.True(tagDictionary.ContainsKey(tag.Id));
             Assert.True(tagDictionary.Count != 0);
-            var tags = await taggingService.GetAllTags(obj);
             Assert.True(tagDictionary.Count == tags.Count());
             Assert.Equal(tag, tags.First());
 
@@ -58,7 +58,7 @@ namespace ObjectMetaDataTagging.Test
             {
                 mockAddedHandler.Verify(
                     handler => handler.HandleAsync(It.Is<AsyncTagAddedEventArgs>(e => e.TaggedObject == obj && e.Tag.Name == "Suspicious")),
-                    Times.AtMostOnce);
+                    Times.Once);
                 var suspiciousTagId = tagDictionary.Values.FirstOrDefault(t => t.Name == "Suspicious")!.Id;
                 Assert.Equal("Suspicious", tagDictionary[suspiciousTagId].Name);
                 Assert.Equal(suspiciousTagId, tagDictionary[suspiciousTagId].Id);
@@ -72,6 +72,36 @@ namespace ObjectMetaDataTagging.Test
                 Assert.DoesNotContain("Suspicious", tagDictionary.Values.Select(t => t.Name));
             }
         }
+
+        [Fact]
+        public async void RemoveTagAsync_ShouldRemoveGivenTagFromDictionary_AndRaiseTagRemovedEvent()
+        {
+            // Arrange
+            var mockRemovedHandler = new Mock<IAsyncEventHandler<AsyncTagRemovedEventArgs>>();
+            var taggingEventManager = new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>(
+                null, mockRemovedHandler.Object, null
+            );
+
+            var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
+            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var tag = new BaseTag("TestTag", "Warning", "A string tag");
+            var tag2 = new BaseTag("TestTag2", "Warning", "A string tag");
+
+            // Act
+            await taggingService.SetTagAsync(obj, tag);
+            await taggingService.SetTagAsync(obj, tag2);
+            await taggingService.RemoveTagAsync(obj, tag.Id);
+
+            taggingEventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(obj,tag)).Wait();
+
+            // Assert
+            mockRemovedHandler.Verify(
+                handler => handler.HandleAsync(It.Is<AsyncTagRemovedEventArgs>(e => e.TaggedObject == obj && e.Tag == tag)),
+                Times.Once);
+   
+            Assert.False(taggingService.data.ContainsKey(tag.Id));
+
+        }
     }
 
     public class PersonTranscation
@@ -80,7 +110,5 @@ namespace ObjectMetaDataTagging.Test
         public string Sender { get; set; }
         public string Receiver { get; set; }
         public double Amount { get; set; }
-
-        //public List<BaseTag> AssociatedTags { get; } = new List<BaseTag>();
     }
 }
