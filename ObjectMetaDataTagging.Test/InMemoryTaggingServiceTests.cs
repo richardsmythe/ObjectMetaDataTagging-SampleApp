@@ -92,16 +92,87 @@ namespace ObjectMetaDataTagging.Test
             await taggingService.SetTagAsync(obj, tag2);
             await taggingService.RemoveTagAsync(obj, tag.Id);
 
-            taggingEventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(obj,tag)).Wait();
+            taggingEventManager.RaiseTagRemoved(new AsyncTagRemovedEventArgs(obj, tag)).Wait();
 
             // Assert
             mockRemovedHandler.Verify(
                 handler => handler.HandleAsync(It.Is<AsyncTagRemovedEventArgs>(e => e.TaggedObject == obj && e.Tag == tag)),
                 Times.Once);
-   
-            Assert.False(taggingService.data.ContainsKey(tag.Id));
 
+            Assert.False(taggingService.data.ContainsKey(tag.Id));
         }
+
+        [Fact]
+        public async void UpdateTagAsync_ShouldUpdateGivenTagInDictionary_AndRaiseTagRemovedEvent()
+        {
+            // Arrange
+            var mockUpdateHandler = new Mock<IAsyncEventHandler<AsyncTagUpdatedEventArgs>>();
+            var taggingEventManager = new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>(
+                null, null, mockUpdateHandler.Object
+            );
+
+            var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
+            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var tag = new BaseTag("TestTag", "Warning", "A string tag");
+            var tag2 = new BaseTag("TestTag2", "Warning", "A string tag");
+            var modifiedTag = new BaseTag("TestUpdatedTag", 652, "Updated Tag");
+
+            // Act
+            await taggingService.SetTagAsync(obj, tag);
+            await taggingService.SetTagAsync(obj, tag2);
+            await taggingService.UpdateTagAsync(obj, tag.Id, modifiedTag);
+            var tagCount = (await taggingService.GetAllTags(obj)).Count();
+
+            taggingEventManager.RaiseTagUpdated(new AsyncTagUpdatedEventArgs(obj, tag, modifiedTag)).Wait();
+
+            // Assert
+            mockUpdateHandler.Verify(
+                handler => handler.HandleAsync(It.Is<AsyncTagUpdatedEventArgs>(e => e.TaggedObject == obj && e.NewTag == modifiedTag)),
+                Times.Once);
+
+            // Assert
+            mockUpdateHandler.Verify(
+                handler => handler.HandleAsync(It.Is<AsyncTagUpdatedEventArgs>(e => e.TaggedObject == obj && e.NewTag == modifiedTag)),
+                Times.Once);
+
+            Assert.True(taggingService.data.TryGetValue(obj, out var tags));
+            Assert.False(taggingService.data.ContainsKey(modifiedTag.Id));
+            Assert.Equal(tagCount, tags.Count);
+        }
+
+        [Fact]
+        public void HasTag_ShouldReturnTrue_WhenObjectHasTag()
+        {
+            // Arrange
+            var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
+            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var tag = new BaseTag("TestTag", "Warning", "A string tag");
+
+            // Act
+            taggingService.SetTagAsync(obj, tag).Wait();
+            var hasTag = taggingService.HasTag(obj, tag.Id);
+
+            // Assert
+            Assert.True(hasTag);
+        }
+
+        [Fact]
+        public async Task GetObjectByTag_ShouldReturnAssociatedObject_WhenTagExists()
+        {
+            // Arrange
+            var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
+            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var tag = new BaseTag("TestTag", "Warning", "A string tag");
+
+            // Act
+            await taggingService.SetTagAsync(obj, tag);
+            var result = taggingService.GetObjectByTag(tag.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result is PersonTranscation);
+        }
+
     }
 
     public class PersonTranscation

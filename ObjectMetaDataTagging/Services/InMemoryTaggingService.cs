@@ -114,12 +114,12 @@ namespace ObjectMetaDataTagging.Services
                 }
 
                 return false;
-      
+
             }
             finally
             {
                 semaphore.Release();
-            }    
+            }
         }
 
         public virtual async Task<bool> RemoveTagAsync(object? o, Guid tagId)
@@ -140,7 +140,7 @@ namespace ObjectMetaDataTagging.Services
                         // if there are no tags left for this object, remove entry
                         if (tags.Count == 0)
                         {
-                           data.TryRemove(o, out _);
+                            data.TryRemove(o, out _);
                         }
 
                         return true;
@@ -169,8 +169,6 @@ namespace ObjectMetaDataTagging.Services
 
             var tagDictionary = data.GetOrAdd(o, new Dictionary<Guid, BaseTag>());
 
-            // ensure that multiple threads don't interfere with
-            // each other when modifying the dictionary concurrently
             await semaphore.WaitAsync();
             try
             {
@@ -198,8 +196,6 @@ namespace ObjectMetaDataTagging.Services
 
             modifiedTag.DateLastUpdated = DateTime.UtcNow;
 
-            // Ensure that multiple threads don't interfere with
-            // each other when modifying the dictionary concurrently
             await semaphore.WaitAsync();
 
             try
@@ -208,7 +204,12 @@ namespace ObjectMetaDataTagging.Services
                 {
                     if (tags.ContainsKey(tagId))
                     {
+                        var originalTag = tags[tagId];
+                        modifiedTag.Id = originalTag.Id;
+
+
                         tags[tagId] = modifiedTag;
+
                         return true;
                     }
                 }
@@ -244,7 +245,7 @@ namespace ObjectMetaDataTagging.Services
             }
         }
 
-        public virtual Task<T?> GetObjectByTag(Guid tagId)
+        public virtual object GetObjectByTag(Guid tagId)
         {
             foreach (var kvp in data)
             {
@@ -254,14 +255,7 @@ namespace ObjectMetaDataTagging.Services
                 {
                     if (tags.TryGetValue(tagId, out var tag))
                     {
-                        if (kvp.Key is Task<T> associatedObject)
-                        {
-                            return associatedObject;
-                        }
-                        else
-                        {
-                            throw new ObjectNotFoundException("Associated object is not of expected type Task<T>.", nameof(kvp.Key));
-                        }
+                        return kvp.Key;
                     }
                 }
             }

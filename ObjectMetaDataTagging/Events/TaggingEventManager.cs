@@ -87,7 +87,7 @@ namespace ObjectMetaDataTagging.Events
                     {
                         if (handler is IAsyncEventHandler<AsyncTagRemovedEventArgs> asyncHandler)
                         {
-                            TagRemoved?.Invoke(this, e);
+                            await asyncHandler.HandleAsync(e);
                         }
                     }
                 }
@@ -97,6 +97,7 @@ namespace ObjectMetaDataTagging.Events
                 throw new TagRemovalException("Error handling tag removal event.", ex);
             }
         }
+
         public async Task RaiseTagUpdated(TUpdated e)
         {
             try
