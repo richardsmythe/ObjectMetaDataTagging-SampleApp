@@ -175,10 +175,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
 
         private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-        IDefaultTaggingService<BaseTag> taggingService,
-        ITagFactory tagFactory,
-        IAlertService alertService,
-        IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+       IDefaultTaggingService<BaseTag> taggingService,
+       ITagFactory tagFactory,
+       IAlertService alertService,
+       IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
@@ -206,19 +206,25 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var childTag1 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 1");
                     var childTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 2");
 
-                    newTag.AddChildTag(childTag1);
-                    newTag.AddChildTag(childTag2);
-
                     // Set properties for child tags
                     childTag1.AssociatedParentObjectName = newTag.Name;
                     childTag1.AssociatedParentObjectId = newTag.Id;
+                    childTag1.Value = "Child Value 1";
+
                     childTag2.AssociatedParentObjectName = newTag.Name;
                     childTag2.AssociatedParentObjectId = newTag.Id;
+                    childTag2.Value = "Child Value 2";
+
+                    newTag.Value = "Parent Value";
+
+                    newTag.AddChildTag(childTag1);
+                    newTag.AddChildTag(childTag2);
 
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
+
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
