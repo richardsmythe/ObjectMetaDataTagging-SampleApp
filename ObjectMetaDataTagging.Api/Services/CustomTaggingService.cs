@@ -19,8 +19,7 @@ namespace ObjectMetaDataTagging.Api.Services
         public override async Task SetTagAsync(object o, T tag)
         {
             await base.SetTagAsync(o, tag);
-            Console.WriteLine("OVERRIDDEN");
-
+           
             var tagFromEvent = _eventManager != null
                 ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
                 : null;
@@ -33,6 +32,6 @@ namespace ObjectMetaDataTagging.Api.Services
 
                 await base.SetTagAsync(o, (T)tagFromEvent);
             }
-        }
+        }   
     }
 }

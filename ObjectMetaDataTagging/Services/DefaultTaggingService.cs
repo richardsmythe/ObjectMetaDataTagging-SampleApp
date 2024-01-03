@@ -28,5 +28,7 @@ namespace ObjectMetaDataTagging.Services
         public bool HasTag(object o, Guid tagId) => _taggingService.HasTag(o, tagId);
 
         public object? GetObjectByTag(Guid tagId) => _taggingService.GetObjectByTag(tagId);
+
+        public void PrintObjectGraph() => _taggingService.PrintObjectGraph();
     }
 }

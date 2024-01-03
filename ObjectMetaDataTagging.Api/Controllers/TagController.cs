@@ -22,7 +22,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
-        private static bool isTestDataInitialised = false; 
+        private static bool isTestDataInitialised = false;
 
         public TagController(
             IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> dynamicQueryBuilder,
@@ -37,7 +37,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _eventManager = eventManager;
             _dynamicQueryBuilder = dynamicQueryBuilder;
 
-            // Check if data is already initialized before calling InitializeTestData
+            // Check if data is already initialised before calling InitialiseTestData
             if (!isTestDataInitialised)
             {
                 InitialiseTestData();
@@ -51,6 +51,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
 
             testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
+
+
         }
 
         [HttpDelete]
@@ -111,12 +113,12 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var tagModels = new List<TagModel>();
             var objectName = "";
             Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00");
+
             foreach (var obj in testData)
             {
-                // gets type --> obj.First().Key.GetType().Name.ToString(); 
-                if (obj.First().Value is BaseTag baseTag)
+                if (obj.First().Value is BaseTag baseTag && baseTag != null)
                 {
-                    objectName = baseTag.AssociatedParentObjectName.ToString();
+                    objectName = baseTag.AssociatedParentObjectName?.ToString() ?? "";
                     objectId = baseTag.AssociatedParentObjectId;
                 }
 
@@ -143,15 +145,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             ChildTags = tag.ChildTags
                         };
 
+                        // Set properties for child tags
                         if (tagModel.ChildTags != null)
                         {
                             foreach (var childTag in tagModel.ChildTags)
                             {
-                                tagModel.Description = "HAS CHILD TAG(S)";
-                                childTag.Id = Guid.NewGuid();
                                 childTag.AssociatedParentObjectName = tagModel.TagName;
                                 childTag.AssociatedParentObjectId = tagModel.tagId;
-                                childTag.Name = "Child Tag";
                             }
                         }
 
@@ -174,13 +174,12 @@ namespace ObjectMetaDataTagging.Api.Controllers
         }
 
 
-        public static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-         IDefaultTaggingService<BaseTag> taggingService,
-         ITagFactory tagFactory,
-         IAlertService alertService,
-         IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+        private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
+        IDefaultTaggingService<BaseTag> taggingService,
+        ITagFactory tagFactory,
+        IAlertService alertService,
+        IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
         {
-
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
 
@@ -198,22 +197,28 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    //var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                    var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
-                    BaseTag newTag = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "");
-                    //BaseTag newTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), tagTypes[random.Next(tagTypes.Length)].ToString(), "");
-                    //BaseTag newTag3 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), tagTypes[random.Next(tagTypes.Length)].ToString(), "");
-
+                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
                     await taggingService.SetTagAsync(newObj, newTag);
 
-                    newTag.AddChildTag(tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 1"));
-                    newTag.AddChildTag(tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 2"));
+                    // Add child tags (if needed)
+                    var childTag1 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 1");
+                    var childTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 2");
+
+                    newTag.AddChildTag(childTag1);
+                    newTag.AddChildTag(childTag2);
+
+                    // Set properties for child tags
+                    childTag1.AssociatedParentObjectName = newTag.Name;
+                    childTag1.AssociatedParentObjectId = newTag.Id;
+                    childTag2.AssociatedParentObjectName = newTag.Name;
+                    childTag2.AssociatedParentObjectId = newTag.Id;
 
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
-
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -253,6 +258,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
             //////////////////////////////////////////////
 
             return testData;
+        }
+
+        [HttpGet("print-object-graph")]
+        public IActionResult PrintObjectGraph()
+        {
+            _taggingService.PrintObjectGraph();
+            return Ok("Object graph printed to console.");
         }
 
     }
