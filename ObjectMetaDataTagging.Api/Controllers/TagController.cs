@@ -175,24 +175,25 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
 
         private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-       IDefaultTaggingService<BaseTag> taggingService,
-       ITagFactory tagFactory,
-       IAlertService alertService,
-       IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+            IDefaultTaggingService<BaseTag> taggingService,
+            ITagFactory tagFactory,
+            IAlertService alertService,
+            IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
+            int numberOfObjects = random.Next(1, 5);
 
-            for (int i = 0; i < random.Next(1, 2); i++)
+            for (int i = 0; i < numberOfObjects; i++)
             {
                 var newObj = new ExamplePersonTransaction
                 {
-                    Sender = "Sender" + random.Next(1, 1000),
-                    Receiver = "Receiver" + random.Next(1, 1000),
+                    Sender = "Sender" + random.Next(1, 50),
+                    Receiver = "Receiver" + random.Next(1, 50),
                     Amount = random.Next(1, 5999),
                 };
 
-                int numberOfTags = random.Next(1, 2);
+                int numberOfTags = random.Next(1, 10);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
 
                 for (int j = 0; j < numberOfTags; j++)
@@ -202,23 +203,20 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
                     await taggingService.SetTagAsync(newObj, newTag);
 
-                    // Add child tags (if needed)
-                    var childTag1 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 1");
-                    var childTag2 = tagFactory.CreateBaseTag(tagTypes[random.Next(tagTypes.Length)].ToString(), null, "child tag 2");
+                    int numberOfChildTags = random.Next(0, 5);
 
-                    // Set properties for child tags
-                    childTag1.AssociatedParentObjectName = newTag.Name;
-                    childTag1.AssociatedParentObjectId = newTag.Id;
-                    childTag1.Value = "Child Value 1";
+                    for (int k = 0; k < numberOfChildTags; k++)
+                    {
+                        var childTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                        var childTag = tagFactory.CreateBaseTag(childTagName, null, $"Child tag {k + 1}");
 
-                    childTag2.AssociatedParentObjectName = newTag.Name;
-                    childTag2.AssociatedParentObjectId = newTag.Id;
-                    childTag2.Value = "Child Value 2";
+                        // Set properties for child tag
+                        childTag.AssociatedParentObjectName = newTag.Name;
+                        childTag.AssociatedParentObjectId = newTag.Id;
+                        childTag.Value = $"Child Value {k + 1}";
 
-                    newTag.Value = "Parent Value";
-
-                    newTag.AddChildTag(childTag1);
-                    newTag.AddChildTag(childTag2);
+                        newTag.AddChildTag(childTag);
+                    }
 
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());

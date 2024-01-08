@@ -1,13 +1,13 @@
 ﻿using ObjectMetaDataTagging.Models.TagModels;
-using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Linq;
 
 namespace ObjectMetaDataTagging.Services
 {
-    public class GraphNode  // Change the class name to GraphNode
+    /// <summary>
+    ///  A service to build an object graph structure with a given dictionary, 
+    ///  using a depth-first recursive approach it will scan all tag hierarchies.
+    /// </summary>
+    public class GraphNode
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -30,36 +30,34 @@ namespace ObjectMetaDataTagging.Services
             {
                 var rootObject = kvp.Key;
 
-              
+
                 var objectName = rootObject.GetType().Name;
 
                 if (rootObject != null)
                 {
-                    // var objectId = idProperty.GetValue(rootObject);                  
-
                     var rootNode = await BuildSubgraph(rootObject, objectName, concurrentDictionary, visitedIds);
-                    graphNodes.Add(rootNode);
+                    if (rootNode != null)
+                    {
+                        graphNodes.Add(rootNode);
+                    }
                 }
                 else
                 {
-                    // Handle the case where the root object doesn't have Id and Name properties
-                    // You might want to log a warning or throw an exception based on your requirements.
+                    // when the root object doesn't have Id and Name properties
                 }
             }
 
             return graphNodes;
         }
 
-        private static async Task<GraphNode> BuildSubgraph(object rootObject, string objectName, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
+        private static async Task<GraphNode?> BuildSubgraph(object rootObject, string objectName, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
         {
             var idProperty = rootObject.GetType().GetProperty("Id");
             if (idProperty == null) return null;
-
+            
             var objectId = idProperty.GetValue(rootObject);
             if (objectId == null) return null;
 
-
-     
             if (visitedIds.Contains((Guid)objectId))
             {
 
@@ -74,8 +72,8 @@ namespace ObjectMetaDataTagging.Services
             {
                 if (tags != null)
                 {
-                    foreach(var tag in tags.Values)
-{
+                    foreach (var tag in tags.Values)
+                    {
                         var childNode = await BuildSubgraph(tag, tag.Name, concurrentDictionary, visitedIds);
 
                         if (childNode != null)
@@ -83,7 +81,7 @@ namespace ObjectMetaDataTagging.Services
                             foreach (var childTag in tag.ChildTags)
                             {
                                 var childTagNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
-                                
+
                                 if (childTagNode != null)
                                 {
                                     childNode.Children.Add(childTagNode);
@@ -120,16 +118,16 @@ namespace ObjectMetaDataTagging.Services
 
         private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
-            var indent = new string(' ', depth * 2);
+            var indent = new string(' ', depth * 6);
 
             if (!isRoot)
             {
-                Console.WriteLine($"{indent}- {node.Name}");
+                Console.WriteLine($"{indent}|___ {node.Name}");
             }
 
             foreach (var childNode in node.Children)
             {
-                PrintSubgraph(childNode, depth + 2);
+                PrintSubgraph(childNode, depth + 1);
             }
         }
 
