@@ -1,5 +1,5 @@
 ﻿using ObjectMetaDataTagging.Models.TagModels;
-using System.Threading.Tasks;
+using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Interfaces
 {
@@ -14,6 +14,8 @@ namespace ObjectMetaDataTagging.Interfaces
         Task<bool> RemoveTagAsync(object? o, Guid tagId);
         bool HasTag(object o, Guid tagId);
         object? GetObjectByTag(Guid tagId);
-        void PrintObjectGraph();
+
+        Task<List<GraphNode>> GetObjectGraph();
+
     }
 }

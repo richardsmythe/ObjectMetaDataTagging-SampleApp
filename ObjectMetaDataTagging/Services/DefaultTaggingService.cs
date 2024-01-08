@@ -29,6 +29,6 @@ namespace ObjectMetaDataTagging.Services
 
         public object? GetObjectByTag(Guid tagId) => _taggingService.GetObjectByTag(tagId);
 
-        public void PrintObjectGraph() => _taggingService.PrintObjectGraph();
+        public Task<List<GraphNode>> GetObjectGraph() => _taggingService.GetObjectGraph();
     }
 }

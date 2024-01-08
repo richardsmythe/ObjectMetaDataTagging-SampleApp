@@ -56,6 +56,11 @@ namespace ObjectMetaDataTagging.Services
             remove => _eventManager.TagUpdated -= value;
         }
 
+        public async Task<List<GraphNode>> GetObjectGraph()
+        {
+            return await ObjectGraphBuilder.BuildObjectGraph(data);
+        }
+
         #region Default Tag Operations
         public virtual Task<IEnumerable<T>> GetAllTags(object o)
         {
@@ -285,55 +290,6 @@ namespace ObjectMetaDataTagging.Services
         }
 
         #endregion
-
-        public void PrintObjectGraph()
-        {
-            foreach (var kvp in data)
-            {
-                Console.WriteLine($"Object:");
-                PrintObjectProperties(kvp.Key);
-                PrintTags(kvp.Value, 1);
-                Console.WriteLine();
-            }
-        }
-
-        private void PrintObjectProperties(object obj)
-        {
-            var properties = obj.GetType().GetProperties();
-            foreach (var property in properties)
-            {
-                var value = property.GetValue(obj);
-                Console.WriteLine($"  {property.Name}: {value}");
-            }
-        }
-
-        private void PrintTags(Dictionary<Guid, BaseTag> tags, int indentationLevel)
-        {
-            foreach (var tag in tags.Values)
-            {
-                PrintTag(tag, indentationLevel);
-
-                // Check if the tag has child tags
-                if (tag.ChildTags != null && tag.ChildTags.Any())
-                {
-                    PrintTags(tag.ChildTags.ToDictionary(childTag => childTag.Id, childTag => childTag), indentationLevel + 1);
-                }
-            }
-        }
-
-        private void PrintTag(BaseTag tag, int indentationLevel)
-        {
-            string indentation = new string(' ', indentationLevel * 4);
-            Console.WriteLine($"{indentation}- Tag Id: {tag.Id}");
-            Console.WriteLine($"{indentation}  Name: {tag.Name}");
-            Console.WriteLine($"{indentation}  Value: {tag.Value}");
-            Console.WriteLine($"{indentation}  Type: {tag.Type}");
-            Console.WriteLine($"{indentation}  Description: {tag.Description}");
-            Console.WriteLine($"{indentation}  AssociatedParentObjectName: {tag.AssociatedParentObjectName}");
-            Console.WriteLine($"{indentation}  AssociatedParentObjectId: {tag.AssociatedParentObjectId}");
-            Console.WriteLine($"{indentation}  DateCreated: {tag.DateCreated}");
-            Console.WriteLine($"{indentation}  DateLastUpdated: {tag.DateLastUpdated}");
-        }
 
 
     }

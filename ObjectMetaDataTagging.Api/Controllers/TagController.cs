@@ -267,10 +267,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
         }
 
         [HttpGet("print-object-graph")]
-        public IActionResult PrintObjectGraph()
+        public async Task<IActionResult> PrintObjectGraph()
         {
-            _taggingService.PrintObjectGraph();
-            return Ok("Object graph printed to console.");
+            var objectGraph = await _taggingService.GetObjectGraph();
+            ObjectGraphBuilder.PrintObjectGraph(objectGraph);
+            return Ok(objectGraph);
         }
 
     }
