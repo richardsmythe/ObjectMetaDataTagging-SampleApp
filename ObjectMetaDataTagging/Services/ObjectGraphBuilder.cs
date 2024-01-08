@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 
 namespace ObjectMetaDataTagging.Services
@@ -29,11 +30,10 @@ namespace ObjectMetaDataTagging.Services
             {
                 var rootObject = kvp.Key;
 
-                // Assuming you want to get the Id and Name properties
-                var idProperty = rootObject.GetType().GetProperty("Id");
+              
                 var objectName = rootObject.GetType().Name;
 
-                if (idProperty != null)
+                if (rootObject != null)
                 {
                     // var objectId = idProperty.GetValue(rootObject);                  
 
@@ -53,23 +53,22 @@ namespace ObjectMetaDataTagging.Services
         private static async Task<GraphNode> BuildSubgraph(object rootObject, string objectName, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
         {
             var idProperty = rootObject.GetType().GetProperty("Id");
-
-            if (idProperty == null)
-            {
-                //Console.WriteLine($"Id property not found on object of type '{rootObject.GetType().Name}'.");
-                return null;
-            }
+            if (idProperty == null) return null;
 
             var objectId = idProperty.GetValue(rootObject);
+            if (objectId == null) return null;
 
-            if (objectId == null)
-            {           
-                //Console.WriteLine($"Id property is null on object of type '{rootObject.GetType().Name}'.");
+
+     
+            if (visitedIds.Contains((Guid)objectId))
+            {
+
                 return null;
             }
 
-            var node = new GraphNode((Guid)objectId, objectName);
+            visitedIds.Add((Guid)objectId);
 
+            var node = new GraphNode((Guid)objectId, objectName);
 
             if (concurrentDictionary.TryGetValue(rootObject, out var tags))
             {
