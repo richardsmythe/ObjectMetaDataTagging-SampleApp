@@ -56,19 +56,15 @@ namespace ObjectMetaDataTagging.Services
 
             if (idProperty == null)
             {
-                // Handle the case where the root object doesn't have an 'Id' property
-                // You might want to log a warning or throw an exception based on your requirements.
-                Console.WriteLine($"Id property not found on object of type '{rootObject.GetType().Name}'.");
+                //Console.WriteLine($"Id property not found on object of type '{rootObject.GetType().Name}'.");
                 return null;
             }
 
             var objectId = idProperty.GetValue(rootObject);
 
             if (objectId == null)
-            {
-                // Handle the case where the 'Id' property is null
-                // You might want to log a warning or throw an exception based on your requirements.
-                Console.WriteLine($"Id property is null on object of type '{rootObject.GetType().Name}'.");
+            {           
+                //Console.WriteLine($"Id property is null on object of type '{rootObject.GetType().Name}'.");
                 return null;
             }
 
@@ -85,7 +81,6 @@ namespace ObjectMetaDataTagging.Services
 
                         if (childNode != null)
                         {
-                            // Use tag.ChildTags directly to get the parent tag's child tags
                             foreach (var childTag in tag.ChildTags)
                             {
                                 var childTagNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
@@ -93,55 +88,51 @@ namespace ObjectMetaDataTagging.Services
                                 if (childTagNode != null)
                                 {
                                     childNode.Children.Add(childTagNode);
-
                                 }
                             }
-
-                            // Add the childNode after processing its child tags
                             node.Children.Add(childNode);
                         }
                     }
                 }
                 else
                 {
-                    // Handle the case where 'tags' is null
-                    Console.WriteLine($"Tags are null for object with Id '{objectId}'.");
+                    // when tags is null
+                    //Console.WriteLine($"Tags are null for object with Id '{objectId}'.");
                 }
             }
             else
             {
-                // Handle the case where the key is not present in the dictionary
-                Console.WriteLine($"Key '{objectId}' not present in the dictionary.");
+                // when key is not present in the dictionary
+                //Console.WriteLine($"Key '{objectId}' not present in the dictionary.");
             }
 
             return node;
         }
 
 
-
-
         public static void PrintObjectGraph(List<GraphNode> graphNodes)
         {
             foreach (var node in graphNodes)
             {
-                Console.WriteLine($"Object: {node.Name}");
-                PrintSubgraph(node, 1);
+                Console.WriteLine($"Root Object: {node.Name}");
+                PrintSubgraph(node, 1, true);
             }
         }
 
-        private static void PrintSubgraph(GraphNode node, int depth)
+        private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
             var indent = new string(' ', depth * 2);
-            foreach (var childNode in node.Children)
+
+            if (!isRoot)
             {
-                Console.WriteLine($"{indent}- {childNode.Name}");
-                PrintSubgraph(childNode, depth + 1);
+                Console.WriteLine($"{indent}- {node.Name}");
             }
 
-            if (node.Children.Count == 0)
+            foreach (var childNode in node.Children)
             {
-                Console.WriteLine($"{indent}- (No Children)");
+                PrintSubgraph(childNode, depth + 2);
             }
         }
+
     }
 }
