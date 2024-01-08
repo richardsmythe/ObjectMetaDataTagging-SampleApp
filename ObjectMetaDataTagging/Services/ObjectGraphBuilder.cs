@@ -35,7 +35,7 @@ namespace ObjectMetaDataTagging.Services
 
                 if (idProperty != null)
                 {
-                   // var objectId = idProperty.GetValue(rootObject);                  
+                    // var objectId = idProperty.GetValue(rootObject);                  
 
                     var rootNode = await BuildSubgraph(rootObject, objectName, concurrentDictionary, visitedIds);
                     graphNodes.Add(rootNode);
@@ -74,32 +74,31 @@ namespace ObjectMetaDataTagging.Services
 
             var node = new GraphNode((Guid)objectId, objectName);
 
-            // Check if objectId is present in the dictionary
+
             if (concurrentDictionary.TryGetValue(rootObject, out var tags))
             {
                 if (tags != null)
                 {
-                    foreach (var tag in tags.Values)
-                    {
+                    foreach(var tag in tags.Values)
+{
                         var childNode = await BuildSubgraph(tag, tag.Name, concurrentDictionary, visitedIds);
 
                         if (childNode != null)
                         {
-                            node.Children.Add(childNode);
-                        }
-
-                        if(tag.ChildTags != null)
-                        {
-                            foreach(var ct in tag.ChildTags)
+                            // Use tag.ChildTags directly to get the parent tag's child tags
+                            foreach (var childTag in tag.ChildTags)
                             {
-                                var childTagNod = await BuildSubgraph(ct, ct.Name, concurrentDictionary, visitedIds);
-
-                                if (childTagNod != null)
+                                var childTagNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
+                                
+                                if (childTagNode != null)
                                 {
-                                    node.Children.Add(childTagNod);
-                                }
+                                    childNode.Children.Add(childTagNode);
 
+                                }
                             }
+
+                            // Add the childNode after processing its child tags
+                            node.Children.Add(childNode);
                         }
                     }
                 }
