@@ -5,7 +5,7 @@ namespace ObjectMetaDataTagging.Services
 {
     /// <summary>
     ///  A service to build an object graph structure with a given dictionary, 
-    ///  using a depth-first recursive approach it will scan all tag hierarchies.
+    ///  using a depth-first recursive approach it will scan all tag hierarchies and display them.
     /// </summary>
     public class GraphNode
     {
@@ -78,6 +78,9 @@ namespace ObjectMetaDataTagging.Services
 
                         if (childNode != null)
                         {
+                            node.Children.Add(childNode);
+
+                            // Iterate through direct child tags
                             foreach (var childTag in tag.ChildTags)
                             {
                                 var childTagNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
@@ -85,9 +88,22 @@ namespace ObjectMetaDataTagging.Services
                                 if (childTagNode != null)
                                 {
                                     childNode.Children.Add(childTagNode);
+
+                                    // Check if the childTag has grandchild tags
+                                    if (childTag.ChildTags != null)
+                                    {
+                                        foreach (var grandChildTag in childTag.ChildTags)
+                                        {
+                                            var grandchildTagNode = await BuildSubgraph(grandChildTag, grandChildTag.Name, concurrentDictionary, visitedIds);
+
+                                            if (grandchildTagNode != null)
+                                            {
+                                                childTagNode.Children.Add(grandchildTagNode);
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                            node.Children.Add(childNode);
                         }
                     }
                 }

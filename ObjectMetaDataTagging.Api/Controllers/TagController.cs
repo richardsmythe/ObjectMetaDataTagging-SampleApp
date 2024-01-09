@@ -8,6 +8,7 @@ using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Services;
 using ObjectMetaDataTagging.Api.Services;
+using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -135,26 +136,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     var tag = tagPair.Value as BaseTag;
                     if (tag != null)
                     {
-                        var tagModel = new TagModel
-                        {
-                            tagId = tag.Id,
-                            TagName = tag.Name,
-                            Description = tag.Description,
-                            AssociatedObject = objectName,
-                            AssociatedObjectId = objectId,
-                            ChildTags = tag.ChildTags
-                        };
-
-                        // Set properties for child tags
-                        if (tagModel.ChildTags != null)
-                        {
-                            foreach (var childTag in tagModel.ChildTags)
-                            {
-                                childTag.AssociatedParentObjectName = tagModel.TagName;
-                                childTag.AssociatedParentObjectId = tagModel.tagId;
-                            }
-                        }
-
+                        var tagModel = CreateTagModel(tag, objectName, objectId);
                         return tagModel;
                     }
 
@@ -171,6 +153,31 @@ namespace ObjectMetaDataTagging.Api.Controllers
             };
 
             return Ok(new List<Frame> { frameModel });
+        }
+
+        private static TagModel CreateTagModel(BaseTag tag, string objectName, Guid objectId)
+        {
+            var tagModel = new TagModel
+            {
+                tagId = tag.Id,
+                TagName = tag.Name,
+                Description = tag.Description,
+                AssociatedObject = objectName,
+                AssociatedObjectId = objectId,
+                ChildTags = tag.ChildTags?.Select(childTag => CreateTagModel(childTag, tag.Name, tag.Id)).ToList()
+            };
+
+            // Set properties for child tags
+            if (tagModel.ChildTags != null)
+            {
+                foreach (var childTag in tagModel.ChildTags)
+                {
+                    childTag.AssociatedObject = tagModel.TagName;
+                    childTag.AssociatedObjectId = tagModel.tagId;
+                }
+            }
+
+            return tagModel;
         }
 
 
@@ -214,6 +221,23 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         childTag.AssociatedParentObjectName = newTag.Name;
                         childTag.AssociatedParentObjectId = newTag.Id;
                         childTag.Value = $"Child Value {k + 1}";
+
+                        // Recursively create child tags for the child tag itself
+                        int numberOfGrandchildTags = random.Next(0, 3);
+
+                        for (int m = 0; m < numberOfGrandchildTags; m++)
+                        {
+                            var grandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                            //var grandchildTagName = "Grandchild tag";
+                            var grandchildTag = tagFactory.CreateBaseTag(grandchildTagName, null, $"Grandchild tag {m + 1}");
+
+                            // Set properties for grandchild tag
+                            grandchildTag.AssociatedParentObjectName = childTag.Name;
+                            grandchildTag.AssociatedParentObjectId = childTag.Id;
+                            grandchildTag.Value = $"Grandchild Value {m + 1}";
+
+                            childTag.AddChildTag(grandchildTag);
+                        }
 
                         newTag.AddChildTag(childTag);
                     }
@@ -263,6 +287,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
             return testData;
         }
+
+      
 
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()

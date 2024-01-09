@@ -11,7 +11,7 @@ namespace ObjectMetaDataTagging.Api.Models
         public string TagName { get; set; }
         public string Description { get; set; }
 
-        public ICollection<BaseTag> ChildTags { get; set; }
+        public List<TagModel> ChildTags { get; set; }
  
 
     }
