@@ -127,14 +127,14 @@ namespace ObjectMetaDataTagging.Services
         {
             foreach (var node in graphNodes)
             {
-                Console.WriteLine($"Root Object: {node.Name}");
+                Console.WriteLine($"\nRoot Object: {node.Name}");
                 PrintSubgraph(node, 1, true);
             }
         }
 
         private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
-            var indent = new string(' ', depth * 6);
+            var indent = new string(' ', depth * 5);
 
             if (!isRoot)
             {
