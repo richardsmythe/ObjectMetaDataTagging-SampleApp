@@ -189,7 +189,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(1, 5);
+            int numberOfObjects = random.Next(1, 2);
 
             for (int i = 0; i < numberOfObjects; i++)
             {
@@ -200,7 +200,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     Amount = random.Next(1, 5999),
                 };
 
-                int numberOfTags = random.Next(1, 10);
+                int numberOfTags = random.Next(1, 4);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
 
                 for (int j = 0; j < numberOfTags; j++)
@@ -223,7 +223,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         childTag.Value = $"Child Value {k + 1}";
 
                         // Recursively create child tags for the child tag itself
-                        int numberOfGrandchildTags = random.Next(0, 3);
+                        int numberOfGrandchildTags = random.Next(0, 4);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
@@ -247,30 +247,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 }
             }
 
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            //var trans1 = new ExamplePersonTransaction { Sender = "John", Receiver = "Richard", Amount = 54123 };
-
-            //var fundTransferTag = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.FundsTransfer, null);
-            //taggingService.SetTagAsync(trans1, fundTransferTag);
-
-            //var fundTransferTag2 = tagFactory.CreateBaseTag("Payment Expired", ExampleTags.PaymentExpired, null);
-            //taggingService.SetTagAsync(trans1, fundTransferTag2);
-
-            //testData.Add(taggingService.GetAllTags(trans1)
-            //    .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-
-            //var trans2 = new ExamplePersonTransaction { Sender = "Ed", Receiver = "Tim", Amount = 123 };
-
-            //var fundTransferTag3 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
-            //taggingService.SetTagAsync(trans2, fundTransferTag3);
-
-            //var fundTransferTag4 = tagFactory.CreateBaseTag("Transfering Funds", ExampleTags.AccountActivity, "A transcation occured");
-            //taggingService.SetTagAsync(trans2, fundTransferTag4);
-
-            //testData.Add(taggingService.GetAllTags(trans2)
-            //  .Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
 
             /////////// Dynamic Filter Test /////////////
 

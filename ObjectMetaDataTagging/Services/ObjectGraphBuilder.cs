@@ -5,7 +5,7 @@ namespace ObjectMetaDataTagging.Services
 {
     /// <summary>
     ///  A service to build an object graph structure with a given dictionary, 
-    ///  using a depth-first recursive approach it will scan all tag hierarchies and display them.
+    ///  using a depth-first recursive approach it will scan all tag hierarchies.
     /// </summary>
     public class GraphNode
     {
@@ -44,6 +44,7 @@ namespace ObjectMetaDataTagging.Services
                 else
                 {
                     // when the root object doesn't have Id and Name properties
+                    Console.WriteLine("Root object doesn't have a Id or Name properties.");
                 }
             }
 
@@ -79,13 +80,12 @@ namespace ObjectMetaDataTagging.Services
                         {
                             node.Children.Add(childNode);
 
-                            // Recursively process child tags at all depths
+                            // Recursively process all child tag depths
                             await ProcessChildTags(tag.ChildTags, childNode, concurrentDictionary, visitedIds);
                         }
                     }
                 }               
-            }         
-
+            }      
             return node;
         }
 
@@ -104,7 +104,6 @@ namespace ObjectMetaDataTagging.Services
             }
         }
 
-
         public static void PrintObjectGraph(List<GraphNode> graphNodes)
         {
             foreach (var node in graphNodes)
@@ -116,16 +115,25 @@ namespace ObjectMetaDataTagging.Services
 
         private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
-            var indent = new string(' ', depth * 5);
+            var indent = new string(' ', depth * 4);
 
             if (!isRoot)
             {
-                Console.WriteLine($"{indent}|___ {node.Name}");
+                Console.WriteLine($"{indent}└──── {node.Name}");
             }
 
-            foreach (var childNode in node.Children)
+            for (int i = 0; i < node.Children.Count - 1; i++)
             {
+                var childNode = node.Children[i];
+                Console.WriteLine($"{indent}├──── {childNode.Name}");
                 PrintSubgraph(childNode, depth + 1);
+            }
+
+            if (node.Children.Count > 0)
+            {
+                var lastChildNode = node.Children[^1];
+                Console.WriteLine($"{indent}└──── {lastChildNode.Name}");
+                PrintSubgraph(lastChildNode, depth + 1);
             }
         }
 
