@@ -10,6 +10,13 @@ namespace ObjectMetaDataTagging.Models
         FundsTransfer,
         AddressNotMatching,
         NameNotMatchingAccount,
-        AccountActivity
+        IrregularAccountActivity,
+        CreditCardIssue,
+        PaymentIssue,
+        PaymentDeclined,
+        ReportedStolen,
+        PaymentProcessorFailed,
+        NameDuplication,    
+
     }
 }

@@ -54,13 +54,12 @@ namespace ObjectMetaDataTagging.Services
         {
             var idProperty = rootObject.GetType().GetProperty("Id");
             if (idProperty == null) return null;
-            
+
             var objectId = idProperty.GetValue(rootObject);
             if (objectId == null) return null;
 
             if (visitedIds.Contains((Guid)objectId))
             {
-
                 return null;
             }
 
@@ -80,46 +79,29 @@ namespace ObjectMetaDataTagging.Services
                         {
                             node.Children.Add(childNode);
 
-                            // Iterate through direct child tags
-                            foreach (var childTag in tag.ChildTags)
-                            {
-                                var childTagNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
-
-                                if (childTagNode != null)
-                                {
-                                    childNode.Children.Add(childTagNode);
-
-                                    // Check if the childTag has grandchild tags
-                                    if (childTag.ChildTags != null)
-                                    {
-                                        foreach (var grandChildTag in childTag.ChildTags)
-                                        {
-                                            var grandchildTagNode = await BuildSubgraph(grandChildTag, grandChildTag.Name, concurrentDictionary, visitedIds);
-
-                                            if (grandchildTagNode != null)
-                                            {
-                                                childTagNode.Children.Add(grandchildTagNode);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            // Recursively process child tags at all depths
+                            await ProcessChildTags(tag.ChildTags, childNode, concurrentDictionary, visitedIds);
                         }
                     }
-                }
-                else
-                {
-                    // when tags is null
-                    //Console.WriteLine($"Tags are null for object with Id '{objectId}'.");
-                }
-            }
-            else
-            {
-                // when key is not present in the dictionary
-                //Console.WriteLine($"Key '{objectId}' not present in the dictionary.");
-            }
+                }               
+            }         
 
             return node;
+        }
+
+        private static async Task ProcessChildTags(IEnumerable<BaseTag> childTags, GraphNode parentNode, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
+        {
+            foreach (var childTag in childTags)
+            {
+                var childNode = await BuildSubgraph(childTag, childTag.Name, concurrentDictionary, visitedIds);
+
+                if (childNode != null)
+                {
+                    parentNode.Children.Add(childNode);
+
+                    await ProcessChildTags(childTag.ChildTags, childNode, concurrentDictionary, visitedIds);
+                }
+            }
         }
 
 
