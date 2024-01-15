@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="ReadMe.txt">
       <Pack>true</Pack>
       <PackagePath>\</PackagePath>

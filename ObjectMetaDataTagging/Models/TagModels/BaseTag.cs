@@ -33,6 +33,7 @@ namespace ObjectMetaDataTagging.Models.TagModels
             DateCreated = DateTime.UtcNow;
             ChildTags = new List<BaseTag>();
         }
+
         /// <summary>
         /// Allows you to specify the Value and Type of the object. E.g. BaseTag ageTag = new BaseTag("Age", 42, "Person's age"); Value = 42, Type = Int32
         /// </summary>

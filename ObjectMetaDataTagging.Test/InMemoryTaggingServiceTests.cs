@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging.Test
 
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
 
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = amount, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Amount = amount, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", 43, "A numeric tag");
 
 
@@ -83,7 +83,7 @@ namespace ObjectMetaDataTagging.Test
             );
 
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation {  Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
             var tag2 = new BaseTag("TestTag2", "Warning", "A string tag");
 
@@ -112,7 +112,7 @@ namespace ObjectMetaDataTagging.Test
             );
 
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
             var tag2 = new BaseTag("TestTag2", "Warning", "A string tag");
             var modifiedTag = new BaseTag("TestUpdatedTag", 652, "Updated Tag");
@@ -145,7 +145,7 @@ namespace ObjectMetaDataTagging.Test
         {
             // Arrange
             var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation {Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
 
             // Act
@@ -161,7 +161,7 @@ namespace ObjectMetaDataTagging.Test
         {
             // Arrange
             var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
-            var obj = new PersonTranscation { Id = Guid.NewGuid(), Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
 
             // Act
@@ -172,6 +172,8 @@ namespace ObjectMetaDataTagging.Test
             Assert.NotNull(result);
             Assert.True(result is PersonTranscation);
         }
+
+
 
     }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Helpers;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Services;
 
