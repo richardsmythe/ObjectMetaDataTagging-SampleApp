@@ -122,7 +122,7 @@ namespace ObjectMetaDataTagging.Utilities
 
         private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
-            var indent = new string(' ', depth * 4);
+            var indent = new string(' ', depth * 5);
 
             if (!isRoot)
             {
