@@ -17,7 +17,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
     public class TagController : ControllerBase
     {
         private IDefaultTaggingService<BaseTag> _taggingService;
-        private readonly IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> _dynamicQueryBuilder;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
@@ -26,7 +25,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private static bool isTestDataInitialised = false;
 
         public TagController(
-            IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> dynamicQueryBuilder,
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
@@ -36,7 +34,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
             _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             _eventManager = eventManager;
-            _dynamicQueryBuilder = dynamicQueryBuilder;
 
             // Check if data is already initialised before calling InitialiseTestData
             if (!isTestDataInitialised)
@@ -51,7 +48,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _taggingService = new CustomTaggingService<BaseTag>(_eventManager);
             var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
 
-            testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService, _dynamicQueryBuilder);
+            testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService);
 
 
         }
@@ -176,7 +173,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     childTag.AssociatedObjectId = tagModel.tagId;
                 }
             }
-
             return tagModel;
         }
 
@@ -184,12 +180,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
-            IAlertService alertService,
-            IDynamicQueryBuilder<BaseTag, DefaultFilterCriteria> queryBuilder)
+            IAlertService alertService)
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(1, 2);
+            int numberOfObjects = random.Next(1, 3);
 
             for (int i = 0; i < numberOfObjects; i++)
             {
@@ -210,7 +205,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
                     await taggingService.SetTagAsync(newObj, newTag);
 
-                    int numberOfChildTags = random.Next(0, 5);
+                    int numberOfChildTags = random.Next(1, 5);
 
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
@@ -223,7 +218,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         childTag.Value = $"Child Value {k + 1}";
 
                         // Recursively create child tags for the child tag itself
-                        int numberOfGrandchildTags = random.Next(0, 4);
+                        int numberOfGrandchildTags = random.Next(1, 4);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
@@ -247,24 +242,10 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 }
             }
 
-
-            /////////// Dynamic Filter Test /////////////
-
-            //var customFilter = new CustomFilter("Suspicious Transfer", "ExampleTags");
-
-            //var filteredRequest = queryBuilder.BuildDynamicQuery<BaseTag>(
-            //    trans1.AssociatedTags,
-            //    tag => tag.Name == customFilter.Name, // these define the filter condition for delegate based filtering
-            //    tag => tag.Type == customFilter.Type,
-            //    LogicalOperator.AND
-            //);
-
-            //////////////////////////////////////////////
-
             return testData;
-        }
+        }           
 
-      
+
 
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()

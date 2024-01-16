@@ -17,8 +17,8 @@ namespace ObjectMetaDataTagging.Configuration
             // Register defaultTaggingService as singleton so the same instance of the service is across the whole http request
             services.AddSingleton(typeof(IDefaultTaggingService<>), typeof(InMemoryTaggingService<>));
 
-            // Register IDynamicQueryBuilder with its two type parameters
-            services.AddScoped(typeof(IDynamicQueryBuilder<,>), typeof(DynamicQueryBuilder<,>));
+            // Register IDynamicQueryBuilder with its three type parameters
+            services.AddScoped(typeof(IDynamicQueryBuilder<,,>), typeof(DynamicQueryBuilder<,,>));
 
             services.AddSingleton<ITagFactory, TagFactory>();
 
