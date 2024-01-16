@@ -9,6 +9,8 @@ using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Services;
 using ObjectMetaDataTagging.Api.Services;
 using System.Threading.Tasks;
+using ObjectMetaDataTagging.Utilities;
+using System.Linq;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -176,7 +178,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             return tagModel;
         }
 
-
+        // generate dummy data with possibility of 3 generations of child tag
         private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
@@ -184,7 +186,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(1, 3);
+            int numberOfObjects = random.Next(1, 5);
 
             for (int i = 0; i < numberOfObjects; i++)
             {
@@ -192,7 +194,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 {
                     Sender = "Sender" + random.Next(1, 50),
                     Receiver = "Receiver" + random.Next(1, 50),
-                    Amount = random.Next(1, 5999),
+                    Amount = random.Next(1500, 6000),
                 };
 
                 int numberOfTags = random.Next(1, 4);
@@ -200,17 +202,17 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                 for (int j = 0; j < numberOfTags; j++)
                 {
-                    var tagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                    var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
 
-                    BaseTag newTag = tagFactory.CreateBaseTag(tagName, null, "");
+                    BaseTag newTag = tagFactory.CreateBaseTag(randomTagName, null, "");
                     await taggingService.SetTagAsync(newObj, newTag);
 
                     int numberOfChildTags = random.Next(1, 5);
 
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
-                        var childTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                        var childTag = tagFactory.CreateBaseTag(childTagName, null, $"Child tag {k + 1}");
+                        var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                        var childTag = tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
 
                         // Set properties for child tag
                         childTag.AssociatedParentObjectName = newTag.Name;
@@ -222,9 +224,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
-                            var grandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                            //var grandchildTagName = "Grandchild tag";
-                            var grandchildTag = tagFactory.CreateBaseTag(grandchildTagName, null, $"Grandchild tag {m + 1}");
+                            var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
+                            var grandchildTag = tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
                             // Set properties for grandchild tag
                             grandchildTag.AssociatedParentObjectName = childTag.Name;
@@ -243,8 +244,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             }
 
             return testData;
-        }           
-
+        }
 
 
         [HttpGet("print-object-graph")]

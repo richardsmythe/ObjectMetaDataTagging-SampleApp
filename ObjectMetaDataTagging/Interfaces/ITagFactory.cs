@@ -4,9 +4,7 @@ namespace ObjectMetaDataTagging.Interfaces
 {
     public interface ITagFactory
     {
-        /// <summary>
-        /// Factory used to allow for creation of other types of tags if necessary
-        /// </summary>
+        // Factory used to allow for creation of other types of tags if necessary
         BaseTag CreateBaseTag(string name, object value, string description);
     }
 }

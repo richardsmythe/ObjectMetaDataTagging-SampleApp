@@ -1,11 +1,11 @@
 ﻿using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
 
-namespace ObjectMetaDataTagging.Services
+namespace ObjectMetaDataTagging.Utilities
 {
     /// <summary>
     ///  A service to build an object graph structure with a given dictionary, 
-    ///  using a depth-first recursive approach it will scan all tag hierarchies.
+    ///  using a depth-first recursive approach it will scan all tag hierarchies and form a graph.
     /// </summary>
     public class GraphNode
     {
@@ -43,7 +43,6 @@ namespace ObjectMetaDataTagging.Services
                 }
                 else
                 {
-                    // when the root object doesn't have Id and Name properties
                     Console.WriteLine("Root object doesn't have a Id or Name properties.");
                 }
             }
@@ -53,40 +52,48 @@ namespace ObjectMetaDataTagging.Services
 
         private static async Task<GraphNode?> BuildSubgraph(object rootObject, string objectName, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
         {
-            var idProperty = rootObject.GetType().GetProperty("Id");
-            if (idProperty == null) return null;
-
-            var objectId = idProperty.GetValue(rootObject);
-            if (objectId == null) return null;
-
-            if (visitedIds.Contains((Guid)objectId))
+            try
             {
-                return null;
-            }
+                var idProperty = rootObject.GetType().GetProperty("Id");
+                if (idProperty == null) return null;
 
-            visitedIds.Add((Guid)objectId);
+                var objectId = idProperty.GetValue(rootObject);
+                if (objectId == null) return null;
 
-            var node = new GraphNode((Guid)objectId, objectName);
-
-            if (concurrentDictionary.TryGetValue(rootObject, out var tags))
-            {
-                if (tags != null)
+                if (visitedIds.Contains((Guid)objectId))
                 {
-                    foreach (var tag in tags.Values)
+                    return null;
+                }
+
+                visitedIds.Add((Guid)objectId);
+
+                var node = new GraphNode((Guid)objectId, objectName);
+
+                if (concurrentDictionary.TryGetValue(rootObject, out var tags))
+                {
+                    if (tags != null)
                     {
-                        var childNode = await BuildSubgraph(tag, tag.Name, concurrentDictionary, visitedIds);
-
-                        if (childNode != null)
+                        foreach (var tag in tags.Values)
                         {
-                            node.Children.Add(childNode);
+                            var childNode = await BuildSubgraph(tag, tag.Name, concurrentDictionary, visitedIds);
 
-                            // Recursively process all child tag depths
-                            await ProcessChildTags(tag.ChildTags, childNode, concurrentDictionary, visitedIds);
+                            if (childNode != null)
+                            {
+                                node.Children.Add(childNode);
+
+                                // Recursively process all child tag depths
+                                await ProcessChildTags(tag.ChildTags, childNode, concurrentDictionary, visitedIds);
+                            }
                         }
                     }
-                }               
-            }      
-            return node;
+                }
+                return node;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error building subgraph: {ex.Message}");
+                return null;
+            }
         }
 
         private static async Task ProcessChildTags(IEnumerable<BaseTag> childTags, GraphNode parentNode, ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary, HashSet<Guid> visitedIds)
@@ -122,20 +129,12 @@ namespace ObjectMetaDataTagging.Services
                 Console.WriteLine($"{indent}└──── {node.Name}");
             }
 
-            for (int i = 0; i < node.Children.Count - 1; i++)
+            foreach (var childNode in node.Children)
             {
-                var childNode = node.Children[i];
-                Console.WriteLine($"{indent}├──── {childNode.Name}");
                 PrintSubgraph(childNode, depth + 1);
             }
-
-            if (node.Children.Count > 0)
-            {
-                var lastChildNode = node.Children[^1];
-                Console.WriteLine($"{indent}└──── {lastChildNode.Name}");
-                PrintSubgraph(lastChildNode, depth + 1);
-            }
         }
+
 
     }
 }

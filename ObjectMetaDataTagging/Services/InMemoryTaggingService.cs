@@ -2,6 +2,7 @@
 using ObjectMetaDataTagging.Exceptions;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
+using ObjectMetaDataTagging.Utilities;
 using System.Collections.Concurrent;
 
 namespace ObjectMetaDataTagging.Services
@@ -30,8 +31,6 @@ namespace ObjectMetaDataTagging.Services
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         public Action<object, T>? OnSetTagAsyncCallback { get; set; }
 
-
-
         /// <summary>
         /// By exposing these events, it allow consumers to attach event handlers
         /// to perform additional actions when tags are added, removed, or updated.
@@ -55,6 +54,10 @@ namespace ObjectMetaDataTagging.Services
             remove => _eventManager.TagUpdated -= value;
         }
 
+        /// <summary>
+        /// Retrieve an object graph for the current objects and their tags.
+        /// </summary>
+        /// <returns>Returns a list of graph nodes.</returns>
         public async Task<List<GraphNode>> GetObjectGraph()
         {
             return await ObjectGraphBuilder.BuildObjectGraph(data);
@@ -76,8 +79,8 @@ namespace ObjectMetaDataTagging.Services
 
             if (data.TryGetValue(o, out var tags))
             {
-                var allTags = tags.Values.ToList();               
-               
+                var allTags = tags.Values.ToList();
+
                 return Task.FromResult((IEnumerable<T>)allTags);
             }
 

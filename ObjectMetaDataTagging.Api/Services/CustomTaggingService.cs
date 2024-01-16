@@ -1,9 +1,6 @@
 ﻿using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
-using System;
-using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Api.Services
 {

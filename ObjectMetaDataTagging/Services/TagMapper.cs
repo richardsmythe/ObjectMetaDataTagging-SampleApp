@@ -50,7 +50,6 @@ namespace ObjectMetaDataTagging.Services
                     }
                 }
             }
-
             return (T)targetInstance;
         }
     }
