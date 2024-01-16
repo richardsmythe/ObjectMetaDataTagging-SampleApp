@@ -3,8 +3,6 @@ using ObjectMetaDataTagging.Exceptions;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using System.Collections.Concurrent;
-using System.Threading;
-
 
 namespace ObjectMetaDataTagging.Services
 {
@@ -27,17 +25,18 @@ namespace ObjectMetaDataTagging.Services
             _eventManager = null;
         }
 
-        // using object instead of weakreference, make sure to GC
         public readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
         public readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         public Action<object, T>? OnSetTagAsyncCallback { get; set; }
 
-      
-        /* By exposing these events, it allow consumers to attach event handlers 
-         * to perform additional actions when tags are added, removed, or updated. 
-         * This can be useful if someone wants to extend the behavior of the library. */
 
+
+        /// <summary>
+        /// By exposing these events, it allow consumers to attach event handlers
+        /// to perform additional actions when tags are added, removed, or updated.
+        /// This can be useful if someone wants to extend the behavior of the library.
+        /// </summary>
         public event EventHandler<AsyncTagAddedEventArgs> TagAdded
         {
             add => _eventManager.TagAdded += value;
@@ -62,6 +61,12 @@ namespace ObjectMetaDataTagging.Services
         }
 
         #region Default Tag Operations
+
+        /// <summary>
+        /// Gets all tags associated with the specified object.
+        /// </summary>
+        /// <param name="o">The object for which to retrieve tags.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the collection of tags associated with the object.</returns>
         public virtual Task<IEnumerable<T>> GetAllTags(object o)
         {
             if (o == null)
@@ -71,21 +76,22 @@ namespace ObjectMetaDataTagging.Services
 
             if (data.TryGetValue(o, out var tags))
             {
-                var allTags = tags.Values.ToList();
-                
-                //foreach (var tag in allTags)
-                //{
-                    //if (tag is T typedTag)
-                    //{
-                    //    Console.WriteLine($"- Tag Id: {typedTag.Id}, Name: {typedTag.Name}, Value: {typedTag.Value}");
-                    //}
-                //}
+                var allTags = tags.Values.ToList();               
+               
                 return Task.FromResult((IEnumerable<T>)allTags);
             }
 
             throw new ObjectNotFoundException("Object not found in the data collection.", nameof(o));
         }
 
+        /// <summary>
+        /// Gets the tag with the specified ID associated with the specified object.
+        /// </summary>
+        /// <param name="o">The object for which to retrieve the tag.</param>
+        /// <param name="tagId">The ID of the tag to retrieve.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the tag associated with the object and ID, or null if the tag is not found.
+        /// </returns>
         public virtual Task<T>? GetTag(object o, Guid tagId)
         {
             if (o == null)
@@ -104,6 +110,13 @@ namespace ObjectMetaDataTagging.Services
             throw new ObjectNotFoundException("Object or tag not found in the data collection.", nameof(o));
         }
 
+        /// <summary>
+        /// Removes all tags associated with the specified object asynchronously.
+        /// </summary>
+        /// <param name="o">The object for which to remove all tags.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result indicates whether the removal of tags was successful.
+        /// </returns>
         public virtual async Task<bool> RemoveAllTagsAsync(object o)
         {
             await semaphore.WaitAsync();
@@ -128,6 +141,14 @@ namespace ObjectMetaDataTagging.Services
             }
         }
 
+        /// <summary>
+        /// Removes a tag with the specified ID associated with the specified object asynchronously.
+        /// </summary>
+        /// <param name="o">The object for which to remove the tag.</param>
+        /// <param name="tagId">The ID of the tag to remove.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result indicates whether the removal of the tag was successful.
+        /// </returns>
         public virtual async Task<bool> RemoveTagAsync(object? o, Guid tagId)
         {
             await semaphore.WaitAsync();
@@ -166,6 +187,12 @@ namespace ObjectMetaDataTagging.Services
             return false;
         }
 
+        /// <summary>
+        /// Sets a tag associated with the specified object asynchronously.
+        /// </summary>
+        /// <param name="o">The object for which to set the tag.</param>
+        /// <param name="tag">The tag to set.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         public virtual async Task SetTagAsync(object o, T tag)
         {
             if (tag == null || o == null) throw new ObjectNotFoundException("No object or tag supplied.");
@@ -193,6 +220,15 @@ namespace ObjectMetaDataTagging.Services
 
         }
 
+        /// <summary>
+        /// Updates a tag associated with the specified object asynchronously.
+        /// </summary>
+        /// <param name="o">The object for which to update the tag.</param>
+        /// <param name="tagId">The ID of the tag to update.</param>
+        /// <param name="modifiedTag">The modified tag.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result indicates whether the update of the tag was successful.
+        /// </returns>
         public virtual async Task<bool> UpdateTagAsync(object o, Guid tagId, T modifiedTag)
         {
             if (modifiedTag == null || o == null)
@@ -229,6 +265,12 @@ namespace ObjectMetaDataTagging.Services
             }
         }
 
+        /// <summary>
+        /// Checks if the specified object has a tag with the given ID.
+        /// </summary>
+        /// <param name="o">The object to check for the tag.</param>
+        /// <param name="tagId">The ID of the tag to check for.</param>
+        /// <returns>True if the object has the specified tag; otherwise, false.</returns>
         public bool HasTag(object o, Guid tagId)
         {
             if (o != null && data.TryGetValue(o, out var tags))
@@ -251,6 +293,11 @@ namespace ObjectMetaDataTagging.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves the object associated with the specified tag ID.
+        /// </summary>
+        /// <param name="tagId">The ID of the tag to find the associated object for.</param>
+        /// <returns>The object associated with the specified tag ID.</returns>
         public virtual object GetObjectByTag(Guid tagId)
         {
             foreach (var kvp in data)
@@ -269,6 +316,11 @@ namespace ObjectMetaDataTagging.Services
             throw new ObjectNotFoundException($"No object found with tagId: {tagId}", nameof(tagId));
         }
 
+        /// <summary>
+        /// Gets the ID of the specified object.
+        /// </summary>
+        /// <param name="o">The object for which to retrieve the ID.</param>
+        /// <returns>The ID of the specified object.</returns>
         private Guid GetObjectId(object o)
         {
             if (o == null)

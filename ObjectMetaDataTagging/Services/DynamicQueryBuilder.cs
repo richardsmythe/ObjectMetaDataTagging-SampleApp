@@ -1,8 +1,5 @@
 ﻿using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.QueryModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace ObjectMetaDataTagging.Services
@@ -13,7 +10,8 @@ namespace ObjectMetaDataTagging.Services
     /// <typeparam name="TProperty1">Type of the first property used in filtering.</typeparam>
     /// <typeparam name="TProperty2">Type of the second property used in filtering.</typeparam>
     /// <typeparam name="TItem">Type of the items being filtered.</typeparam>
-    public class DynamicQueryBuilder<TProperty1, TProperty2, TItem> : IDynamicQueryBuilder<TProperty1, TProperty2, TItem>
+    public class DynamicQueryBuilder<TProperty1, TProperty2, TItem> : 
+        IDynamicQueryBuilder<TProperty1, TProperty2, TItem>
     {
         /// <summary>
         /// Builds a dynamic query to filter items based on custom filter criteria.
