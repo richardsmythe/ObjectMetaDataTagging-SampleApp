@@ -115,7 +115,7 @@ namespace ObjectMetaDataTagging.Utilities
         {
             foreach (var node in graphNodes)
             {
-                Console.WriteLine($"\nRoot Object: {node.Name}");
+                Console.WriteLine($"\n Root Object: {node.Name}");
                 PrintSubgraph(node, 1, true);
             }
         }

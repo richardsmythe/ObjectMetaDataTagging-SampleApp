@@ -5,8 +5,7 @@ namespace ObjectMetaDataTagging.Interfaces
 {
     public interface IAlertService
     {
-        bool IsSuspiciousTransaction(ExamplePersonTransaction transaction);
-        void MarkAsSuspicious(ExamplePersonTransaction transaction, Guid tagId);
+        bool IsSuspiciousTransaction(Transaction transaction);
 
     }
 }

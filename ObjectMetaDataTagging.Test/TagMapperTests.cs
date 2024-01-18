@@ -22,7 +22,7 @@ namespace ObjectMetaDataTagging.Test
 
             // Assert
             Assert.NotNull(mappedObject);
-            Assert.Equal(mappedObject.AssociatedParentObjectId, tag.AssociatedParentObjectId);
+            Assert.Equal(mappedObject.Parents.Count, tag.Parents.Count);
             Assert.Equal(tag.Type, mappedObject.Type);
         }
         public class PersonTranscation

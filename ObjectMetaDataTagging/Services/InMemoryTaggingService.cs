@@ -209,8 +209,9 @@ namespace ObjectMetaDataTagging.Services
             try
             {
                 tagDictionary[tag.Id] = tag;
-                tag.AssociatedParentObjectId = objectId;
-                tag.AssociatedParentObjectName = objectName;
+                tag.Parents.Add(objectId);
+                //tag.AssociatedParentObjectIds.Add(objectId);
+                //tag.AssociatedParentObjectName = objectName;
 
             }
             finally

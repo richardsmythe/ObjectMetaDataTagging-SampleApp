@@ -8,9 +8,9 @@ namespace ObjectMetaDataTagging.Api.Events
 {
     public class SuspiciousTransactionEventArgs : EventArgs
     {
-        public ExamplePersonTransaction Transaction { get; }
+        public Transaction Transaction { get; }
 
-        public SuspiciousTransactionEventArgs(ExamplePersonTransaction transaction)
+        public SuspiciousTransactionEventArgs(Transaction transaction)
         {
             Transaction = transaction;
         }
@@ -32,7 +32,7 @@ namespace ObjectMetaDataTagging.Api.Events
         {
             try
             {
-                if (args != null && args.TaggedObject is ExamplePersonTransaction transaction)
+                if (args != null && args.TaggedObject is Transaction transaction)
                 {
                     if (_alertService != null && transaction != null && _alertService.IsSuspiciousTransaction(transaction))
                     {
@@ -44,7 +44,6 @@ namespace ObjectMetaDataTagging.Api.Events
                         }
                     }
                 }
-
                 // handles the case where no suspicious tag is added, and just continues
                 return Task.FromResult<BaseTag>(null);
             }

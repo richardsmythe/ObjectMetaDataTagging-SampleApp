@@ -24,8 +24,9 @@ namespace ObjectMetaDataTagging.Api.Services
             if (tagFromEvent != null)
             {
                 tagFromEvent.DateLastUpdated = DateTime.UtcNow;
-                tagFromEvent.AssociatedParentObjectId = tag.AssociatedParentObjectId;
-                tagFromEvent.AssociatedParentObjectName = tag.AssociatedParentObjectName;
+                //tagFromEvent.AssociatedParentObjectId = tag.AssociatedParentObjectId;
+                //tagFromEvent.AssociatedParentObjectName = tag.AssociatedParentObjectName;
+                tagFromEvent.Parents.Add(tag.Id);
 
                 await base.SetTagAsync(o, (T)tagFromEvent);
             }

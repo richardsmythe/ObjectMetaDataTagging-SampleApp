@@ -12,10 +12,9 @@
         public DateTime? DateLastUpdated { get; set; }
         public string Description { get; set; }
         public object Value { get; set; }
-        public object AssociatedParentObjectName { get; set; }
-        public Guid AssociatedParentObjectId { get; set; }
+        public List<BaseTag> ChildTags { get; } = new List<BaseTag>();
+        public List<object> Parents { get; private set; } = new List<object>();
         public string Type { get; private set; }
-        public List<BaseTag> ChildTags { get; private set; }
 
         public BaseTag(string name, object value, string description = null)
         {
@@ -29,32 +28,26 @@
             Description = description;
             SetValue(value);
             DateCreated = DateTime.UtcNow;
-            ChildTags = new List<BaseTag>();
         }
 
-        /// <summary>
-        /// Allows you to specify the Value and Type of the object. E.g. BaseTag ageTag = new BaseTag("Age", 42, "Person's age"); Value = 42, Type = Int32
-        /// </summary>
         private void SetValue(object value)
         {
             Value = value;
             Type = value?.GetType().Name;
         }
-        /// <summary>
-        /// Allows a collection of tags to be assigned to a parent tag.
-        /// </summary>
+
         public void AddChildTag(BaseTag childTag)
         {
-            if(childTag == null)
-            {
+            if (childTag == null)
                 throw new ArgumentNullException(nameof(childTag));
-            }         
+
             ChildTags.Add(childTag);
+            childTag.Parents.Add(this);
         }
 
         public override string ToString()
         {
             return Name;
         }
-    }
+    }   
 }

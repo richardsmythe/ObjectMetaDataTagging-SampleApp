@@ -5,9 +5,9 @@ namespace ObjectMetaDataTagging.Api.Models
 {
     public class TagModel 
     {
-        public Guid tagId { get; set; }
-        public string AssociatedObject { get; set; }
-        public Guid AssociatedObjectId { get; set; }
+        public Guid TagId { get; set; }
+        public string AssociatedObjectName { get; set; }
+        public List<Guid> ParentIds { get; set; } = new List<Guid>();
         public string TagName { get; set; }
         public string Description { get; set; }
 

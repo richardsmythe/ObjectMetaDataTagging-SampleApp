@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ObjectMetaDataTagging.Api.Models;
-using System.Reflection;
-using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.TagModels;
-using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Services;
-using ObjectMetaDataTagging.Api.Services;
-using System.Threading.Tasks;
 using ObjectMetaDataTagging.Utilities;
-using System.Linq;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -55,128 +50,129 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAsync(Guid tagId)
-        {
-            var obj = _taggingService.GetObjectByTag(tagId);
-            if (obj != null && await _taggingService.RemoveTagAsync(obj, tagId))
-            {
-                var updatedTags = _taggingService.GetAllTags(obj);
-                var objectModels = new List<ObjectModel>();
-                var tagModels = new List<TagModel>();
-                var objectName = "";
-                Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); ;
-                foreach (var updatedTag in await updatedTags)
-                {
-                    var tagModel = new TagModel
-                    {
-                        tagId = updatedTag.Id,
-                        TagName = updatedTag.Name,
-                        Description = updatedTag.Description,
-                        AssociatedObject = updatedTag.AssociatedParentObjectName?.ToString(),
-                        AssociatedObjectId = updatedTag.AssociatedParentObjectId,
-                    };
-                    tagModels.Add(tagModel);
+        //[HttpDelete]
+        //public async Task<IActionResult> DeleteAsync(Guid tagId)
+        //{
+        //    var obj = _taggingService.GetObjectByTag(tagId);
+        //    if (obj != null && await _taggingService.RemoveTagAsync(obj, tagId))
+        //    {
+        //        var updatedTags = _taggingService.GetAllTags(obj);
+        //        var objectModels = new List<ObjectModel>();
+        //        var tagModels = new List<TagModel>();
+        //        var objectName = "";
+        //        Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); ;
+        //        foreach (var updatedTag in await updatedTags)
+        //        {
+        //            var tagModel = new TagModel
+        //            {
+        //                tagId = updatedTag.Id,
+        //                TagName = updatedTag.Name,
+        //                Description = updatedTag.Description,
+        //                AssociatedObject = updatedTag.AssociatedParentObjectName?.ToString(),
+        //                AssociatedObjectId = updatedTag.AssociatedParentObjectId,
+        //            };
+        //            tagModels.Add(tagModel);
 
-                    if (updatedTag.AssociatedParentObjectName != null)
-                    {
-                        objectName = updatedTag.AssociatedParentObjectName?.ToString();
-                        objectId = updatedTag.AssociatedParentObjectId;
-                    }
-                }
+        //            if (updatedTag.AssociatedParentObjectName != null)
+        //            {
+        //                objectName = updatedTag.AssociatedParentObjectName?.ToString();
+        //                objectId = updatedTag.AssociatedParentObjectId;
+        //            }
+        //        }
 
-                objectModels.Add(new ObjectModel
-                {
-                    Id = objectId,
-                    ObjectName = objectName
-                });
+        //        objectModels.Add(new ObjectModel
+        //        {
+        //            Id = objectId,
+        //            ObjectName = objectName
+        //        });
 
-                var frameModel = new Frame
-                {
-                    Id = 0,
-                    Origin = Assembly.GetEntryAssembly().GetName().Name,
-                    ObjectData = objectModels,
-                    TagData = tagModels
-                };
+        //        var frameModel = new Frame
+        //        {
+        //            Id = 0,
+        //            Origin = Assembly.GetEntryAssembly().GetName().Name,
+        //            ObjectData = objectModels,
+        //            TagData = tagModels
+        //        };
 
-                return Ok(new List<Frame> { frameModel });
-            }
+        //        return Ok(new List<Frame> { frameModel });
+        //    }
 
-            return NotFound();
-        }
+        //    return NotFound();
+        //}
 
         // Initial data for app
-        [HttpGet]
-        public IActionResult GetObjectsAndTags()
-        {
-            var objectModels = new List<ObjectModel>();
-            var tagModels = new List<TagModel>();
-            var objectName = "";
-            Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00");
+        //[HttpGet]
+        //public IActionResult GetObjectsAndTags()
+        //{
+        //    InitialiseTestData();
+        //    var objectModels = new List<ObjectModel>();
+        //    var tagModels = new List<TagModel>();
+        //    var objectName = "";
+        //    Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00");
 
-            foreach (var obj in testData)
-            {
-                if (obj.First().Value is BaseTag baseTag && baseTag != null)
-                {
-                    objectName = baseTag.AssociatedParentObjectName?.ToString() ?? "";
-                    objectId = baseTag.AssociatedParentObjectId;
-                }
+        //    foreach (var obj in testData)
+        //    {
+        //        //if (obj.First().Value is BaseTag baseTag && baseTag != null)
+        //        //{
+        //        //    objectName = baseTag.AssociatedParentObjectName?.ToString() ?? "";
+        //        //    objectId = baseTag.AssociatedParentObjectId;
+        //        //}
 
-                var tags = obj.Select(kv => kv.Value.ToString());
+        //        var tags = obj.Select(kv => kv.Value.ToString());
 
-                objectModels.Add(new ObjectModel
-                {
-                    Id = objectId,
-                    ObjectName = objectName
-                });
+        //        objectModels.Add(new ObjectModel
+        //        {
+        //            Id = objectId,
+        //            ObjectName = objectName
+        //        });
 
-                tagModels.AddRange(obj.Select(tagPair =>
-                {
-                    var tag = tagPair.Value as BaseTag;
-                    if (tag != null)
-                    {
-                        var tagModel = CreateTagModel(tag, objectName, objectId);
-                        return tagModel;
-                    }
+        //        tagModels.AddRange(obj.Select(tagPair =>
+        //        {
+        //            var tag = tagPair.Value as BaseTag;
+        //            if (tag != null)
+        //            {
+        //                var tagModel = CreateTagModel(tag, objectName, objectId);
+        //                return tagModel;
+        //            }
 
-                    return null;
-                }).Where(tagModel => tagModel != null)!);
-            }
+        //            return null;
+        //        }).Where(tagModel => tagModel != null)!);
+        //    }
 
-            var frameModel = new Frame
-            {
-                Id = 1,
-                Origin = Assembly.GetEntryAssembly().GetName().Name,
-                ObjectData = objectModels,
-                TagData = tagModels
-            };
+        //    var frameModel = new Frame
+        //    {
+        //        Id = 1,
+        //        Origin = Assembly.GetEntryAssembly().GetName().Name,
+        //        ObjectData = objectModels,
+        //        TagData = tagModels
+        //    };
 
-            return Ok(new List<Frame> { frameModel });
-        }
+        //    return Ok(new List<Frame> { frameModel });
+        //    }
 
-        private static TagModel CreateTagModel(BaseTag tag, string objectName, Guid objectId)
-        {
-            var tagModel = new TagModel
-            {
-                tagId = tag.Id,
-                TagName = tag.Name,
-                Description = tag.Description,
-                AssociatedObject = objectName,
-                AssociatedObjectId = objectId,
-                ChildTags = tag.ChildTags?.Select(childTag => CreateTagModel(childTag, tag.Name, tag.Id)).ToList()
-            };
+        //    private static TagModel CreateTagModel(BaseTag tag, string objectName, Guid objectId)
+        //{
+        //    var tagModel = new TagModel
+        //    {
+        //        TagId = tag.Id,
+        //        TagName = tag.Name,
+        //        Description = tag.Description,
+        //        AssociatedObject = objectName,
+        //        AssociatedObjectId = objectId,
+        //        ChildTags = tag.ChildTags?.Select(childTag => CreateTagModel(childTag, tag.Name, tag.Id)).ToList()
+        //    };
 
-            // Set properties for child tags
-            if (tagModel.ChildTags != null)
-            {
-                foreach (var childTag in tagModel.ChildTags)
-                {
-                    childTag.AssociatedObject = tagModel.TagName;
-                    childTag.AssociatedObjectId = tagModel.tagId;
-                }
-            }
-            return tagModel;
-        }
+        //    // Set properties for child tags
+        //    if (tagModel.ChildTags != null)
+        //    {
+        //        foreach (var childTag in tagModel.ChildTags)
+        //        {
+        //            childTag.AssociatedObject = tagModel.TagName;
+        //            childTag.AssociatedObjectId = tagModel.TagId;
+        //        }
+        //    }
+        //    return tagModel;
+        //}
 
         // generate dummy data with possibility of 3 generations of child tag
         private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
@@ -188,14 +184,21 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var random = new Random();
             int numberOfObjects = random.Next(1, 5);
 
+            // Define the dummy classes
+            var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
+
             for (int i = 0; i < numberOfObjects; i++)
             {
-                var newObj = new ExamplePersonTransaction
-                {
-                    Sender = "Sender" + random.Next(1, 50),
-                    Receiver = "Receiver" + random.Next(1, 50),
-                    Amount = random.Next(1500, 6000),
-                };
+                // Randomly select a dummy class type
+                var selectedClassType = dummyClasses[random.Next(dummyClasses.Count)];
+
+                // Create an instance of the selected class
+                var newObj = Activator.CreateInstance(selectedClassType) as DummyBase;
+
+                // Set common properties
+                newObj.Sender = "Sender" + random.Next(1, 50);
+                newObj.Receiver = "Receiver" + random.Next(1, 50);
+                newObj.Amount = random.Next(1500, 6000);
 
                 int numberOfTags = random.Next(1, 4);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
@@ -215,12 +218,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
                         var childTag = tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
 
                         // Set properties for child tag
-                        childTag.AssociatedParentObjectName = newTag.Name;
-                        childTag.AssociatedParentObjectId = newTag.Id;
+                        childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
 
                         // Recursively create child tags for the child tag itself
-                        int numberOfGrandchildTags = random.Next(1, 4);
+                        int numberOfGrandchildTags = random.Next(1, 3);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
@@ -228,13 +230,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             var grandchildTag = tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
                             // Set properties for grandchild tag
-                            grandchildTag.AssociatedParentObjectName = childTag.Name;
-                            grandchildTag.AssociatedParentObjectId = childTag.Id;
+                            //grandchildTag.AssociatedParentObjectName = childTag.Name;
+                            grandchildTag.Parents.Add(childTag.Id);
                             grandchildTag.Value = $"Grandchild Value {m + 1}";
 
                             childTag.AddChildTag(grandchildTag);
                         }
-
+                        
                         newTag.AddChildTag(childTag);
                     }
 
