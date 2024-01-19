@@ -27,9 +27,9 @@ namespace ObjectMetaDataTagging.Api.Controllers
             IAlertService alertService,
             TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
         {
-            _taggingService = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
-            _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
-            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            _taggingService = taggingService;
+            _tagFactory = tagFactory;
+            _alertService = alertService;
             _eventManager = eventManager;
 
             // Check if data is already initialised before calling InitialiseTestData
@@ -184,18 +184,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
             var random = new Random();
             int numberOfObjects = random.Next(1, 5);
 
-            // Define the dummy classes
             var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
 
             for (int i = 0; i < numberOfObjects; i++)
             {
-                // Randomly select a dummy class type
                 var selectedClassType = dummyClasses[random.Next(dummyClasses.Count)];
-
-                // Create an instance of the selected class
+             
                 var newObj = Activator.CreateInstance(selectedClassType) as DummyBase;
 
-                // Set common properties
                 newObj.Sender = "Sender" + random.Next(1, 50);
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
                 newObj.Amount = random.Next(1500, 6000);
@@ -230,16 +226,15 @@ namespace ObjectMetaDataTagging.Api.Controllers
                             var grandchildTag = tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
                             // Set properties for grandchild tag
-                            //grandchildTag.AssociatedParentObjectName = childTag.Name;
                             grandchildTag.Parents.Add(childTag.Id);
-                            grandchildTag.Value = $"Grandchild Value {m + 1}";
+                            grandchildTag.Value = $"Grandchild Value {m + 1}";  
 
                             childTag.AddChildTag(grandchildTag);
                         }
-                        
+                       
                         newTag.AddChildTag(childTag);
                     }
-
+                    
                     var tags = await taggingService.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }

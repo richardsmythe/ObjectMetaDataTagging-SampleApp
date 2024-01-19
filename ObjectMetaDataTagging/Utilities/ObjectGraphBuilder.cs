@@ -115,14 +115,14 @@ namespace ObjectMetaDataTagging.Utilities
         {
             foreach (var node in graphNodes)
             {
-                Console.WriteLine($"\n Root Object: {node.Name}");
+                Console.WriteLine($"\n Root: {node.Name}");
                 PrintSubgraph(node, 1, true);
             }
         }
 
         private static void PrintSubgraph(GraphNode node, int depth, bool isRoot = false)
         {
-            var indent = new string(' ', depth * 5);
+            var indent = new string(' ', depth *5);
 
             if (!isRoot)
             {

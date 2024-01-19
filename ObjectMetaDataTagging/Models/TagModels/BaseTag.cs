@@ -1,7 +1,7 @@
 ﻿namespace ObjectMetaDataTagging.Models.TagModels
 {
     /// <summary>
-    /// A base tag providing basic tag object properties that potential derived classes
+    /// A base tag providing basic tag object properties that derived classes
     /// may require.
     /// </summary>
     public class BaseTag
