@@ -26,6 +26,7 @@ namespace ObjectMetaDataTagging.Services
             _eventManager = null;
         }
 
+        // Hashtable vs dictionary?
         public readonly ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> data = new ConcurrentDictionary<object, Dictionary<Guid, BaseTag>>();
         public readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
@@ -340,6 +341,21 @@ namespace ObjectMetaDataTagging.Services
             }
 
             throw new ObjectNotFoundException("Id property not found or not of type Guid.", nameof(o));
+        }
+
+        public async Task BulkAddTagsAsync(object o, IEnumerable<T> tags)
+        {
+            if (o == null || tags == null) throw new ObjectNotFoundException("No object or tags supplied.");
+
+            Func<object, T, Task> bulkAddDelegate = async (sourceObj, tag) =>
+            {
+                await SetTagAsync(sourceObj, tag);
+            };
+
+            foreach (var tag in tags)
+            {
+                await bulkAddDelegate(o, tag);
+            }
         }
 
         #endregion

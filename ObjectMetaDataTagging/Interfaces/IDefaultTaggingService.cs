@@ -16,6 +16,7 @@ namespace ObjectMetaDataTagging.Interfaces
         object? GetObjectByTag(Guid tagId);
 
         Task<List<GraphNode>> GetObjectGraph();
+        Task BulkAddTagsAsync(object o, IEnumerable<T> tags);
 
     }
 }

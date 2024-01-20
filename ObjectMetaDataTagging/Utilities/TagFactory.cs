@@ -9,5 +9,13 @@ namespace ObjectMetaDataTagging.Helpers
         {
             return new BaseTag(name, value, description);
         }
+        public IEnumerable<BaseTag> CreateBaseTags(IEnumerable<(string name, object value, string description)> tagList)
+        {
+            foreach (var tag in tagList)
+            {
+                yield return CreateBaseTag(tag.name, tag.value, tag.description);
+            }
+        }
+
     }
 }

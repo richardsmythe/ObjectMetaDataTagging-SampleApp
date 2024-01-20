@@ -1,5 +1,6 @@
 using Moq;
 using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Helpers;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
@@ -83,7 +84,7 @@ namespace ObjectMetaDataTagging.Test
             );
 
             var taggingService = new InMemoryTaggingService<BaseTag>(taggingEventManager);
-            var obj = new PersonTranscation {  Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
             var tag2 = new BaseTag("TestTag2", "Warning", "A string tag");
 
@@ -145,7 +146,7 @@ namespace ObjectMetaDataTagging.Test
         {
             // Arrange
             var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
-            var obj = new PersonTranscation {Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var obj = new PersonTranscation { Amount = 1244, Sender = "Richard", Receiver = "Jon" };
             var tag = new BaseTag("TestTag", "Warning", "A string tag");
 
             // Act
@@ -171,6 +172,34 @@ namespace ObjectMetaDataTagging.Test
             // Assert
             Assert.NotNull(result);
             Assert.True(result is PersonTranscation);
+        }
+
+        [Fact]
+        public async Task BulkAddTagsAsync_ShouldAdd20TagsToObject()
+        {
+            // Arrange
+            var tagFactory = new TagFactory();
+            var taggingService = new InMemoryTaggingService<BaseTag>(new TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>());
+            var obj = new PersonTranscation { Amount = 1244, Sender = "Richard", Receiver = "Jon" };
+            var tagData = new List<(string name, object value, string description)>();
+
+            for (int i = 1; i <= 20; i++)
+            {
+                string tagName = $"Tag{i}";
+                string tagValue = $"Value{i}";
+                string tagDescription = $"Description{i}";
+
+                tagData.Add((tagName, tagValue, tagDescription));
+            }
+            IEnumerable<BaseTag> tags = tagFactory.CreateBaseTags(tagData);
+
+            // Act
+            await taggingService.BulkAddTagsAsync(obj, tags);
+
+            // Assert
+            var addedTags = await taggingService.GetAllTags(obj);
+
+            Assert.Equal(20, addedTags.Count());
         }
 
 

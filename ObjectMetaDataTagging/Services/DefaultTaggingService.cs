@@ -31,5 +31,6 @@ namespace ObjectMetaDataTagging.Services
         public object? GetObjectByTag(Guid tagId) => _taggingService.GetObjectByTag(tagId);
 
         public Task<List<GraphNode>> GetObjectGraph() => _taggingService.GetObjectGraph();
+        public Task BulkAddTagsAsync(object o, IEnumerable<T> tags) => _taggingService.BulkAddTagsAsync(o, tags);
     }
 }
