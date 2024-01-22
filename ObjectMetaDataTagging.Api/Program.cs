@@ -1,4 +1,5 @@
 using ObjectMetaDataTagging.Api.Events;
+using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Configuration;
 using ObjectMetaDataTagging.Events;
@@ -30,6 +31,7 @@ namespace ObjectMetaDataTagging.Api
 
             // Web API-specific services
             builder.Services.AddSingleton<IAlertService, AlertService>();
+            builder.Services.AddSingleton<IGenerateTestData, GenerateTestData>();
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagAddedEventArgs>, TagAddedHandler>();
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagRemovedEventArgs>, TagRemovedHandler>();
             builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();

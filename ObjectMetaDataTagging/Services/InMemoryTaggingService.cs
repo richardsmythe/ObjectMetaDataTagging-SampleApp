@@ -250,8 +250,7 @@ namespace ObjectMetaDataTagging.Services
                     {
                         var originalTag = tags[tagId];
                         modifiedTag.Id = originalTag.Id;
-
-
+                        modifiedTag.DateLastUpdated = DateTime.UtcNow;
                         tags[tagId] = modifiedTag;
 
                         return true;
@@ -343,6 +342,10 @@ namespace ObjectMetaDataTagging.Services
             throw new ObjectNotFoundException("Id property not found or not of type Guid.", nameof(o));
         }
 
+        /// <summary>
+        /// Add multiple tags to one object.
+        /// </summary>
+        /// <param name="o">The object for which to add the tags to.</param>
         public async Task BulkAddTagsAsync(object o, IEnumerable<T> tags)
         {
             if (o == null || tags == null) throw new ObjectNotFoundException("No object or tags supplied.");
@@ -351,11 +354,8 @@ namespace ObjectMetaDataTagging.Services
             {
                 await SetTagAsync(sourceObj, tag);
             };
-
-            foreach (var tag in tags)
-            {
-                await bulkAddDelegate(o, tag);
-            }
+            // so that it won't block the calling thread while adding tags,
+            await Task.WhenAll(tags.Select(tag => bulkAddDelegate(o, tag)));
         }
 
         #endregion

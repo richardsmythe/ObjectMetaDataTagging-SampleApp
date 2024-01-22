@@ -19,6 +19,7 @@ namespace ObjectMetaDataTagging.Utilities
             Name = name;
         }
     }
+
     public class ObjectGraphBuilder
     {
         public static async Task<List<GraphNode>> BuildObjectGraph(ConcurrentDictionary<object, Dictionary<Guid, BaseTag>> concurrentDictionary)

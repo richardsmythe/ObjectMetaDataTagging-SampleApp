@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <PackageId>$(AssemblyName).Util</PackageId>
     <Authors>Richard Smythe</Authors>
-    <Description>Provides a set of tools for adding and editing tags associated with objects.</Description>
+    <Description>A light-weight tool for adding and editing tags associated with objects.</Description>
   </PropertyGroup>
 
   <ItemGroup>

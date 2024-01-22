@@ -1,5 +1,4 @@
-﻿using ObjectMetaDataTagging.Exceptions;
-using ObjectMetaDataTagging.Interfaces;
+﻿using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
 using static ObjectMetaDataTagging.Exceptions.EventHandlingExceptions;
 

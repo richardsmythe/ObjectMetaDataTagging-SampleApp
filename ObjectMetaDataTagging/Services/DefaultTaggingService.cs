@@ -5,6 +5,13 @@ using ObjectMetaDataTagging.Utilities;
 
 namespace ObjectMetaDataTagging.Services
 {
+    /// <summary>
+    /// DefaultTaggingService provides a default implementation of the IDefaultTaggingService<T> interface.
+    /// It acts as a proxy to another implementation of IDefaultTaggingService<T> injected during construction.
+    /// Developers can use this class to easily switch between different implementations of IDefaultTaggingService<T>
+    /// without modifying their code, making it adaptable to various storage options.
+    /// </summary>
+    /// <typeparam name="T">The type of tags managed by this service, derived from BaseTag.</typeparam>
     public class DefaultTaggingService<T> : IDefaultTaggingService<T> where T : BaseTag
     {
         private readonly IDefaultTaggingService<T> _taggingService;

@@ -198,7 +198,6 @@ namespace ObjectMetaDataTagging.Test
 
             // Assert
             var addedTags = await taggingService.GetAllTags(obj);
-
             Assert.Equal(20, addedTags.Count());
         }
 

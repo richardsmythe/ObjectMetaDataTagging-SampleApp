@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
@@ -16,6 +17,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private IDefaultTaggingService<BaseTag> _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
+        private readonly IGenerateTestData _generateTestData;
         private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
@@ -25,12 +27,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
+            IGenerateTestData generateTestData,
             TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
         {
             _taggingService = taggingService;
             _tagFactory = tagFactory;
             _alertService = alertService;
             _eventManager = eventManager;
+            _generateTestData = generateTestData;
 
             // Check if data is already initialised before calling InitialiseTestData
             if (!isTestDataInitialised)
@@ -42,12 +46,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
         private async Task InitialiseTestData()
         {
-            _taggingService = new CustomTaggingService<BaseTag>(_eventManager);
-            var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
-
-            testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService);
-
-
+            testData = await _generateTestData.GenerateTestData();
         }
 
         //[HttpDelete]
@@ -175,73 +174,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
         //}
 
         // generate dummy data with possibility of 3 generations of child tag
-        private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-            IDefaultTaggingService<BaseTag> taggingService,
-            ITagFactory tagFactory,
-            IAlertService alertService)
-        {
-            var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
-            var random = new Random();
-            int numberOfObjects = random.Next(1, 5);
-
-            var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
-
-            for (int i = 0; i < numberOfObjects; i++)
-            {
-                var selectedClassType = dummyClasses[random.Next(dummyClasses.Count)];
-             
-                var newObj = Activator.CreateInstance(selectedClassType) as DummyBase;
-
-                newObj.Sender = "Sender" + random.Next(1, 50);
-                newObj.Receiver = "Receiver" + random.Next(1, 50);
-                newObj.Amount = random.Next(1500, 6000);
-
-                int numberOfTags = random.Next(1, 4);
-                var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
-
-                for (int j = 0; j < numberOfTags; j++)
-                {
-                    var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-
-                    BaseTag newTag = tagFactory.CreateBaseTag(randomTagName, null, "");
-                    await taggingService.SetTagAsync(newObj, newTag);
-
-                    int numberOfChildTags = random.Next(1, 5);
-
-                    for (int k = 0; k < numberOfChildTags; k++)
-                    {
-                        var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                        var childTag = tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
-
-                        // Set properties for child tag
-                        childTag.Parents.Add(newTag.Id);
-                        childTag.Value = $"Child Value {k + 1}";
-
-                        // Recursively create child tags for the child tag itself
-                        int numberOfGrandchildTags = random.Next(1, 3);
-
-                        for (int m = 0; m < numberOfGrandchildTags; m++)
-                        {
-                            var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                            var grandchildTag = tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
-
-                            // Set properties for grandchild tag
-                            grandchildTag.Parents.Add(childTag.Id);
-                            grandchildTag.Value = $"Grandchild Value {m + 1}";  
-
-                            childTag.AddChildTag(grandchildTag);
-                        }
-                       
-                        newTag.AddChildTag(childTag);
-                    }
-                    
-                    var tags = await taggingService.GetAllTags(newObj);
-                    testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-                }
-            }
-
-            return testData;
-        }
 
 
         [HttpGet("print-object-graph")]
