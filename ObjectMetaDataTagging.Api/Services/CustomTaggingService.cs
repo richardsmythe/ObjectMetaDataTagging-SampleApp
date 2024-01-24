@@ -1,33 +1,39 @@
-﻿using ObjectMetaDataTagging.Events;
+﻿using System;
+using System.Threading.Tasks;
+using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
-using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Api.Services
 {
-    public class CustomTaggingService<T> : InMemoryTaggingService<T>
-        where T : BaseTag
+    public class CustomTaggingService<T> : ObjectMetaDataTaggingFacade<T> where T : BaseTag
     {
-        public CustomTaggingService(
-            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
-            : base(eventManager)
+        public CustomTaggingService(IDefaultTaggingService<T> taggingService)
+            : base(taggingService)
         {
+           
         }
 
         public override async Task SetTagAsync(object o, T tag)
         {
             await base.SetTagAsync(o, tag);
-           
-            var tagFromEvent = _eventManager != null
-                ? await _eventManager.RaiseTagAdded(new AsyncTagAddedEventArgs(o, tag))
-                : null;
 
+            // Raise the TagAdded event
+            var args = new AsyncTagAddedEventArgs(o, tag);
+
+
+            // Check if the event has modified the tag
+            var tagFromEvent = args.Tag;
             if (tagFromEvent != null)
             {
                 tagFromEvent.DateLastUpdated = DateTime.UtcNow;
                 tagFromEvent.Parents.Add(tag.Id);
 
-                await base.SetTagAsync(o, (T)tagFromEvent);
+                // Update the tag using the modified tag from the event
+                await base.SetTagAsync(o, tag);
             }
-        }   
+        }
+
+      
     }
 }

@@ -3,6 +3,8 @@ using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.TagModels;
+using System;
+using System.Threading.Tasks;
 
 namespace ObjectMetaDataTagging.Api.Events
 {
@@ -16,62 +18,38 @@ namespace ObjectMetaDataTagging.Api.Events
         }
     }
 
-    public class TagAddedHandler : IAsyncEventHandler<AsyncTagAddedEventArgs>
+    public class TagAddedHandler
     {
         private readonly IAlertService _alertService;
         private readonly ITagFactory _tagFactory;
+        private readonly ObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
 
-        public TagAddedHandler(IAlertService alertService, ITagFactory tagFactory)
+        public TagAddedHandler(IAlertService alertService, ITagFactory tagFactory, ObjectMetaDataTaggingFacade<BaseTag> taggingFacade)
         {
             _alertService = alertService;
             _tagFactory = tagFactory;
-
+            _taggingFacade = taggingFacade;
         }
 
-        public Task<BaseTag> HandleAsync(AsyncTagAddedEventArgs args)
+        public async Task<BaseTag> HandleTagAddedAsync(object o, BaseTag tag)
         {
             try
             {
-                if (args != null && args.TaggedObject is Transaction transaction)
+                if (o is Transaction transaction && _alertService != null && _alertService.IsSuspiciousTransaction(transaction))
                 {
-                    if (_alertService != null && transaction != null && _alertService.IsSuspiciousTransaction(transaction))
-                    {
-                        if (!transaction.AssociatedTags.Any(tag => tag.Value.Equals(ExampleTags.Suspicious)))
-                        {
-                            var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
-                            transaction.AssociatedTags.Add(newTag);
-                            return Task.FromResult(newTag);
-                        }
-                    }
+                    var newTag = _tagFactory.CreateBaseTag("Suspicious Transfer", ExampleTags.Suspicious, "This object has been tagged as suspicious");
+                    await _taggingFacade.SetTagAsync(transaction, newTag);
+                    return newTag;
                 }
+
                 // handles the case where no suspicious tag is added, and just continues
-                return Task.FromResult<BaseTag>(null);
+                return null;
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine($"Exception in HandleAsync: {ex}");              
+                Console.WriteLine($"Exception in HandleTagAddedAsync: {ex}");
                 throw;
             }
-        }
-
-    }
-
-    public class TagRemovedHandler : IAsyncEventHandler<AsyncTagRemovedEventArgs>
-    {
-        public Task<BaseTag> HandleAsync(AsyncTagRemovedEventArgs args)
-        {
-            // tbc
-            return null;
-        }
-    }
-
-    public class TagUpdatedHandler : IAsyncEventHandler<AsyncTagUpdatedEventArgs>
-    {
-        public Task<BaseTag> HandleAsync(AsyncTagUpdatedEventArgs args)
-        {
-            // tbc
-            return null;
         }
     }
 }

@@ -14,6 +14,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        private ObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
+
         private IDefaultTaggingService<BaseTag> _taggingService;
         private readonly ITagFactory _tagFactory;
         private readonly IAlertService _alertService;
@@ -24,12 +26,15 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private static bool isTestDataInitialised = false;
 
         public TagController(
+             ObjectMetaDataTaggingFacade<BaseTag> taggingFacade,
             IDefaultTaggingService<BaseTag> taggingService,
             ITagFactory tagFactory,
             IAlertService alertService,
             IGenerateTestData generateTestData,
             TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
         {
+            _taggingFacade = taggingFacade ?? throw new ArgumentNullException(nameof(taggingFacade));
+
             _taggingService = taggingService;
             _tagFactory = tagFactory;
             _alertService = alertService;
@@ -179,7 +184,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()
         {
-            var objectGraph = await _taggingService.GetObjectGraph();
+            var objectGraph = await _taggingFacade.GetObjectGraph();
             ObjectGraphBuilder.PrintObjectGraph(objectGraph);
             return Ok(objectGraph);
         }

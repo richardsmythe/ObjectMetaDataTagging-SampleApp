@@ -31,15 +31,10 @@ namespace ObjectMetaDataTagging.Api
 
             // Web API-specific services
             builder.Services.AddSingleton<IAlertService, AlertService>();
-            builder.Services.AddSingleton<IGenerateTestData, GenerateTestData>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagAddedEventArgs>, TagAddedHandler>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagRemovedEventArgs>, TagRemovedHandler>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
+            builder.Services.AddScoped<IGenerateTestData, GenerateTestData>();
 
             // Register CustomTaggingService
-            builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
-
-
+            builder.Services.AddScoped<CustomTaggingService<BaseTag>>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

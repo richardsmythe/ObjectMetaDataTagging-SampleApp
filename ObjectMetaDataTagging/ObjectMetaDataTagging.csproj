@@ -5,9 +5,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>$(AssemblyName).Util</PackageId>
+    <PackageId>ObjectMetaDataTaggingLibrary</PackageId>
     <Authors>Richard Smythe</Authors>
-    <Description>A light-weight tool for adding and editing tags associated with objects.</Description>
+    <Description>A light-weight event-driven tool for adding and editing tags associated with objects.</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Object Metadata Tagging Libary</Title>
+    <Product>Object MetaData Tagging Library</Product>
+    <Copyright>2024</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

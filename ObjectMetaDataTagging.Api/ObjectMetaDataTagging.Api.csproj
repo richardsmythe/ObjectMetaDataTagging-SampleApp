@@ -6,11 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ObjectMetaDataTaggingLibrary" Version="1.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ObjectMetaDataTagging\ObjectMetaDataTagging.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,21 +7,23 @@ namespace ObjectMetaDataTagging.Api.Services
 {
     public class GenerateTestData : IGenerateTestData
     {
-        private readonly IDefaultTaggingService<BaseTag> _taggingService;
+        private readonly ObjectMetaDataTaggingFacade<BaseTag> _taggingService;
         private readonly ITagFactory _tagFactory;
 
         public GenerateTestData(
-            IDefaultTaggingService<BaseTag> taggingService,
+            ObjectMetaDataTaggingFacade<BaseTag> taggingService,
             ITagFactory tagFactory)
         {
             _taggingService = taggingService;
             _tagFactory = tagFactory;          
         }
+        
+        // Generates 3 levels of tags on objects
         async Task<List<IEnumerable<KeyValuePair<string, object>>>> IGenerateTestData.GenerateTestData()
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(3, 3);
+            int numberOfObjects = random.Next(3, 5);
 
             var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
 
@@ -33,7 +35,7 @@ namespace ObjectMetaDataTagging.Api.Services
 
                 newObj.Sender = "Sender" + random.Next(1, 50);
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
-                newObj.Amount = random.Next(1500, 6000);
+                newObj.Amount = random.Next(4500, 6000);
 
                 int numberOfTags = random.Next(1, 4);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();

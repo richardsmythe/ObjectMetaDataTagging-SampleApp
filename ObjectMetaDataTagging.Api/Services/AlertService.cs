@@ -13,7 +13,7 @@ public class AlertService : IAlertService
 
     public bool IsSuspiciousTransaction(Transaction transaction)
     {
-        return transaction.Amount > 3000;
+        return transaction.Amount > 2000;
     } 
 }
 
