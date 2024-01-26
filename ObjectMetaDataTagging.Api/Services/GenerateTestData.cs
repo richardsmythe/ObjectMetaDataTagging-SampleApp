@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Helpers;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.TagModels;
@@ -13,14 +14,30 @@ namespace ObjectMetaDataTagging.Api.Services
     public class GenerateTestData : IGenerateTestData
     {
         private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
+        private readonly HashSet<Guid> handledObjectIds;
 
-        public GenerateTestData(
-            IObjectMetaDataTaggingFacade<BaseTag> taggingService)
+        public GenerateTestData(IObjectMetaDataTaggingFacade<BaseTag> taggingService)
         {
-            _taggingFacade = taggingService;            
-            _taggingFacade.TagAdded += (sender, args) =>
+            _taggingFacade = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
+            handledObjectIds = new HashSet<Guid>();
+
+            // Shows how external components can subscribe to events in the library
+            _taggingFacade.TagAdded += async (sender, args) =>
             {
-                Console.WriteLine($"Tag added for object {args.TaggedObject.GetType().Name}: {args.Tag}");
+                if (args.TaggedObject is DummyBase dummyObject)
+                {
+                    if (!handledObjectIds.Contains(dummyObject.Id))
+                    {
+                        handledObjectIds.Add(dummyObject.Id);
+                        if (dummyObject.Amount > 2000)
+                        {
+                            Console.WriteLine($"Performing action for object with Account > 2000: {dummyObject}");
+                            var newTag = _taggingFacade.CreateBaseTag("Suspicious Transfer Detected", ExampleTags.Suspicious, "This object has been tagged as suspicious");
+                            newTag.Parents.Add(dummyObject.Id);
+                            await _taggingFacade.SetTagAsync(dummyObject, newTag);
+                        }
+                    }
+                }
             };
         }
 
