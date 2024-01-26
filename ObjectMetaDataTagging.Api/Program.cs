@@ -1,4 +1,4 @@
-using ObjectMetaDataTagging.Api.Events;
+
 using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Configuration;
@@ -29,12 +29,8 @@ namespace ObjectMetaDataTagging.Api
             // Register OMDT library
             builder.Services.AddObjectMetaDataTagging();
 
-            // Web API-specific services
-            builder.Services.AddSingleton<IAlertService, AlertService>();
+            builder.Services.AddScoped<IAlertService, AlertService>();
             builder.Services.AddScoped<IGenerateTestData, GenerateTestData>();
-
-            // Register CustomTaggingService
-            builder.Services.AddScoped<CustomTaggingService<BaseTag>>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

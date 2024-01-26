@@ -1,6 +1,6 @@
 ﻿using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Interfaces;
-using ObjectMetaDataTagging.Api.Events;
+
 
 public class AlertService : IAlertService
 {

@@ -1,5 +1,6 @@
 ﻿
 using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Models.TagModels;
 
 namespace ObjectMetaDataTagging.Interfaces
 {

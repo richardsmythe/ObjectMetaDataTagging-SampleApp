@@ -2,15 +2,12 @@
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Helpers;
 using ObjectMetaDataTagging.Interfaces;
+using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
 
 namespace ObjectMetaDataTagging.Configuration
 {
-    /* 
-       Default services for the external application to register with,
-       e.g., builder.Services.AddObjectMetaDataTagging();
-    */
-    public static class ServiceCollection
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddObjectMetaDataTagging(this IServiceCollection services)
         {
@@ -24,6 +21,10 @@ namespace ObjectMetaDataTagging.Configuration
 
             // Register the EventManager
             services.AddSingleton<TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs>>();
+
+            // Register ObjectMetaDataTaggingFacade<BaseTag> and its interface IObjectMetaDataTaggingFacade<BaseTag>
+            services.AddScoped<IObjectMetaDataTaggingFacade<BaseTag>, ObjectMetaDataTaggingFacade<BaseTag>>();
+            services.AddScoped<ObjectMetaDataTaggingFacade<BaseTag>>();
 
             return services;
         }

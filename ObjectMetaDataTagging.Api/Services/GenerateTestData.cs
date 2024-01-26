@@ -1,4 +1,9 @@
-﻿using ObjectMetaDataTagging.Api.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ObjectMetaDataTagging.Api.Interfaces;
+using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.TagModels;
@@ -7,20 +12,25 @@ namespace ObjectMetaDataTagging.Api.Services
 {
     public class GenerateTestData : IGenerateTestData
     {
-        private readonly ObjectMetaDataTaggingFacade<BaseTag> _taggingService;
+        private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
         private readonly ITagFactory _tagFactory;
 
         public GenerateTestData(
-            ObjectMetaDataTaggingFacade<BaseTag> taggingService,
+            IObjectMetaDataTaggingFacade<BaseTag> taggingService,
             ITagFactory tagFactory)
         {
-            _taggingService = taggingService;
-            _tagFactory = tagFactory;          
+            _taggingFacade = taggingService;
+            _tagFactory = tagFactory;
+            _taggingFacade.TagAdded += (sender, args) =>
+            {
+                Console.WriteLine($"Tag added for object {args.TaggedObject.GetType().Name}: {args.Tag}");
+            };
         }
-        
+
         // Generates 3 levels of tags on objects
         async Task<List<IEnumerable<KeyValuePair<string, object>>>> IGenerateTestData.GenerateTestData()
         {
+            
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
             int numberOfObjects = random.Next(3, 5);
@@ -30,7 +40,6 @@ namespace ObjectMetaDataTagging.Api.Services
             for (int i = 0; i < numberOfObjects; i++)
             {
                 var selectedClassType = dummyClasses[random.Next(dummyClasses.Count)];
-
                 var newObj = Activator.CreateInstance(selectedClassType) as DummyBase;
 
                 newObj.Sender = "Sender" + random.Next(1, 50);
@@ -43,9 +52,8 @@ namespace ObjectMetaDataTagging.Api.Services
                 for (int j = 0; j < numberOfTags; j++)
                 {
                     var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-
                     BaseTag newTag = _tagFactory.CreateBaseTag(randomTagName, null, "");
-                    await _taggingService.SetTagAsync(newObj, newTag);
+                    await _taggingFacade.SetTagAsync(newObj, newTag);
 
                     int numberOfChildTags = random.Next(1, 5);
 
@@ -54,11 +62,9 @@ namespace ObjectMetaDataTagging.Api.Services
                         var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
                         var childTag = _tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
 
-                        // Set properties for child tag
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
 
-                        // Recursively create child tags for the child tag itself
                         int numberOfGrandchildTags = random.Next(1, 3);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
@@ -66,7 +72,6 @@ namespace ObjectMetaDataTagging.Api.Services
                             var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
                             var grandchildTag = _tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
-                            // Set properties for grandchild tag
                             grandchildTag.Parents.Add(childTag.Id);
                             grandchildTag.Value = $"Grandchild Value {m + 1}";
 
@@ -76,7 +81,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         newTag.AddChildTag(childTag);
                     }
 
-                    var tags = await _taggingService.GetAllTags(newObj);
+                    var tags = await _taggingFacade.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
