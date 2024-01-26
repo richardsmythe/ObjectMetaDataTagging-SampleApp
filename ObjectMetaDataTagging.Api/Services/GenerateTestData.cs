@@ -13,14 +13,11 @@ namespace ObjectMetaDataTagging.Api.Services
     public class GenerateTestData : IGenerateTestData
     {
         private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
-        private readonly ITagFactory _tagFactory;
 
         public GenerateTestData(
-            IObjectMetaDataTaggingFacade<BaseTag> taggingService,
-            ITagFactory tagFactory)
+            IObjectMetaDataTaggingFacade<BaseTag> taggingService)
         {
-            _taggingFacade = taggingService;
-            _tagFactory = tagFactory;
+            _taggingFacade = taggingService;            
             _taggingFacade.TagAdded += (sender, args) =>
             {
                 Console.WriteLine($"Tag added for object {args.TaggedObject.GetType().Name}: {args.Tag}");
@@ -52,7 +49,7 @@ namespace ObjectMetaDataTagging.Api.Services
                 for (int j = 0; j < numberOfTags; j++)
                 {
                     var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                    BaseTag newTag = _tagFactory.CreateBaseTag(randomTagName, null, "");
+                    BaseTag newTag = _taggingFacade.CreateBaseTag(randomTagName, null, "");
                     await _taggingFacade.SetTagAsync(newObj, newTag);
 
                     int numberOfChildTags = random.Next(1, 5);
@@ -60,7 +57,7 @@ namespace ObjectMetaDataTagging.Api.Services
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
                         var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                        var childTag = _tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
+                        var childTag = _taggingFacade.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
 
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
@@ -70,7 +67,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
                             var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                            var grandchildTag = _tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
+                            var grandchildTag = _taggingFacade.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
                             grandchildTag.Parents.Add(childTag.Id);
                             grandchildTag.Value = $"Grandchild Value {m + 1}";
