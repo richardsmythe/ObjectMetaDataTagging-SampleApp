@@ -29,7 +29,6 @@ namespace ObjectMetaDataTagging.Api
             // Register OMDT library
             builder.Services.AddObjectMetaDataTagging();
 
-            builder.Services.AddScoped<IAlertService, AlertService>();
             builder.Services.AddScoped<IGenerateTestData, GenerateTestData>();
 
             builder.Services.AddEndpointsApiExplorer();

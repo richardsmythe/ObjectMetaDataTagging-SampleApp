@@ -21,7 +21,7 @@ namespace ObjectMetaDataTagging.Api.Services
             _taggingFacade = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
             handledObjectIds = new HashSet<Guid>();
 
-            // Shows how external components can subscribe to events in the library
+            // Shows how external components can subscribe to events in the library and perform certain actions
             _taggingFacade.TagAdded += async (sender, args) =>
             {
                 if (args.TaggedObject is DummyBase dummyObject)
@@ -30,8 +30,7 @@ namespace ObjectMetaDataTagging.Api.Services
                     {
                         handledObjectIds.Add(dummyObject.Id);
                         if (dummyObject.Amount > 2000)
-                        {
-                            Console.WriteLine($"Performing action for object with Account > 2000: {dummyObject}");
+                        {                           
                             var newTag = _taggingFacade.CreateBaseTag("Suspicious Transfer Detected", ExampleTags.Suspicious, "This object has been tagged as suspicious");
                             newTag.Parents.Add(dummyObject.Id);
                             await _taggingFacade.SetTagAsync(dummyObject, newTag);
@@ -47,7 +46,7 @@ namespace ObjectMetaDataTagging.Api.Services
             
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(3, 5);
+            int numberOfObjects = random.Next(1, 3);
 
             var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
 
@@ -58,7 +57,7 @@ namespace ObjectMetaDataTagging.Api.Services
 
                 newObj.Sender = "Sender" + random.Next(1, 50);
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
-                newObj.Amount = random.Next(4500, 6000);
+                newObj.Amount = random.Next(1500, 4000);
 
                 int numberOfTags = random.Next(1, 4);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
@@ -99,7 +98,6 @@ namespace ObjectMetaDataTagging.Api.Services
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
-
             return testData;
         }
     }
