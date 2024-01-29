@@ -4,9 +4,12 @@ using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Events;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
+using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Services;
 using ObjectMetaDataTagging.Utilities;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -43,12 +46,60 @@ namespace ObjectMetaDataTagging.Api.Controllers
 
         }
 
+        [HttpGet("filter-tags")]
+        public async Task<IActionResult> FilterTags()
+        {
+            try
+            {
+                Func<BaseTag, bool> myFilter = tag =>
+                    tag.Name == ExampleTags.NameDuplication.ToString(); 
+
+                var tags = testData
+                   .SelectMany(item => item
+                   .Where(kvp => kvp.Value is BaseTag)
+                   .Select(kvp => (BaseTag)kvp.Value))
+                   .ToList();
+
+                var filteredTags = await _taggingFacade
+                    .BuildQuery(tags, myFilter, LogicalOperator.AND);
+
+                if (filteredTags.Any())
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        ReferenceHandler = ReferenceHandler.Preserve,
+                        WriteIndented = true,
+                    };
+
+                    var jsonString = JsonSerializer.Serialize(filteredTags, options);
+
+                    return Ok(jsonString);
+                }
+
+                return Ok("No tags meet the filter criteria.");
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()
         {
-            var objectGraph = await _taggingFacade.GetObjectGraph();
-            ObjectGraphBuilder.PrintObjectGraph(objectGraph);
-            return Ok(objectGraph);
+            try
+            {
+                var objectGraph = await _taggingFacade.GetObjectGraph();
+                ObjectGraphBuilder.PrintObjectGraph(objectGraph);
+                return Ok(objectGraph);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occured: {ex.Message}");
+            }
         }
     }
 }
