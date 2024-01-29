@@ -21,7 +21,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
         private readonly IGenerateTestData _generateTestData;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
-        private static bool isTestDataInitialised = false;
 
         public TagController(
             IObjectMetaDataTaggingFacade<BaseTag> taggingFacade,
@@ -30,14 +29,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             _taggingFacade = taggingFacade;
             _generateTestData = generateTestData;
-
-
-            // Check if data is already initialised before calling InitialiseTestData
-            if (!isTestDataInitialised)
-            {
-                InitialiseTestData();
-                isTestDataInitialised = true;
-            }
+            InitialiseTestData();
         }
 
         private async Task InitialiseTestData()
@@ -52,8 +44,8 @@ namespace ObjectMetaDataTagging.Api.Controllers
             try
             {
                 Func<BaseTag, bool> myFilter = tag =>
-                    tag.Name == ExampleTags.NameDuplication.ToString(); 
-
+                    tag.Name == ExampleTags.NameDuplication.ToString() //&& tag.ChildTags.Count > 0
+                    ;
                 var tags = testData
                    .SelectMany(item => item
                    .Where(kvp => kvp.Value is BaseTag)
