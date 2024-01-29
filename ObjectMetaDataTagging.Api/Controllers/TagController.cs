@@ -10,6 +10,7 @@ using ObjectMetaDataTagging.Services;
 using ObjectMetaDataTagging.Utilities;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using ObjectMetaDataTagging.Api.Models;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -29,13 +30,14 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             _taggingFacade = taggingFacade;
             _generateTestData = generateTestData;
-            InitialiseTestData();
+            _ = InitialiseTestData();
         }
 
         private async Task InitialiseTestData()
         {
+            // Generates the dummy data on which this web app
+            // uses to demonstrate the usage of the tagging lirbary.
             testData = await _generateTestData.GenerateTestData();
-
         }
 
         [HttpGet("filter-tags")]
@@ -43,15 +45,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             try
             {
-                Func<BaseTag, bool> myFilter = tag =>
-                    tag.Name == ExampleTags.NameDuplication.ToString() //&& tag.ChildTags.Count > 0
-                    ;
                 var tags = testData
                    .SelectMany(item => item
                    .Where(kvp => kvp.Value is BaseTag)
                    .Select(kvp => (BaseTag)kvp.Value))
                    .ToList();
-
+                
+                Func<BaseTag, bool> myFilter = tag => {
+                    return tag.Name == ExampleTags.NameDuplication.ToString() 
+                    ;
+                };
                 var filteredTags = await _taggingFacade
                     .BuildQuery(tags, myFilter, LogicalOperator.AND);
 
@@ -77,6 +80,44 @@ namespace ObjectMetaDataTagging.Api.Controllers
             }
         }
 
+        [HttpGet("map-tag")]
+        public async Task<IActionResult> MapTag()
+        {
+            try
+            {
+                var sourceTagToMap = testData
+                    .SelectMany(item => item
+                    .Where(kvp => kvp.Value is BaseTag)
+                    .Select(kvp => (BaseTag)kvp.Value))
+                    .FirstOrDefault();
+
+                if (sourceTagToMap == null) return Ok("No tags available to map.");
+
+                Tag targetTag = new Tag()
+                {
+                    SomeField = "Test",
+                    AnotherField = "Test",
+                };
+
+                var mappedTag = await _taggingFacade.MapTagsBetweenTypes(sourceTagToMap, targetTag);
+
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve,
+                    WriteIndented = true,
+                };
+
+                var jsonString = JsonSerializer.Serialize(mappedTag, options);
+
+                return Ok(jsonString);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
 
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()
@@ -85,6 +126,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             {
                 var objectGraph = await _taggingFacade.GetObjectGraph();
                 ObjectGraphBuilder.PrintObjectGraph(objectGraph);
+
                 return Ok(objectGraph);
 
             }
