@@ -19,16 +19,16 @@ namespace ObjectMetaDataTagging.Api.Controllers
     public class TagController : ControllerBase
     {
 
-        private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
+        private readonly ITaggingManager<BaseTag> _taggingManager;
         private readonly IGenerateTestData _generateTestData;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
         public TagController(
-            IObjectMetaDataTaggingFacade<BaseTag> taggingFacade,
+            ITaggingManager<BaseTag> taggingFacade,
             IGenerateTestData generateTestData
             )
         {
-            _taggingFacade = taggingFacade;
+            _taggingManager = taggingFacade;
             _generateTestData = generateTestData;
             _ = InitialiseTestData();
         }
@@ -55,7 +55,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     return tag.Name == ExampleTags.NameDuplication.ToString() 
                     ;
                 };
-                var filteredTags = await _taggingFacade
+                var filteredTags = await _taggingManager
                     .BuildQuery(tags, myFilter, LogicalOperator.AND);
 
                 if (filteredTags.Any())
@@ -99,7 +99,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
                     AnotherField = "Test",
                 };
 
-                var mappedTag = await _taggingFacade.MapTagsBetweenTypes(sourceTagToMap, targetTag);
+                var mappedTag = await _taggingManager.MapTagsBetweenTypes(sourceTagToMap, targetTag);
 
                 var options = new JsonSerializerOptions
                 {
@@ -124,7 +124,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         {
             try
             {
-                var objectGraph = await _taggingFacade.GetObjectGraph();
+                var objectGraph = await _taggingManager.GetObjectGraph();
                 ObjectGraphBuilder.PrintObjectGraph(objectGraph);
 
                 return Ok(objectGraph);

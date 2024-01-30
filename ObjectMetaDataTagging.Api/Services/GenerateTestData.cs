@@ -13,16 +13,16 @@ namespace ObjectMetaDataTagging.Api.Services
 {
     public class GenerateTestData : IGenerateTestData
     {
-        private readonly IObjectMetaDataTaggingFacade<BaseTag> _taggingFacade;
+        private readonly ITaggingManager<BaseTag> _taggingManager;
         private readonly HashSet<Guid> handledObjectIds;
 
-        public GenerateTestData(IObjectMetaDataTaggingFacade<BaseTag> taggingService)
+        public GenerateTestData(ITaggingManager<BaseTag> taggingService)
         {
-            _taggingFacade = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
+            _taggingManager = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
             handledObjectIds = new HashSet<Guid>();
 
             // Shows how external components can subscribe to events in the library and perform certain actions
-            _taggingFacade.TagAdded += async (sender, args) =>
+            _taggingManager.TagAdded += async (sender, args) =>
             {
                 if (args.TaggedObject is DummyBase dummyObject)
                 {
@@ -31,9 +31,9 @@ namespace ObjectMetaDataTagging.Api.Services
                         handledObjectIds.Add(dummyObject.Id);
                         if (dummyObject.Amount > 2000)
                         {                           
-                            var newTag = _taggingFacade.CreateBaseTag("Suspicious Transfer Detected", ExampleTags.Suspicious, "This object has been tagged as suspicious");
+                            var newTag = _taggingManager.CreateBaseTag("Suspicious Transfer Detected", ExampleTags.Suspicious, "This object has been tagged as suspicious");
                             newTag.Parents.Add(dummyObject.Id);
-                            await _taggingFacade.SetTagAsync(dummyObject, newTag);
+                            await _taggingManager.SetTagAsync(dummyObject, newTag);
                         }
                     }
                 }
@@ -65,15 +65,15 @@ namespace ObjectMetaDataTagging.Api.Services
                 for (int j = 0; j < numberOfTags; j++)
                 {
                     var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                    BaseTag newTag = _taggingFacade.CreateBaseTag(randomTagName, null, "");
-                    await _taggingFacade.SetTagAsync(newObj, newTag);
+                    BaseTag newTag = _taggingManager.CreateBaseTag(randomTagName, null, "");
+                    await _taggingManager.SetTagAsync(newObj, newTag);
 
                     int numberOfChildTags = random.Next(1, 5);
 
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
                         var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                        var childTag = _taggingFacade.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
+                        var childTag = _taggingManager.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
 
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
@@ -83,7 +83,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
                             var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                            var grandchildTag = _taggingFacade.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
+                            var grandchildTag = _taggingManager.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
 
                             grandchildTag.Parents.Add(childTag.Id);
                             grandchildTag.Value = $"Grandchild Value {m + 1}";
@@ -94,7 +94,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         newTag.AddChildTag(childTag);
                     }
 
-                    var tags = await _taggingFacade.GetAllTags(newObj);
+                    var tags = await _taggingManager.GetAllTags(newObj);
                     testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
                 }
             }
