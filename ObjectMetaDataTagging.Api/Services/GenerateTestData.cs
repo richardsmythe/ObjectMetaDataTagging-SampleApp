@@ -46,7 +46,7 @@ namespace ObjectMetaDataTagging.Api.Services
             
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(1, 3);
+            int numberOfObjects = random.Next(5, 5);
 
             var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
 
@@ -59,7 +59,7 @@ namespace ObjectMetaDataTagging.Api.Services
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
                 newObj.Amount = random.Next(1500, 4000);
 
-                int numberOfTags = random.Next(1, 4);
+                int numberOfTags = random.Next(4, 4);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
 
                 for (int j = 0; j < numberOfTags; j++)
@@ -68,7 +68,7 @@ namespace ObjectMetaDataTagging.Api.Services
                     BaseTag newTag = _taggingManager.CreateBaseTag(randomTagName, null, "");
                     await _taggingManager.SetTagAsync(newObj, newTag);
 
-                    int numberOfChildTags = random.Next(1, 5);
+                    int numberOfChildTags = random.Next(5, 5);
 
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
@@ -78,7 +78,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
 
-                        int numberOfGrandchildTags = random.Next(1, 3);
+                        int numberOfGrandchildTags = random.Next(8, 8);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {

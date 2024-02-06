@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ObjectMetaDataTagging.Api.Interfaces;
-using ObjectMetaDataTagging.Api.Services;
-using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Api.Models;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models;
 using ObjectMetaDataTagging.Models.QueryModels;
 using ObjectMetaDataTagging.Models.TagModels;
-using ObjectMetaDataTagging.Services;
 using ObjectMetaDataTagging.Utilities;
-using System.Text.Json.Serialization;
 using System.Text.Json;
-using ObjectMetaDataTagging.Api.Models;
+using System.Text.Json.Serialization;
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -24,11 +21,11 @@ namespace ObjectMetaDataTagging.Api.Controllers
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
         public TagController(
-            ITaggingManager<BaseTag> taggingFacade,
+            ITaggingManager<BaseTag> taggingManager,
             IGenerateTestData generateTestData
             )
         {
-            _taggingManager = taggingFacade;
+            _taggingManager = taggingManager;
             _generateTestData = generateTestData;
             _ = InitialiseTestData();
         }
