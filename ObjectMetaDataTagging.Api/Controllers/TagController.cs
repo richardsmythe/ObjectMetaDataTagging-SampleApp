@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ObjectMetaDataTagging.Api.Models;
-using System.Reflection;
-using ObjectMetaDataTagging.Models;
-using ObjectMetaDataTagging.Events;
+using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Interfaces;
 using ObjectMetaDataTagging.Models.TagModels;
-using ObjectMetaDataTagging.Models.QueryModels;
-using ObjectMetaDataTagging.Services;
-using ObjectMetaDataTagging.Api.Services;
-using System.Threading.Tasks;
 using ObjectMetaDataTagging.Utilities;
-using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+
 
 namespace ObjectMetaDataTagging.Api.Controllers
 {
@@ -18,242 +13,90 @@ namespace ObjectMetaDataTagging.Api.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
-        private IDefaultTaggingService<BaseTag> _taggingService;
-        private readonly ITagFactory _tagFactory;
-        private readonly IAlertService _alertService;
-        private readonly TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> _eventManager;
+        private readonly ITaggingManager<BaseTag> _taggingManager;
+        private readonly IGenerateTestData _generateTestData;
         private List<IEnumerable<KeyValuePair<string, object>>> testData;
 
-        private static bool isTestDataInitialised = false;
-
         public TagController(
-            IDefaultTaggingService<BaseTag> taggingService,
-            ITagFactory tagFactory,
-            IAlertService alertService,
-            TaggingEventManager<AsyncTagAddedEventArgs, AsyncTagRemovedEventArgs, AsyncTagUpdatedEventArgs> eventManager)
+            ITaggingManager<BaseTag> taggingManager,
+            IGenerateTestData generateTestData
+        )
         {
-            _taggingService = taggingService ?? throw new ArgumentNullException(nameof(taggingService));
-            _tagFactory = tagFactory ?? throw new ArgumentNullException(nameof(tagFactory));
-            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
-            _eventManager = eventManager;
+            _taggingManager = taggingManager;
+            _generateTestData = generateTestData;
 
-            // Check if data is already initialised before calling InitialiseTestData
-            if (!isTestDataInitialised)
+            InitializeTestData();
+        }
+
+
+        private async Task InitializeTestData()
+        {
+            try
             {
-                InitialiseTestData();
-                isTestDataInitialised = true;
+                testData = await _generateTestData.GenerateTestData();
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
-        private async Task InitialiseTestData()
+        [HttpGet("generateTags")]
+        public async Task<ActionResult<List<IEnumerable<KeyValuePair<string, object>>>>> GenerateTags()
         {
-            _taggingService = new CustomTaggingService<BaseTag>(_eventManager);
-            var defaultTaggingService = new DefaultTaggingService<BaseTag>(_taggingService);
-
-            testData = await GenerateTestData(defaultTaggingService, _tagFactory, _alertService);
-
-
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAsync(Guid tagId)
-        {
-            var obj = _taggingService.GetObjectByTag(tagId);
-            if (obj != null && await _taggingService.RemoveTagAsync(obj, tagId))
+            if (testData == null)
             {
-                var updatedTags = _taggingService.GetAllTags(obj);
-                var objectModels = new List<ObjectModel>();
-                var tagModels = new List<TagModel>();
-                var objectName = "";
-                Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); ;
-                foreach (var updatedTag in await updatedTags)
-                {
-                    var tagModel = new TagModel
-                    {
-                        tagId = updatedTag.Id,
-                        TagName = updatedTag.Name,
-                        Description = updatedTag.Description,
-                        AssociatedObject = updatedTag.AssociatedParentObjectName?.ToString(),
-                        AssociatedObjectId = updatedTag.AssociatedParentObjectId,
-                    };
-                    tagModels.Add(tagModel);
-
-                    if (updatedTag.AssociatedParentObjectName != null)
-                    {
-                        objectName = updatedTag.AssociatedParentObjectName?.ToString();
-                        objectId = updatedTag.AssociatedParentObjectId;
-                    }
-                }
-
-                objectModels.Add(new ObjectModel
-                {
-                    Id = objectId,
-                    ObjectName = objectName
-                });
-
-                var frameModel = new Frame
-                {
-                    Id = 0,
-                    Origin = Assembly.GetEntryAssembly().GetName().Name,
-                    ObjectData = objectModels,
-                    TagData = tagModels
-                };
-
-                return Ok(new List<Frame> { frameModel });
+                return BadRequest("Test data not initialized");
             }
 
-            return NotFound();
+            return Ok(testData);
         }
 
-        // Initial data for app
-        [HttpGet]
-        public IActionResult GetObjectsAndTags()
-        {
-            var objectModels = new List<ObjectModel>();
-            var tagModels = new List<TagModel>();
-            var objectName = "";
-            Guid objectId = new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00");
+        //[HttpGet("map-tag")]
+        //public async Task<IActionResult> MapTag()
+        //{
+        //    try
+        //    {
+        //        var tagToMap = testData
+        //            .SelectMany(item => item
+        //            .Where(kvp => kvp.Value is BaseTag)
+        //            .Select(kvp => (BaseTag)kvp.Value))
+        //            .FirstOrDefault();
 
-            foreach (var obj in testData)
-            {
-                if (obj.First().Value is BaseTag baseTag && baseTag != null)
-                {
-                    objectName = baseTag.AssociatedParentObjectName?.ToString() ?? "";
-                    objectId = baseTag.AssociatedParentObjectId;
-                }
+        //        if (tagToMap == null) return Ok("No tags available to map.");
 
-                var tags = obj.Select(kv => kv.Value.ToString());
+        //        Tag tag = new Tag()
+        //        {
+        //            SomeField = "Test",
+        //            AnotherField = "Test",
+        //        };
 
-                objectModels.Add(new ObjectModel
-                {
-                    Id = objectId,
-                    ObjectName = objectName
-                });
+        //        // Explicitly specify the type of mappedTag
+        //        BaseTag mappedTag = await _taggingManager.MapTagsBetweenTypes<BaseTag, BaseTag>(tagToMap, tag);
 
-                tagModels.AddRange(obj.Select(tagPair =>
-                {
-                    var tag = tagPair.Value as BaseTag;
-                    if (tag != null)
-                    {
-                        var tagModel = CreateTagModel(tag, objectName, objectId);
-                        return tagModel;
-                    }
+        //        var options = new JsonSerializerOptions
+        //        {
+        //            ReferenceHandler = ReferenceHandler.Preserve,
+        //            WriteIndented = true,
+        //        };
 
-                    return null;
-                }).Where(tagModel => tagModel != null)!);
-            }
+        //        var jsonString = JsonSerializer.Serialize(mappedTag, options);
 
-            var frameModel = new Frame
-            {
-                Id = 1,
-                Origin = Assembly.GetEntryAssembly().GetName().Name,
-                ObjectData = objectModels,
-                TagData = tagModels
-            };
-
-            return Ok(new List<Frame> { frameModel });
-        }
-
-        private static TagModel CreateTagModel(BaseTag tag, string objectName, Guid objectId)
-        {
-            var tagModel = new TagModel
-            {
-                tagId = tag.Id,
-                TagName = tag.Name,
-                Description = tag.Description,
-                AssociatedObject = objectName,
-                AssociatedObjectId = objectId,
-                ChildTags = tag.ChildTags?.Select(childTag => CreateTagModel(childTag, tag.Name, tag.Id)).ToList()
-            };
-
-            // Set properties for child tags
-            if (tagModel.ChildTags != null)
-            {
-                foreach (var childTag in tagModel.ChildTags)
-                {
-                    childTag.AssociatedObject = tagModel.TagName;
-                    childTag.AssociatedObjectId = tagModel.tagId;
-                }
-            }
-            return tagModel;
-        }
-
-        // generate dummy data with possibility of 3 generations of child tag
-        private static async Task<List<IEnumerable<KeyValuePair<string, object>>>> GenerateTestData(
-            IDefaultTaggingService<BaseTag> taggingService,
-            ITagFactory tagFactory,
-            IAlertService alertService)
-        {
-            var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
-            var random = new Random();
-            int numberOfObjects = random.Next(1, 5);
-
-            for (int i = 0; i < numberOfObjects; i++)
-            {
-                var newObj = new ExamplePersonTransaction
-                {
-                    Sender = "Sender" + random.Next(1, 50),
-                    Receiver = "Receiver" + random.Next(1, 50),
-                    Amount = random.Next(1500, 6000),
-                };
-
-                int numberOfTags = random.Next(1, 4);
-                var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
-
-                for (int j = 0; j < numberOfTags; j++)
-                {
-                    var randomTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-
-                    BaseTag newTag = tagFactory.CreateBaseTag(randomTagName, null, "");
-                    await taggingService.SetTagAsync(newObj, newTag);
-
-                    int numberOfChildTags = random.Next(1, 5);
-
-                    for (int k = 0; k < numberOfChildTags; k++)
-                    {
-                        var randomChildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                        var childTag = tagFactory.CreateBaseTag(randomChildTagName, null, $"Child tag {k + 1}");
-
-                        // Set properties for child tag
-                        childTag.AssociatedParentObjectName = newTag.Name;
-                        childTag.AssociatedParentObjectId = newTag.Id;
-                        childTag.Value = $"Child Value {k + 1}";
-
-                        // Recursively create child tags for the child tag itself
-                        int numberOfGrandchildTags = random.Next(1, 4);
-
-                        for (int m = 0; m < numberOfGrandchildTags; m++)
-                        {
-                            var randomGrandchildTagName = tagTypes[random.Next(tagTypes.Length)].ToString();
-                            var grandchildTag = tagFactory.CreateBaseTag(randomGrandchildTagName, null, $"Grandchild tag {m + 1}");
-
-                            // Set properties for grandchild tag
-                            grandchildTag.AssociatedParentObjectName = childTag.Name;
-                            grandchildTag.AssociatedParentObjectId = childTag.Id;
-                            grandchildTag.Value = $"Grandchild Value {m + 1}";
-
-                            childTag.AddChildTag(grandchildTag);
-                        }
-
-                        newTag.AddChildTag(childTag);
-                    }
-
-                    var tags = await taggingService.GetAllTags(newObj);
-                    testData.Add(tags.Select(tag => new KeyValuePair<string, object>(tag.Name, tag)).ToList());
-                }
-            }
-
-            return testData;
-        }
-
+        //        return Ok(jsonString);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"An error occurred: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()
         {
-            var objectGraph = await _taggingService.GetObjectGraph();
+            var objectGraph = await _taggingManager.GetObjectGraph();
             ObjectGraphBuilder.PrintObjectGraph(objectGraph);
             return Ok(objectGraph);
         }
-
     }
+
 }

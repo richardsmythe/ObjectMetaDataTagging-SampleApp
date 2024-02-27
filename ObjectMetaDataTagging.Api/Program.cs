@@ -1,10 +1,7 @@
-using ObjectMetaDataTagging.Api.Events;
+using ObjectMetaDataTagging.Api.Interfaces;
 using ObjectMetaDataTagging.Api.Services;
 using ObjectMetaDataTagging.Configuration;
-using ObjectMetaDataTagging.Events;
-using ObjectMetaDataTagging.Interfaces;
-using ObjectMetaDataTagging.Models.TagModels;
-using ObjectMetaDataTagging.Services;
+using System.Text.Json.Serialization;
 
 namespace ObjectMetaDataTagging.Api
 {
@@ -23,21 +20,16 @@ namespace ObjectMetaDataTagging.Api
                 .AllowAnyMethod());
             });
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // or ReferenceHandler.Ignore
+            });
 
             // Register OMDT library
             builder.Services.AddObjectMetaDataTagging();
 
-            // Web API-specific services
-            builder.Services.AddSingleton<IAlertService, AlertService>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagAddedEventArgs>, TagAddedHandler>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagRemovedEventArgs>, TagRemovedHandler>();
-            builder.Services.AddSingleton<IAsyncEventHandler<AsyncTagUpdatedEventArgs>, TagUpdatedHandler>();
-
-            // Register CustomTaggingService
-            builder.Services.AddSingleton<IDefaultTaggingService<BaseTag>, CustomTaggingService<BaseTag>>();
-
-
+            // Web API-specific services     
+            builder.Services.AddScoped<IGenerateTestData, GenerateTestData>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
