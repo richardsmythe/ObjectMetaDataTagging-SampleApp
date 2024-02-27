@@ -52,43 +52,34 @@ namespace ObjectMetaDataTagging.Api.Controllers
             return Ok(testData);
         }
 
-        //[HttpGet("map-tag")]
-        //public async Task<IActionResult> MapTag()
-        //{
-        //    try
-        //    {
-        //        var tagToMap = testData
-        //            .SelectMany(item => item
-        //            .Where(kvp => kvp.Value is BaseTag)
-        //            .Select(kvp => (BaseTag)kvp.Value))
-        //            .FirstOrDefault();
+        [HttpGet("map-tag")]
+        public async Task<IActionResult> MapTag()
+        {
+            try
+            {
+                var tagToMap = testData
+                    .SelectMany(item => item
+                    .Where(kvp => kvp.Value is BaseTag)
+                    .Select(kvp => (BaseTag)kvp.Value))
+                    .FirstOrDefault();
 
-        //        if (tagToMap == null) return Ok("No tags available to map.");
+                if (tagToMap == null) return Ok("No tags available to map.");
 
-        //        Tag tag = new Tag()
-        //        {
-        //            SomeField = "Test",
-        //            AnotherField = "Test",
-        //        };
+                Tag tag = new Tag()
+                {
+                    SomeField = "Test",
+                    AnotherField = "Test",
+                };
 
-        //        // Explicitly specify the type of mappedTag
-        //        BaseTag mappedTag = await _taggingManager.MapTagsBetweenTypes<BaseTag, BaseTag>(tagToMap, tag);
+                BaseTag mappedTag = await _taggingManager.MapTagsBetweenTypes(tagToMap, tag);
 
-        //        var options = new JsonSerializerOptions
-        //        {
-        //            ReferenceHandler = ReferenceHandler.Preserve,
-        //            WriteIndented = true,
-        //        };
-
-        //        var jsonString = JsonSerializer.Serialize(mappedTag, options);
-
-        //        return Ok(jsonString);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"An error occurred: {ex.Message}");
-        //    }
-        //}
+                return Ok(mappedTag);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
         [HttpGet("print-object-graph")]
         public async Task<IActionResult> PrintObjectGraph()
@@ -99,4 +90,13 @@ namespace ObjectMetaDataTagging.Api.Controllers
         }
     }
 
+    internal class Tag:BaseTag
+    {
+        public Tag()
+        {
+        }
+
+        public string SomeField { get; set; }
+        public string AnotherField { get; set; }
+    }
 }
