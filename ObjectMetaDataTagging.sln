@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectMetaDataTagging.Api", "ObjectMetaDataTagging.Api\ObjectMetaDataTagging.Api.csproj", "{DB9AFB9D-D573-4195-A419-155BFB41E0AB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectMetaDataTagging", "ObjectMetaDataTagging\ObjectMetaDataTagging.csproj", "{A5D10D2D-E30F-4A40-BAB0-2960C79AE766}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DB9AFB9D-D573-4195-A419-155BFB41E0AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB9AFB9D-D573-4195-A419-155BFB41E0AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB9AFB9D-D573-4195-A419-155BFB41E0AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5D10D2D-E30F-4A40-BAB0-2960C79AE766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5D10D2D-E30F-4A40-BAB0-2960C79AE766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5D10D2D-E30F-4A40-BAB0-2960C79AE766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5D10D2D-E30F-4A40-BAB0-2960C79AE766}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

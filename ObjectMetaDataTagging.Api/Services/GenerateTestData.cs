@@ -23,13 +23,13 @@ namespace ObjectMetaDataTagging.Api.Services
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(1, 1);
-            var dummyClasses = new List<Type> { typeof(Transaction), typeof(Fraud), typeof(Address) };
+            int numberOfObjects = random.Next(4, 4);
+            var dummyClasses = new List<Type> { typeof(UserTransaction), typeof(Fraud), typeof(Address), typeof(Beneficiary) };
 
             for (int i = 0; i < numberOfObjects; i++)
             {
                 var selectedClassType = dummyClasses[random.Next(dummyClasses.Count)];
-                var newObj = Activator.CreateInstance(selectedClassType) as DummyBase;
+                var newObj = Activator.CreateInstance(selectedClassType) as ExamplePersonTransaction;
 
                 newObj.Sender = "Sender" + random.Next(1, 50);
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
@@ -44,7 +44,7 @@ namespace ObjectMetaDataTagging.Api.Services
                     BaseTag newTag = _tagFactory.CreateBaseTag(randomTagName, null, "");
                     await _taggingManager.SetTagAsync(newObj, newTag);
 
-                    int numberOfChildTags = random.Next(1, 1);
+                    int numberOfChildTags = random.Next(1, 3);
 
                     for (int k = 0; k < numberOfChildTags; k++)
                     {
@@ -54,7 +54,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
 
-                        int numberOfGrandchildTags = random.Next(1, 1);
+                        int numberOfGrandchildTags = random.Next(1,2);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {
@@ -78,24 +78,20 @@ namespace ObjectMetaDataTagging.Api.Services
             return testData;
         }
 
-        public class DummyBase
-        {
-            public Guid Id { get; set; } = Guid.NewGuid();
-            public string Sender { get; set; }
-            public string Receiver { get; set; }
-            public int Amount { get; set; }
-        }
-
-        public class Fraud : DummyBase
+        public class Fraud : ExamplePersonTransaction
         {
         }
 
-        public class Address : DummyBase
+        public class Address : ExamplePersonTransaction
         {    
         }
 
-        public class Transaction : DummyBase
-        {        
+        public class Beneficiary : ExamplePersonTransaction
+        {
+
+        }
+        public class UserTransaction : ExamplePersonTransaction
+        {
 
         }
 

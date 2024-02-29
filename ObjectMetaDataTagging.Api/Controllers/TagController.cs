@@ -5,6 +5,9 @@ using ObjectMetaDataTagging.Models.TagModels;
 using ObjectMetaDataTagging.Utilities;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using ObjectMetaDataTagging.Events;
+using static ObjectMetaDataTagging.Api.Services.GenerateTestData;
+using ObjectMetaDataTagging.Models;
 
 
 namespace ObjectMetaDataTagging.Api.Controllers
@@ -25,10 +28,9 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _taggingManager = taggingManager;
             _generateTestData = generateTestData;
 
+            _taggingManager.TagAdded += HandleTagAdded;
             InitializeTestData();
         }
-
-
         private async Task InitializeTestData()
         {
             try
@@ -41,6 +43,35 @@ namespace ObjectMetaDataTagging.Api.Controllers
             }
         }
 
+        private async void HandleTagAdded(object sender, AsyncTagAddedEventArgs<BaseTag> e)
+        {
+            try
+            {
+                var lastAddedTag = e.Tag;
+
+                var lastAddedObject = _taggingManager.GetObjectByTag(lastAddedTag.Id) as ExamplePersonTransaction;
+
+                if (lastAddedObject.Amount > 2000)
+                {
+
+                    //var suspiciousTransferTag = new BaseTag()
+                    //{
+                    //    Name = "SuspiciousTransfer",
+                    //    Value = null,
+                    //    Description = "Suspicious Transfer Detected"
+                    //};
+
+                    //var suspiciousTransferTag = _taggingManager.CreateBaseTag("SuspiciousTransfer", null, "Suspicious Transfer Detected");
+                                 
+                    //await _taggingManager.SetTagAsync(lastAddedObject, suspiciousTransferTag);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpGet("generateTags")]
         public async Task<ActionResult<List<IEnumerable<KeyValuePair<string, object>>>>> GenerateTags()
         {
@@ -48,7 +79,6 @@ namespace ObjectMetaDataTagging.Api.Controllers
             {
                 return BadRequest("Test data not initialized");
             }
-
             return Ok(testData);
         }
 
@@ -90,7 +120,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
         }
     }
 
-    internal class Tag:BaseTag
+    internal class Tag : BaseTag
     {
         public Tag()
         {
