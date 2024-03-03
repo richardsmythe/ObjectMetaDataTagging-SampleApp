@@ -183,7 +183,7 @@ namespace ObjectMetaDataTagging.Services
             try
             {
                 tagDictionary[tag.Id] = tag;
-                tag.Parents.Add(objectId);
+                tag.Parents.Add(o);
             }
             finally
             {

@@ -28,7 +28,7 @@ namespace ObjectMetaDataTagging.Api.Controllers
             _taggingManager = taggingManager;
             _generateTestData = generateTestData;
 
-            _taggingManager.TagAdded += HandleTagAdded;
+           // _taggingManager.TagAdded += HandleTagAdded;
             InitializeTestData();
         }
         private async Task InitializeTestData()
@@ -43,34 +43,34 @@ namespace ObjectMetaDataTagging.Api.Controllers
             }
         }
 
-        private async void HandleTagAdded(object sender, AsyncTagAddedEventArgs<BaseTag> e)
-        {
-            try
-            {
-                var lastAddedTag = e.Tag;
+        //private async void HandleTagAdded(object sender, AsyncTagAddedEventArgs<BaseTag> e)
+        //{
+        //    try
+        //    {
+        //        var lastAddedTag = e.Tag;
 
-                var lastAddedObject = _taggingManager.GetObjectByTag(lastAddedTag.Id) as ExamplePersonTransaction;
+        //        var lastAddedObject = _taggingManager.GetObjectByTag(lastAddedTag.Id) as ExamplePersonTransaction;
 
-                if (lastAddedObject.Amount > 2000)
-                {
+        //        if (lastAddedObject.Amount > 2000)
+        //        {
 
-                    //var suspiciousTransferTag = new BaseTag()
-                    //{
-                    //    Name = "SuspiciousTransfer",
-                    //    Value = null,
-                    //    Description = "Suspicious Transfer Detected"
-                    //};
+        //            //var suspiciousTransferTag = new BaseTag()
+        //            //{
+        //            //    Name = "SuspiciousTransfer",
+        //            //    Value = null,
+        //            //    Description = "Suspicious Transfer Detected"
+        //            //};
 
-                    //var suspiciousTransferTag = _taggingManager.CreateBaseTag("SuspiciousTransfer", null, "Suspicious Transfer Detected");
+        //            //var suspiciousTransferTag = _taggingManager.CreateBaseTag("SuspiciousTransfer", null, "Suspicious Transfer Detected");
                                  
-                    //await _taggingManager.SetTagAsync(lastAddedObject, suspiciousTransferTag);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
-        }
+        //            //await _taggingManager.SetTagAsync(lastAddedObject, suspiciousTransferTag);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"An error occurred: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("generateTags")]
         public async Task<ActionResult<List<IEnumerable<KeyValuePair<string, object>>>>> GenerateTags()

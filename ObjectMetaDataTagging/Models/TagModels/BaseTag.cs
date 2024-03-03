@@ -1,4 +1,6 @@
-﻿namespace ObjectMetaDataTagging.Models.TagModels
+﻿using System.Reflection;
+
+namespace ObjectMetaDataTagging.Models.TagModels
 {
     /// <summary>
     /// A base tag providing basic tag object properties that derived classes
