@@ -58,10 +58,19 @@ namespace ObjectMetaDataTagging.Api.Controllers
                 var lastAddedTag = e.Tag;
                 var lastAddedObject = _taggingManager.GetObjectByTag(lastAddedTag.Id) as ExamplePersonTransaction;
 
-                if (lastAddedObject != null && lastAddedObject.Amount > 2000)
+                if (lastAddedObject != null)
                 {
-                    var suspiciousTransferTag = _taggingManager.CreateBaseTag("SuspiciousTransfer (automatically triggered)", null, "Suspicious Transfer Detected");
-                    await _taggingManager.SetTagAsync(lastAddedObject, suspiciousTransferTag);
+                    // Get all tags associated with the object
+                    var tags = await _taggingManager.GetAllTags(lastAddedObject);
+
+                    // Check if the object already has a "SuspiciousTransfer" tag
+                    var existingSuspiciousTransferTag = tags.FirstOrDefault(tag => tag.Name == "SuspiciousTransfer (automatically triggered)");
+
+                    if (existingSuspiciousTransferTag == null && lastAddedObject.Amount > 2000)
+                    {
+                        var suspiciousTransferTag = _taggingManager.CreateBaseTag("SuspiciousTransfer (automatically triggered)", null, "Suspicious Transfer Detected");
+                        await _taggingManager.SetTagAsync(lastAddedObject, suspiciousTransferTag);
+                    }
                 }
             }
             catch (Exception ex)
