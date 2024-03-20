@@ -18,12 +18,12 @@ namespace ObjectMetaDataTagging.Api.Services
             _tagFactory = tagFactory;
         }
 
-        // Generates 3 levels of tags on objects
+        // Generates 3 levels of tags on objects example purposes.
         async Task<List<IEnumerable<KeyValuePair<string, object>>>> IGenerateTestData.GenerateTestData()
         {
             var testData = new List<IEnumerable<KeyValuePair<string, object>>>();
             var random = new Random();
-            int numberOfObjects = random.Next(10, 10);
+            int numberOfObjects = random.Next(3, 5);
             var dummyClasses = new List<Type> { typeof(UserTransaction), typeof(Fraud), typeof(Address), typeof(Beneficiary) };
 
             for (int i = 0; i < numberOfObjects; i++)
@@ -33,7 +33,7 @@ namespace ObjectMetaDataTagging.Api.Services
 
                 newObj.Sender = "Sender" + random.Next(1, 50);
                 newObj.Receiver = "Receiver" + random.Next(1, 50);
-                newObj.Amount = random.Next(4500, 6000);
+                newObj.Amount = random.Next(1000, 7000);
 
                 int numberOfTags = random.Next(1, 3);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
@@ -54,7 +54,7 @@ namespace ObjectMetaDataTagging.Api.Services
                         childTag.Parents.Add(newTag.Id);
                         childTag.Value = $"Child Value {k + 1}";
 
-                        int numberOfGrandchildTags = random.Next(1,1);
+                        int numberOfGrandchildTags = random.Next(1,3);
 
                         for (int m = 0; m < numberOfGrandchildTags; m++)
                         {

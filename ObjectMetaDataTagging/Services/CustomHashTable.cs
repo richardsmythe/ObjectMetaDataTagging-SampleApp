@@ -175,7 +175,7 @@ namespace ObjectMetaDataTaggingLibrary.Services
                 string keyString = key.ToString();
                 foreach (char c in keyString)
                 {
-                    hash = ((hash << 5) + hash) ^ c; // the left bitwise shift by 5 is equivalent to multiplying by 32
+                    hash = ((hash << 4) + hash) ^ c; // the left bitwise shift by 5 is equivalent to multiplying by 32
                 }
             }
 
@@ -230,8 +230,8 @@ namespace ObjectMetaDataTaggingLibrary.Services
                     Console.Write($"[{i}]: ");
                     while (currentNode != null)
                     {
-                        Console.Write($"[{currentNode.Key} - {currentNode.Value}] ");
-                        //Console.Write($"[Tag:{i}] ");
+                        Console.Write($"[{currentNode.Key} - {i}] ");
+                        Console.Write($"[Tag:{i}] ");
                         currentNode = currentNode.Next;
                     }
                     Console.WriteLine();
@@ -240,9 +240,6 @@ namespace ObjectMetaDataTaggingLibrary.Services
                 Console.WriteLine($"\nTotal collisions: {CollisionCount}");
             }
         }
-
-
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue Get(TKey key)
@@ -293,7 +290,6 @@ namespace ObjectMetaDataTaggingLibrary.Services
                 }
             }
         }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int PowerOf2(int capacity)
