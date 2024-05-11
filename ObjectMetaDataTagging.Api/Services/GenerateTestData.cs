@@ -46,7 +46,7 @@ namespace ObjectMetaDataTagging.Api.Services
                 newObj.Amount = random.Next(1000, 7000);
 
                 // Generate a random number of tags for the object
-                int numberOfTags = random.Next(1, 3);
+                int numberOfTags = random.Next(1, 1);
                 var tagTypes = Enum.GetValues(typeof(ExampleTags)).Cast<ExampleTags>().ToArray();
 
                 for (int j = 0; j < numberOfTags; j++)
